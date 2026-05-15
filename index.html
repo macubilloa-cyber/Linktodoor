@@ -289,9 +289,9 @@
     .soc:hover{background:var(--pri);color:var(--white)}
 
     /* ── SCROLL REVEAL ── */
-    .reveal{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
-    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
 
     /* ── RESPONSIVE ── */
     @media(max-width:1024px){
@@ -679,10 +679,13 @@ function selectShip(el, name, days) {
 }
 
 /* Scroll reveal */
+const revealEls = document.querySelectorAll('.reveal');
 const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
+revealEls.forEach(el => obs.observe(el));
+/* Fallback: reveal everything after 800ms in case observer doesn't fire */
+setTimeout(() => revealEls.forEach(el => el.classList.add('visible')), 800);
 
 /* Calculadora */
 function calcCosto() {
