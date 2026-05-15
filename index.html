@@ -3,1221 +3,698 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Linktodoor — Delivery que llega a tu puerta</title>
+  <title>Linktodoor — Tu casillero en Miami</title>
   <style>
-    /* ── TOKENS ───────────────────────────────────────────────────── */
     :root {
-      --pri:        #FF6B35;
-      --pri-dark:   #e55a28;
-      --dark:       #1A1A2E;
-      --accent:     #0F3460;
-      --light:      #F4F6FA;
-      --gray:       #6C757D;
-      --success:    #28C76F;
-      --white:      #FFFFFF;
-      --shadow:     0 10px 30px rgba(0,0,0,.10);
-      --shadow-lg:  0 20px 60px rgba(0,0,0,.16);
-      --r:          16px;
-      --t:          all .3s cubic-bezier(.4,0,.2,1);
+      --pri:      #5B5BD6;
+      --pri-dark: #4848b8;
+      --pri-lite: #7B7BE6;
+      --cream:    #F5F0E4;
+      --cream2:   #EDE8DC;
+      --lblue:    #C4D9F5;
+      --dark:     #12121F;
+      --dark2:    #1E1E35;
+      --gray:     #6B7280;
+      --white:    #FFFFFF;
+      --shadow:   0 8px 28px rgba(0,0,0,.10);
+      --shadow-lg:0 20px 56px rgba(0,0,0,.16);
+      --r:        16px;
+      --t:        all .3s cubic-bezier(.4,0,.2,1);
     }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+      color:var(--dark);background:var(--white);overflow-x:hidden}
 
-    /* ── RESET ────────────────────────────────────────────────────── */
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body {
-      font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
-      color:var(--dark); background:var(--white); overflow-x:hidden;
-    }
+    /* ── NAV ── */
+    nav{position:fixed;inset:0 0 auto;z-index:1000;padding:1rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;transition:var(--t)}
+    nav.scrolled{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+      box-shadow:0 2px 24px rgba(0,0,0,.09)}
+    .logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+    .logo-mark{background:var(--pri);border-radius:10px;padding:.35rem .6rem;
+      display:flex;flex-direction:column;line-height:1;gap:1px}
+    .logo-mark .l1{font-size:.75rem;font-weight:900;color:var(--cream);letter-spacing:.5px}
+    .logo-mark .l2{font-size:.75rem;font-weight:900;color:var(--lblue);letter-spacing:.5px}
+    .logo-text{font-size:1.2rem;font-weight:800;color:var(--white);transition:var(--t)}
+    nav.scrolled .logo-text{color:var(--dark)}
+    .nav-links{display:flex;align-items:center;gap:1.8rem;list-style:none}
+    .nav-links a{text-decoration:none;color:rgba(255,255,255,.82);font-weight:500;transition:var(--t)}
+    nav.scrolled .nav-links a{color:var(--dark)}
+    .nav-links a:hover{color:var(--pri)}
+    .nav-cta{background:var(--pri)!important;color:var(--white)!important;
+      padding:.55rem 1.4rem;border-radius:50px;font-weight:700!important}
+    .nav-cta:hover{background:var(--pri-dark)!important}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;z-index:11}
+    .hamburger span{display:block;width:25px;height:2px;background:var(--white);border-radius:2px;transition:var(--t)}
+    nav.scrolled .hamburger span{background:var(--dark)}
+    .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
-    /* ── NAV ──────────────────────────────────────────────────────── */
-    nav {
-      position:fixed; inset:0 0 auto;
-      z-index:1000; padding:1rem 2rem;
-      display:flex; align-items:center; justify-content:space-between;
-      transition:var(--t);
-    }
-    nav.scrolled {
-      background:rgba(255,255,255,.96);
-      backdrop-filter:blur(12px);
-      box-shadow:0 2px 24px rgba(0,0,0,.09);
-    }
-    .logo {
-      display:flex; align-items:center; gap:.5rem;
-      text-decoration:none; font-size:1.45rem; font-weight:900;
-      color:var(--white); transition:var(--t);
-    }
-    nav.scrolled .logo { color:var(--dark); }
-    .logo-box {
-      width:40px; height:40px; border-radius:10px;
-      background:var(--pri); display:flex; align-items:center;
-      justify-content:center; font-size:1.15rem;
-    }
-    .nav-links {
-      display:flex; align-items:center; gap:1.8rem; list-style:none;
-    }
-    .nav-links a {
-      text-decoration:none; color:rgba(255,255,255,.85);
-      font-weight:500; transition:var(--t);
-    }
-    nav.scrolled .nav-links a { color:var(--dark); }
-    .nav-links a:hover { color:var(--pri); }
-    .nav-cta {
-      background:var(--pri) !important; color:var(--white) !important;
-      padding:.55rem 1.4rem; border-radius:50px; font-weight:700 !important;
-    }
-    .nav-cta:hover { background:var(--pri-dark) !important; }
-    .hamburger {
-      display:none; flex-direction:column; gap:5px;
-      cursor:pointer; padding:4px; z-index:11;
-    }
-    .hamburger span {
-      display:block; width:25px; height:2px;
-      background:var(--white); border-radius:2px; transition:var(--t);
-    }
-    nav.scrolled .hamburger span { background:var(--dark); }
-    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
-    .hamburger.open span:nth-child(2) { opacity:0; }
-    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    /* ── HERO ── */
+    #hero{min-height:100vh;background:var(--pri);position:relative;
+      display:flex;align-items:center;overflow:hidden}
+    .hero-bg{position:absolute;inset:0}
+    .hero-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
+    .hc1{width:700px;height:700px;top:-250px;right:-150px;animation:floatY 10s ease-in-out infinite}
+    .hc2{width:450px;height:450px;bottom:-180px;left:-100px;animation:floatY 7s ease-in-out infinite reverse}
+    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
 
-    /* ── HERO ─────────────────────────────────────────────────────── */
-    #hero {
-      min-height:100vh;
-      background:linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
-      position:relative; display:flex; align-items:center; overflow:hidden;
-    }
-    .hero-orb {
-      position:absolute; border-radius:50%;
-      background:var(--pri); opacity:.06;
-    }
-    .hero-orb-1 { width:620px; height:620px; top:-200px; right:-80px;
-      animation:floatY 9s ease-in-out infinite; }
-    .hero-orb-2 { width:400px; height:400px; bottom:-120px; left:-60px;
-      animation:floatY 7s ease-in-out infinite reverse; }
+    .hero-inner{max-width:1200px;margin:0 auto;padding:2rem;
+      display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;width:100%}
 
-    @keyframes floatY {
-      0%,100% { transform:translateY(0); }
-      50%      { transform:translateY(-22px); }
-    }
+    .hero-tag{display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+      color:var(--cream);padding:.4rem 1rem;border-radius:50px;
+      font-size:.8rem;font-weight:700;letter-spacing:.5px;margin-bottom:1.2rem}
+    .hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;
+      background:var(--cream);animation:blink 1.4s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-    .hero-inner {
-      max-width:1200px; margin:0 auto; padding:2rem;
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:3.5rem; align-items:center; width:100%;
-    }
-    .hero-text h1 {
-      font-size:clamp(2.4rem,5vw,4rem); font-weight:900;
-      color:var(--white); line-height:1.1; margin-bottom:1.4rem;
-    }
-    .hero-text h1 em { color:var(--pri); font-style:normal; }
-    .hero-text p {
-      font-size:1.15rem; color:rgba(255,255,255,.68);
-      line-height:1.75; margin-bottom:2.2rem; max-width:480px;
-    }
-    .hero-btns { display:flex; gap:1rem; flex-wrap:wrap; }
-    .btn-pri {
-      background:var(--pri); color:var(--white);
-      padding:.9rem 1.9rem; border-radius:50px;
-      font-weight:700; font-size:1rem; text-decoration:none;
-      border:none; cursor:pointer; display:inline-flex;
-      align-items:center; gap:.5rem; transition:var(--t);
-      font-family:inherit; position:relative; overflow:hidden;
-    }
-    .btn-pri:hover { background:var(--pri-dark); transform:translateY(-2px);
-      box-shadow:0 10px 28px rgba(255,107,53,.42); }
-    .btn-ghost {
-      background:rgba(255,255,255,.08); color:var(--white);
-      padding:.9rem 1.9rem; border-radius:50px;
-      font-weight:600; font-size:1rem; text-decoration:none;
-      border:2px solid rgba(255,255,255,.28); cursor:pointer;
-      display:inline-flex; align-items:center; gap:.5rem;
-      transition:var(--t); font-family:inherit;
-    }
-    .btn-ghost:hover { background:rgba(255,255,255,.18);
-      border-color:rgba(255,255,255,.6); }
+    .hero-text h1{font-size:clamp(2.6rem,5.5vw,4.2rem);font-weight:900;
+      color:var(--cream);line-height:1.05;margin-bottom:.5rem;letter-spacing:-1px}
+    .hero-text h1 em{color:var(--lblue);font-style:normal;display:block}
+    .hero-text p{font-size:1.1rem;color:rgba(245,240,228,.72);line-height:1.75;
+      margin-bottom:2rem;max-width:480px}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-cream{background:var(--cream);color:var(--pri);padding:.9rem 1.9rem;
+      border-radius:50px;font-weight:800;font-size:1rem;text-decoration:none;
+      border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;
+      transition:var(--t);font-family:inherit;position:relative;overflow:hidden}
+    .btn-cream:hover{background:var(--white);transform:translateY(-2px);
+      box-shadow:0 10px 28px rgba(0,0,0,.2)}
+    .btn-ghost{background:rgba(255,255,255,.1);color:var(--cream);padding:.9rem 1.9rem;
+      border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;
+      border:2px solid rgba(255,255,255,.3);cursor:pointer;
+      display:inline-flex;align-items:center;gap:.5rem;transition:var(--t);font-family:inherit}
+    .btn-ghost:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.6)}
 
-    /* ripple */
-    .ripple {
-      position:absolute; border-radius:50%;
-      transform:scale(0); animation:rippleAnim .6s linear;
-      background:rgba(255,255,255,.3); pointer-events:none;
-    }
-    @keyframes rippleAnim { to { transform:scale(4); opacity:0; } }
+    .ripple{position:absolute;border-radius:50%;transform:scale(0);
+      animation:rippleAnim .6s linear;background:rgba(91,91,214,.2);pointer-events:none}
+    @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
 
-    .hero-stats { display:flex; gap:2.2rem; margin-top:2.8rem; }
-    .hero-stat .num {
-      font-size:2rem; font-weight:900; color:var(--white);
-      font-variant-numeric:tabular-nums;
-    }
-    .hero-stat .lbl { font-size:.82rem; color:rgba(255,255,255,.55); }
+    .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;flex-wrap:wrap}
+    .hero-stat .num{font-size:1.9rem;font-weight:900;color:var(--cream)}
+    .hero-stat .lbl{font-size:.78rem;color:rgba(245,240,228,.55)}
 
     /* hero card */
-    .hero-card {
-      background:rgba(255,255,255,.07); backdrop-filter:blur(18px);
-      border:1px solid rgba(255,255,255,.14); border-radius:22px;
-      padding:2rem; position:relative;
-    }
-    .hc-head {
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:1.4rem;
-    }
-    .hc-title { color:rgba(255,255,255,.55); font-size:.82rem; font-weight:500; }
-    .badge-on {
-      background:var(--success); color:var(--white);
-      padding:.25rem .75rem; border-radius:20px;
-      font-size:.78rem; font-weight:700;
-      display:flex; align-items:center; gap:.35rem;
-    }
-    .badge-on::before {
-      content:''; width:7px; height:7px; border-radius:50%;
-      background:#fff; animation:blink 1.2s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+    .hero-card{background:rgba(255,255,255,.1);backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:2rem;position:relative}
+    .hc-label{font-size:.75rem;font-weight:700;color:rgba(245,240,228,.55);
+      letter-spacing:.8px;text-transform:uppercase;margin-bottom:1.2rem}
 
-    .route {
-      display:flex; align-items:center; gap:.8rem; margin-bottom:1.4rem;
-    }
-    .route-pt { text-align:center; flex:1; }
-    .route-pt .city { color:var(--white); font-weight:700; font-size:.95rem; }
-    .route-pt .sub  { color:rgba(255,255,255,.45); font-size:.72rem; }
-    .route-bar {
-      flex:2; height:3px; background:rgba(255,255,255,.18);
-      border-radius:3px; position:relative;
-    }
-    .route-fill {
-      height:100%; border-radius:3px; background:var(--pri);
-      transition:width 2s ease; width:0%;
-    }
-    .truck-dot {
-      position:absolute; top:-10px; font-size:1.3rem;
-      transition:left 2s ease; left:0%;
-      filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
-    }
+    .route-visual{display:flex;align-items:center;gap:1rem;margin-bottom:1.8rem}
+    .route-city{text-align:center;flex:1}
+    .route-city .flag{font-size:2rem;margin-bottom:.3rem}
+    .route-city .city-name{font-size:.85rem;font-weight:700;color:var(--cream)}
+    .route-city .country{font-size:.7rem;color:rgba(245,240,228,.5)}
+    .route-line{flex:2;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+    .route-arrow{font-size:1.5rem;animation:flyRight 2s ease-in-out infinite}
+    @keyframes flyRight{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+    .route-days{font-size:.68rem;font-weight:700;color:var(--lblue);
+      background:rgba(196,217,245,.15);padding:.2rem .6rem;border-radius:10px}
 
-    .d-steps { display:flex; gap:.5rem; }
-    .d-step {
-      flex:1; background:rgba(255,255,255,.05); border-radius:10px;
-      padding:.7rem .4rem; text-align:center;
-      border:1px solid transparent; transition:var(--t);
-    }
-    .d-step.active {
-      background:rgba(255,107,53,.18); border-color:var(--pri);
-    }
-    .d-step .di { font-size:1.1rem; }
-    .d-step .dl { color:rgba(255,255,255,.5); font-size:.68rem; margin-top:.25rem; }
-    .d-step.active .dl { color:var(--pri); font-weight:600; }
+    .ship-types{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.5rem}
+    .ship-type{background:rgba(255,255,255,.08);border-radius:12px;padding:1rem;
+      border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:var(--t);text-align:center}
+    .ship-type.active{background:rgba(245,240,228,.15);border-color:var(--cream)}
+    .ship-type .st-icon{font-size:1.4rem;margin-bottom:.4rem}
+    .ship-type .st-name{font-size:.8rem;font-weight:800;color:var(--cream);letter-spacing:.3px}
+    .ship-type .st-days{font-size:.7rem;color:rgba(245,240,228,.55);margin-top:.15rem}
+    .ship-type.active .st-days{color:var(--lblue)}
 
-    /* floating cards */
-    .fc {
-      position:absolute; background:var(--white); border-radius:14px;
-      padding:.9rem 1.1rem; box-shadow:var(--shadow-lg);
-      display:flex; align-items:center; gap:.7rem;
-    }
-    .fc-1 { top:-28px; right:-18px; animation:fc-float 4s ease-in-out infinite; }
-    .fc-2 { bottom:-20px; left:-18px; animation:fc-float 4s ease-in-out infinite 2s; }
-    @keyframes fc-float {
-      0%,100% { transform:translateY(0) rotate(-1deg); }
-      50%      { transform:translateY(-8px) rotate(1deg); }
-    }
-    .fc-ico {
-      width:38px; height:38px; border-radius:9px;
-      display:flex; align-items:center; justify-content:center; font-size:1.15rem;
-    }
-    .fc-t  { font-size:.78rem; font-weight:700; color:var(--dark); }
-    .fc-st { font-size:.7rem; color:var(--gray); }
+    .price-tag{background:var(--cream);border-radius:12px;padding:.9rem 1.2rem;
+      display:flex;align-items:center;justify-content:space-between}
+    .price-tag .pt-label{font-size:.75rem;font-weight:700;color:var(--pri);letter-spacing:.3px}
+    .price-tag .pt-price{font-size:1.3rem;font-weight:900;color:var(--pri)}
 
-    /* ── TRACKING ─────────────────────────────────────────────────── */
-    #tracking { background:var(--light); padding:5rem 2rem; }
+    /* float cards */
+    .fc{position:absolute;background:var(--white);border-radius:14px;
+      padding:.85rem 1.1rem;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:.7rem}
+    .fc-1{top:-28px;right:-18px;animation:fcFloat 4s ease-in-out infinite}
+    .fc-2{bottom:-20px;left:-18px;animation:fcFloat 4s ease-in-out infinite 2s}
+    @keyframes fcFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+    .fc-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+    .fc-t{font-size:.75rem;font-weight:700;color:var(--dark)}
+    .fc-st{font-size:.68rem;color:var(--gray)}
 
-    .sec-head {
-      text-align:center; max-width:600px; margin:0 auto 3rem;
-    }
-    .sec-tag {
-      display:inline-block; background:rgba(255,107,53,.1);
-      color:var(--pri); padding:.35rem .9rem; border-radius:20px;
-      font-size:.82rem; font-weight:700; margin-bottom:.9rem;
-    }
-    .sec-head h2 {
-      font-size:clamp(1.9rem,4vw,2.9rem); font-weight:800;
-      line-height:1.2; margin-bottom:.9rem;
-    }
-    .sec-head p { color:var(--gray); font-size:1.05rem; line-height:1.7; }
+    /* ── SEC COMMON ── */
+    .sec-head{text-align:center;max-width:620px;margin:0 auto 3rem}
+    .sec-tag{display:inline-block;background:rgba(91,91,214,.1);color:var(--pri);
+      padding:.35rem .9rem;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:.9rem}
+    .sec-head h2{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800;line-height:1.2;margin-bottom:.9rem}
+    .sec-head p{color:var(--gray);font-size:1.05rem;line-height:1.7}
 
-    .trk-box {
-      max-width:900px; margin:0 auto;
-    }
-    .trk-search {
-      background:var(--white); border-radius:var(--r);
-      padding:2rem; box-shadow:var(--shadow); margin-bottom:1.5rem;
-    }
-    .trk-row { display:flex; gap:.9rem; }
-    .trk-input {
-      flex:1; padding:.9rem 1.4rem; border:2px solid #E0E5EE;
-      border-radius:50px; font-size:1rem; outline:none;
-      transition:var(--t); font-family:inherit;
-    }
-    .trk-input:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(255,107,53,.1); }
-    .trk-input.error { border-color:#ff4444; animation:shake .5s ease; }
-    @keyframes shake {
-      0%,100% { transform:translateX(0); }
-      20% { transform:translateX(-8px); }
-      40% { transform:translateX(8px); }
-      60% { transform:translateX(-5px); }
-      80% { transform:translateX(5px); }
-    }
-    .trk-btn {
-      background:var(--pri); color:var(--white); border:none;
-      padding:.9rem 1.8rem; border-radius:50px; font-weight:700;
-      font-size:1rem; cursor:pointer; transition:var(--t);
-      display:flex; align-items:center; gap:.5rem;
-      white-space:nowrap; font-family:inherit;
-    }
-    .trk-btn:hover { background:var(--pri-dark); transform:translateY(-2px); }
-    .trk-btn:disabled { opacity:.65; cursor:not-allowed; transform:none; }
-    .trk-hint { margin-top:.7rem; font-size:.83rem; color:var(--gray); }
-    .trk-hint span { color:var(--pri); cursor:pointer; text-decoration:underline; }
-    .trk-hint span:hover { color:var(--pri-dark); }
+    /* ── SERVICIOS ── */
+    #servicios{background:var(--cream);padding:5rem 2rem}
+    .serv-grid{max-width:1100px;margin:0 auto;
+      display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+    .serv-card{background:var(--white);border-radius:var(--r);padding:2rem;
+      border:2px solid transparent;transition:var(--t);display:flex;gap:1.2rem;align-items:flex-start}
+    .serv-card:hover{border-color:var(--pri);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .serv-ico{width:56px;height:56px;border-radius:14px;background:rgba(91,91,214,.1);
+      display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;transition:var(--t)}
+    .serv-card:hover .serv-ico{background:var(--pri)}
+    .serv-card h3{font-size:1.05rem;font-weight:800;letter-spacing:.3px;margin-bottom:.4rem;color:var(--dark)}
+    .serv-card p{font-size:.9rem;color:var(--gray);line-height:1.6}
 
-    /* result card */
-    .trk-result {
-      background:var(--white); border-radius:var(--r);
-      padding:2.5rem; box-shadow:var(--shadow);
-      display:none; animation:slideUp .5s ease;
-    }
-    @keyframes slideUp {
-      from { opacity:0; transform:translateY(20px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .trk-result.show { display:block; }
+    /* ── CÓMO FUNCIONA ── */
+    #como{padding:5rem 2rem;background:var(--white)}
+    .steps{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:0}
+    .step-row{display:flex;align-items:flex-start;gap:2rem;padding:2rem 0;
+      border-bottom:1px solid var(--cream2);transition:var(--t)}
+    .step-row:last-child{border-bottom:none}
+    .step-row:hover .step-num-big{background:var(--pri);color:var(--white)}
+    .step-num-big{width:60px;height:60px;border-radius:16px;background:rgba(91,91,214,.1);
+      color:var(--pri);font-size:1.6rem;font-weight:900;display:flex;align-items:center;
+      justify-content:center;flex-shrink:0;transition:var(--t)}
+    .step-body h3{font-size:1.05rem;font-weight:800;letter-spacing:.3px;
+      text-transform:uppercase;margin-bottom:.4rem;color:var(--dark)}
+    .step-body p{font-size:.92rem;color:var(--gray);line-height:1.65;max-width:600px}
 
-    .trk-r-head {
-      display:flex; align-items:flex-start; justify-content:space-between;
-      flex-wrap:wrap; gap:1rem; margin-bottom:1.8rem;
-    }
-    .trk-r-id { font-size:.85rem; color:var(--gray); margin-bottom:.25rem; }
-    .trk-r-title { font-size:1.45rem; font-weight:800; }
+    /* ── PRECIOS ── */
+    #precios{background:var(--dark2);padding:5rem 2rem}
+    #precios .sec-head h2{color:var(--cream)}
+    #precios .sec-head p{color:rgba(245,240,228,.5)}
+    #precios .sec-tag{background:rgba(91,91,214,.3);color:var(--lblue)}
 
-    .status-pill {
-      padding:.45rem 1.1rem; border-radius:20px; font-weight:700; font-size:.85rem;
-    }
-    .s-transit   { background:rgba(255,193,7,.15); color:#cc8800; }
-    .s-delivered { background:rgba(40,199,111,.15); color:#1ea55c; }
-    .s-pending   { background:rgba(108,117,125,.12); color:var(--gray); }
+    .precio-main{max-width:900px;margin:0 auto}
+    .precio-rate{background:var(--pri);border-radius:20px;padding:2.5rem;
+      text-align:center;margin-bottom:2rem;position:relative;overflow:hidden}
+    .precio-rate::before{content:'';position:absolute;width:300px;height:300px;
+      border-radius:50%;background:rgba(255,255,255,.06);top:-100px;right:-80px}
+    .precio-rate .rate-label{font-size:.85rem;font-weight:700;color:rgba(245,240,228,.65);
+      letter-spacing:.8px;text-transform:uppercase;margin-bottom:.5rem}
+    .precio-rate .rate-num{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;
+      color:var(--cream);line-height:1;margin-bottom:.3rem}
+    .precio-rate .rate-sub{font-size:1rem;color:rgba(245,240,228,.65)}
 
-    .info-row {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:1rem; margin-bottom:2rem;
-    }
-    .info-tile {
-      background:var(--light); border-radius:10px; padding:1rem;
-    }
-    .info-tile .il { font-size:.73rem; color:var(--gray); margin-bottom:.3rem; }
-    .info-tile .iv { font-weight:700; font-size:.9rem; }
+    .modalidades{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
+    .modal-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:var(--r);padding:2rem;transition:var(--t)}
+    .modal-card:hover{background:rgba(255,255,255,.1);border-color:rgba(91,91,214,.6);
+      transform:translateY(-4px)}
+    .modal-card.flash .mc-icon{color:#FFD700}
+    .modal-card.consol .mc-icon{color:var(--lblue)}
+    .mc-icon{font-size:2rem;margin-bottom:.8rem}
+    .mc-name{font-size:1rem;font-weight:800;color:var(--cream);letter-spacing:.3px;
+      text-transform:uppercase;margin-bottom:.25rem}
+    .mc-days{font-size:1.8rem;font-weight:900;color:var(--pri-lite);margin-bottom:.5rem}
+    .mc-days span{font-size:.85rem;font-weight:500;color:rgba(245,240,228,.5)}
+    .mc-desc{font-size:.85rem;color:rgba(245,240,228,.55);line-height:1.6}
 
-    /* progress bar */
-    .prog-track {
-      display:flex; justify-content:space-between;
-      position:relative; margin-bottom:2.5rem;
-    }
-    .prog-track::before {
-      content:''; position:absolute; top:20px; left:10%; right:10%;
-      height:3px; background:#E5E9F0;
-    }
-    .prog-fill {
-      position:absolute; top:20px; left:10%; height:3px;
-      background:var(--pri); transition:width 1.4s ease; width:0%; z-index:1;
-    }
-    .prog-step {
-      display:flex; flex-direction:column; align-items:center; gap:.6rem; z-index:2; flex:1;
-    }
-    .prog-dot {
-      width:40px; height:40px; border-radius:50%;
-      background:#E5E9F0; display:flex; align-items:center;
-      justify-content:center; font-size:.95rem; transition:var(--t);
-    }
-    .prog-dot.done { background:var(--pri); box-shadow:0 0 0 5px rgba(255,107,53,.15); }
-    .prog-dot.cur  {
-      background:var(--pri);
-      box-shadow:0 0 0 6px rgba(255,107,53,.2), 0 0 0 12px rgba(255,107,53,.08);
-      animation:pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { box-shadow:0 0 0 6px rgba(255,107,53,.2), 0 0 0 12px rgba(255,107,53,.08); }
-      50%      { box-shadow:0 0 0 9px rgba(255,107,53,.25), 0 0 0 18px rgba(255,107,53,.06); }
-    }
-    .prog-lbl { font-size:.78rem; font-weight:600; color:var(--gray); text-align:center; }
-    .prog-lbl.active { color:var(--pri); }
+    /* calculadora */
+    .calculadora{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      border-radius:var(--r);padding:2rem}
+    .calc-title{font-size:.9rem;font-weight:700;color:var(--cream);margin-bottom:1.2rem;
+      letter-spacing:.3px;text-transform:uppercase}
+    .calc-row{display:flex;gap:1rem;align-items:flex-end}
+    .calc-field{flex:1}
+    .calc-field label{display:block;font-size:.78rem;color:rgba(245,240,228,.5);
+      margin-bottom:.4rem;font-weight:600}
+    .calc-input{width:100%;padding:.85rem 1.2rem;background:rgba(255,255,255,.08);
+      border:2px solid rgba(255,255,255,.12);border-radius:50px;color:var(--cream);
+      font-size:1rem;outline:none;transition:var(--t);font-family:inherit}
+    .calc-input:focus{border-color:var(--pri-lite);background:rgba(255,255,255,.12)}
+    .calc-input::placeholder{color:rgba(245,240,228,.3)}
+    .btn-calc{background:var(--pri);color:var(--white);border:none;
+      padding:.85rem 1.8rem;border-radius:50px;font-weight:700;font-size:.95rem;
+      cursor:pointer;transition:var(--t);white-space:nowrap;font-family:inherit}
+    .btn-calc:hover{background:var(--pri-dark);transform:translateY(-2px)}
+    .calc-result{margin-top:1.2rem;padding:1rem 1.4rem;background:rgba(91,91,214,.2);
+      border-radius:12px;display:none;animation:slideUp .4s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .calc-result.show{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+    .cr-label{font-size:.82rem;color:rgba(245,240,228,.6)}
+    .cr-amount{font-size:1.6rem;font-weight:900;color:var(--cream)}
 
-    /* timeline */
-    .timeline { border-left:3px solid #E5E9F0; padding-left:1.8rem; margin-left:.8rem; }
-    .tl-item { position:relative; padding-bottom:1.4rem; opacity:.45; }
-    .tl-item.done { opacity:1; }
-    .tl-item::before {
-      content:''; position:absolute; left:-2.25rem; top:5px;
-      width:11px; height:11px; border-radius:50%; background:#E5E9F0;
-    }
-    .tl-item.done::before { background:var(--pri); }
-    .tl-item.cur::before  {
-      background:var(--pri); box-shadow:0 0 0 4px rgba(255,107,53,.2);
-    }
-    .tl-time { font-size:.78rem; color:var(--gray); margin-bottom:.25rem; }
-    .tl-ev   { font-weight:600; font-size:.9rem; margin-bottom:.15rem; }
-    .tl-loc  { font-size:.82rem; color:var(--gray); }
+    /* ── ENTREGAS ── */
+    #entregas{background:var(--cream);padding:5rem 2rem}
+    .entrega-inner{max-width:1000px;margin:0 auto;
+      display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+    .entrega-text h2{font-size:clamp(2rem,4vw,3rem);font-weight:900;
+      line-height:1.15;margin-bottom:1rem;color:var(--dark)}
+    .entrega-text h2 em{color:var(--pri);font-style:normal}
+    .entrega-text p{color:var(--gray);font-size:1rem;line-height:1.7;margin-bottom:2rem}
+    .dias-badge{background:var(--pri);color:var(--white);border-radius:20px;
+      padding:1.2rem 2rem;display:inline-flex;align-items:center;gap:1rem;
+      font-weight:700;font-size:1.05rem;box-shadow:0 8px 24px rgba(91,91,214,.35)}
+    .dias-badge .d-icon{font-size:1.5rem}
 
-    /* ── HOW IT WORKS ─────────────────────────────────────────────── */
-    #how { padding:5rem 2rem; background:var(--white); }
+    .entrega-icons{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .ei-card{background:var(--white);border-radius:14px;padding:1.4rem;text-align:center;
+      box-shadow:var(--shadow);transition:var(--t)}
+    .ei-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .ei-card .ei-ico{font-size:2rem;margin-bottom:.6rem}
+    .ei-card .ei-label{font-size:.8rem;font-weight:700;color:var(--dark);letter-spacing:.3px;text-transform:uppercase}
 
-    .steps {
-      max-width:1100px; margin:0 auto;
-      display:grid; grid-template-columns:repeat(4,1fr); gap:2rem;
-      position:relative;
-    }
-    .steps::before {
-      content:''; position:absolute; top:50px; left:12.5%; right:12.5%;
-      height:2px; background:linear-gradient(to right, var(--pri), #FFB38A);
-    }
-    .step-card {
-      background:var(--white); border-radius:var(--r);
-      padding:2rem 1.4rem; text-align:center;
-      position:relative; z-index:1;
-      border:2px solid transparent; transition:var(--t);
-    }
-    .step-card:hover {
-      border-color:var(--pri); transform:translateY(-8px); box-shadow:var(--shadow-lg);
-    }
-    .step-num {
-      position:absolute; top:-14px; left:50%; transform:translateX(-50%);
-      width:28px; height:28px; background:var(--pri); color:var(--white);
-      border-radius:50%; display:flex; align-items:center; justify-content:center;
-      font-weight:800; font-size:.8rem;
-    }
-    .step-ico {
-      width:76px; height:76px; border-radius:18px;
-      background:rgba(255,107,53,.1); display:flex; align-items:center;
-      justify-content:center; font-size:1.9rem; margin:.5rem auto 1.4rem;
-      transition:var(--t);
-    }
-    .step-card:hover .step-ico { background:var(--pri); }
-    .step-card h3 { font-size:1.05rem; font-weight:700; margin-bottom:.7rem; }
-    .step-card p  { font-size:.88rem; color:var(--gray); line-height:1.6; }
+    /* ── CTA ── */
+    #cta{background:var(--pri);padding:5rem 2rem;text-align:center;position:relative;overflow:hidden}
+    #cta::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;
+      background:rgba(255,255,255,.05);top:-200px;left:50%;transform:translateX(-50%)}
+    #cta h2{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:var(--cream);
+      margin-bottom:.8rem;position:relative}
+    #cta h2 em{color:var(--lblue);font-style:normal}
+    #cta p{color:rgba(245,240,228,.68);font-size:1.1rem;margin-bottom:2.5rem;position:relative}
+    .cta-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;position:relative}
+    .btn-wa{background:#25D366;color:var(--white);padding:1rem 2rem;border-radius:50px;
+      font-weight:700;font-size:1rem;text-decoration:none;display:inline-flex;
+      align-items:center;gap:.6rem;transition:var(--t)}
+    .btn-wa:hover{background:#1fb855;transform:translateY(-2px);box-shadow:0 10px 28px rgba(37,211,102,.35)}
+    .btn-ig{background:rgba(255,255,255,.12);color:var(--cream);padding:1rem 2rem;
+      border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;
+      border:2px solid rgba(255,255,255,.3);display:inline-flex;align-items:center;
+      gap:.6rem;transition:var(--t)}
+    .btn-ig:hover{background:rgba(255,255,255,.22)}
 
-    /* ── PRICING ──────────────────────────────────────────────────── */
-    #pricing {
-      background:linear-gradient(135deg, #1A1A2E, #0F3460);
-      padding:5rem 2rem;
-    }
-    #pricing .sec-head h2 { color:var(--white); }
-    #pricing .sec-head p  { color:rgba(255,255,255,.58); }
+    /* ── FOOTER ── */
+    footer{background:var(--dark);color:rgba(255,255,255,.45);padding:3rem 2rem 1.5rem}
+    .foot-inner{max-width:1100px;margin:0 auto}
+    .foot-top{display:flex;align-items:flex-start;justify-content:space-between;
+      gap:2rem;flex-wrap:wrap;margin-bottom:2.5rem}
+    .foot-brand p{font-size:.87rem;line-height:1.7;max-width:260px;margin-top:.8rem}
+    .foot-links-group h4{color:rgba(255,255,255,.7);font-size:.85rem;font-weight:700;
+      letter-spacing:.5px;text-transform:uppercase;margin-bottom:.9rem}
+    .foot-links-group ul{list-style:none}
+    .foot-links-group li{margin-bottom:.5rem}
+    .foot-links-group a{color:rgba(255,255,255,.45);text-decoration:none;font-size:.87rem;transition:var(--t)}
+    .foot-links-group a:hover{color:var(--pri-lite)}
+    .foot-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.4rem;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:.8rem}
+    .foot-social{display:flex;gap:.7rem}
+    .soc{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;text-decoration:none;
+      color:rgba(255,255,255,.5);font-size:.8rem;font-weight:700;transition:var(--t)}
+    .soc:hover{background:var(--pri);color:var(--white)}
 
-    .p-toggle {
-      display:flex; align-items:center; justify-content:center;
-      gap:1rem; margin-bottom:3rem;
-    }
-    .p-lbl { color:rgba(255,255,255,.65); font-size:.92rem; font-weight:500; }
-    .switch {
-      width:58px; height:28px; background:rgba(255,255,255,.18);
-      border-radius:14px; position:relative; cursor:pointer; transition:var(--t);
-    }
-    .switch.on { background:var(--pri); }
-    .knob {
-      position:absolute; top:3px; left:3px; width:22px; height:22px;
-      background:var(--white); border-radius:50%; transition:var(--t);
-    }
-    .switch.on .knob { left:33px; }
-    .save-tag {
-      background:var(--pri); color:var(--white);
-      padding:.18rem .55rem; border-radius:8px; font-size:.72rem; font-weight:700;
-    }
+    /* ── SCROLL REVEAL ── */
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
 
-    .price-grid {
-      max-width:1080px; margin:0 auto;
-      display:grid; grid-template-columns:repeat(3,1fr); gap:2rem;
+    /* ── RESPONSIVE ── */
+    @media(max-width:1024px){
+      .serv-grid{grid-template-columns:1fr}
+      .modalidades{grid-template-columns:1fr}
+      .entrega-inner{grid-template-columns:1fr}
+      .entrega-icons{grid-template-columns:repeat(4,1fr)}
     }
-    .p-card {
-      background:rgba(255,255,255,.06); backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.1); border-radius:var(--r);
-      padding:2.4rem 2rem; transition:var(--t); position:relative;
-    }
-    .p-card.feat {
-      background:var(--white); border-color:var(--white);
-      transform:scale(1.05); box-shadow:var(--shadow-lg);
-    }
-    .p-card:not(.feat):hover {
-      background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.28);
-      transform:translateY(-5px);
-    }
-    .feat-tag {
-      position:absolute; top:-14px; left:50%; transform:translateX(-50%);
-      background:var(--pri); color:var(--white); padding:.35rem 1.1rem;
-      border-radius:20px; font-size:.78rem; font-weight:700; white-space:nowrap;
-    }
-    .p-name { font-size:1rem; font-weight:700; color:rgba(255,255,255,.6); margin-bottom:.4rem; }
-    .p-card.feat .p-name { color:var(--gray); }
-    .p-price { display:flex; align-items:baseline; gap:.25rem; margin-bottom:.4rem; }
-    .p-cur  { font-size:1.1rem; font-weight:700; color:rgba(255,255,255,.5); }
-    .p-card.feat .p-cur  { color:var(--gray); }
-    .p-amt  {
-      font-size:2.9rem; font-weight:900; color:var(--white);
-      font-variant-numeric:tabular-nums; transition:var(--t);
-    }
-    .p-card.feat .p-amt  { color:var(--dark); }
-    .p-per  { font-size:.88rem; color:rgba(255,255,255,.45); }
-    .p-card.feat .p-per  { color:var(--gray); }
-    .p-desc {
-      font-size:.87rem; color:rgba(255,255,255,.45);
-      line-height:1.55; margin-bottom:1.8rem;
-    }
-    .p-card.feat .p-desc { color:var(--gray); }
-    .p-feats { list-style:none; margin-bottom:2.2rem; }
-    .p-feats li {
-      display:flex; align-items:center; gap:.65rem;
-      padding:.45rem 0; font-size:.87rem; color:rgba(255,255,255,.68);
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .p-card.feat .p-feats li { color:var(--dark); border-bottom-color:rgba(0,0,0,.05); }
-    .ck { color:var(--success); font-weight:700; }
-    .cx { color:rgba(255,255,255,.25); }
-    .p-card.feat .cx { color:#ccc; }
-    .btn-plan {
-      width:100%; padding:.95rem; border-radius:50px;
-      font-weight:700; font-size:.95rem; cursor:pointer;
-      transition:var(--t); border:none; font-family:inherit;
-    }
-    .btn-outline {
-      background:transparent; color:rgba(255,255,255,.65);
-      border:2px solid rgba(255,255,255,.2);
-    }
-    .btn-outline:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.5); }
-    .btn-filled {
-      background:var(--pri); color:var(--white);
-    }
-    .btn-filled:hover {
-      background:var(--pri-dark); transform:translateY(-2px);
-      box-shadow:0 10px 28px rgba(255,107,53,.42);
-    }
-
-    /* ── TESTIMONIALS ─────────────────────────────────────────────── */
-    #testimonials { padding:5rem 2rem; background:var(--light); }
-    .slider-wrap { max-width:1100px; margin:0 auto; overflow:hidden; }
-    .slider-track { display:flex; gap:2rem; transition:transform .5s cubic-bezier(.4,0,.2,1); }
-    .t-card {
-      min-width:calc(33.333% - 1.37rem);
-      background:var(--white); border-radius:var(--r);
-      padding:2rem; box-shadow:var(--shadow); flex-shrink:0;
-    }
-    .stars { color:#FFD700; margin-bottom:.9rem; letter-spacing:2px; }
-    .t-text {
-      color:var(--dark); line-height:1.72; font-size:.93rem;
-      margin-bottom:1.4rem; font-style:italic;
-    }
-    .t-auth { display:flex; align-items:center; gap:.9rem; }
-    .t-avatar {
-      width:46px; height:46px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1.1rem; font-weight:700; color:var(--white); flex-shrink:0;
-    }
-    .t-name { font-weight:700; font-size:.9rem; }
-    .t-role { font-size:.78rem; color:var(--gray); }
-    .dots {
-      display:flex; justify-content:center; gap:.7rem; margin-top:1.8rem;
-    }
-    .dot {
-      width:9px; height:9px; border-radius:50%;
-      background:#D1D5DB; cursor:pointer; transition:var(--t);
-    }
-    .dot.on { background:var(--pri); width:26px; border-radius:5px; }
-
-    /* ── FOOTER ───────────────────────────────────────────────────── */
-    footer {
-      background:#0D0D1A; color:rgba(255,255,255,.55);
-      padding:4rem 2rem 2rem;
-    }
-    .foot-grid {
-      max-width:1200px; margin:0 auto;
-      display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
-      gap:3rem; margin-bottom:3rem;
-    }
-    .foot-brand .logo { color:var(--white); margin-bottom:1rem; }
-    .foot-brand p { font-size:.88rem; line-height:1.7; max-width:270px; }
-    .socials { display:flex; gap:.7rem; margin-top:1.4rem; }
-    .soc {
-      width:34px; height:34px; border-radius:8px;
-      background:rgba(255,255,255,.08); display:flex;
-      align-items:center; justify-content:center;
-      text-decoration:none; color:rgba(255,255,255,.6);
-      font-size:.78rem; font-weight:700; transition:var(--t);
-    }
-    .soc:hover { background:var(--pri); color:var(--white); }
-    .foot-col h4 { color:var(--white); font-weight:700; margin-bottom:1.1rem; }
-    .foot-col ul { list-style:none; }
-    .foot-col li { margin-bottom:.6rem; }
-    .foot-col a {
-      color:rgba(255,255,255,.55); text-decoration:none;
-      font-size:.88rem; transition:var(--t);
-    }
-    .foot-col a:hover { color:var(--pri); }
-    .foot-bottom {
-      max-width:1200px; margin:0 auto;
-      display:flex; align-items:center; justify-content:space-between;
-      padding-top:1.8rem; border-top:1px solid rgba(255,255,255,.08);
-      font-size:.82rem; flex-wrap:wrap; gap:1rem;
-    }
-    .foot-links { display:flex; gap:1.4rem; }
-    .foot-links a { color:inherit; text-decoration:none; }
-    .foot-links a:hover { color:var(--pri); }
-
-    /* ── SCROLL REVEAL ────────────────────────────────────────────── */
-    .reveal {
-      opacity:0; transform:translateY(28px);
-      transition:opacity .6s ease, transform .6s ease;
-    }
-    .reveal.visible { opacity:1; transform:translateY(0); }
-    .d1 { transition-delay:.1s; }
-    .d2 { transition-delay:.2s; }
-    .d3 { transition-delay:.3s; }
-    .d4 { transition-delay:.4s; }
-
-    /* ── RESPONSIVE ───────────────────────────────────────────────── */
-    @media (max-width:1024px) {
-      .steps { grid-template-columns:repeat(2,1fr); }
-      .steps::before { display:none; }
-      .price-grid { grid-template-columns:1fr; max-width:440px; }
-      .p-card.feat { transform:none; }
-      .foot-grid  { grid-template-columns:1fr 1fr; }
-      .info-row   { grid-template-columns:1fr 1fr; }
-      .t-card     { min-width:calc(50% - 1rem); }
-    }
-    @media (max-width:768px) {
-      nav { padding:1rem 1.2rem; }
-      .nav-links {
-        position:fixed; inset:0; background:rgba(13,13,26,.97);
-        flex-direction:column; justify-content:center; align-items:center;
-        gap:2rem; font-size:1.2rem; display:none;
-      }
-      .nav-links.open { display:flex; }
-      .nav-links a { color:var(--white) !important; }
-      .hamburger { display:flex; }
-      .hero-inner { grid-template-columns:1fr; text-align:center; gap:2.5rem; }
-      .hero-text p { margin-inline:auto; }
-      .hero-btns { justify-content:center; }
-      .hero-stats { justify-content:center; }
-      .hero-visual { order:-1; }
-      .fc-1, .fc-2 { display:none; }
-      .steps { grid-template-columns:1fr; max-width:380px; }
-      .trk-row { flex-direction:column; }
-      .t-card { min-width:82vw; }
-      .foot-grid { grid-template-columns:1fr; }
-      .info-row   { grid-template-columns:1fr; }
-      .prog-track { gap:.2rem; }
-      .prog-lbl { font-size:.68rem; }
+    @media(max-width:768px){
+      nav{padding:1rem 1.2rem}
+      .nav-links{position:fixed;inset:0;background:rgba(18,18,31,.97);
+        flex-direction:column;justify-content:center;align-items:center;
+        gap:2rem;font-size:1.15rem;display:none}
+      .nav-links.open{display:flex}
+      .nav-links a{color:var(--white)!important}
+      .hamburger{display:flex}
+      .hero-inner{grid-template-columns:1fr;text-align:center;gap:2.5rem}
+      .hero-text p{margin-inline:auto}
+      .hero-btns{justify-content:center}
+      .hero-stats{justify-content:center}
+      .hero-visual{order:-1}
+      .fc-1,.fc-2{display:none}
+      .ship-types{grid-template-columns:1fr 1fr}
+      .calc-row{flex-direction:column}
+      .entrega-icons{grid-template-columns:repeat(2,1fr)}
+      .foot-top{flex-direction:column}
     }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════ NAV ════════════════════════════════════ -->
+<!-- NAV -->
 <nav id="nav">
   <a href="#" class="logo">
-    <div class="logo-box">📦</div>Linktodoor
+    <div class="logo-mark"><span class="l1">LINK</span><span class="l2">DOOR</span></div>
+    <span class="logo-text">Linktodoor</span>
   </a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#tracking">Rastrear</a></li>
-    <li><a href="#how">Cómo funciona</a></li>
-    <li><a href="#pricing">Precios</a></li>
-    <li><a href="#testimonials">Opiniones</a></li>
-    <li><a href="#tracking" class="nav-cta">🔍 Rastrear paquete</a></li>
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#como">Cómo funciona</a></li>
+    <li><a href="#precios">Tarifas</a></li>
+    <li><a href="#entregas">Entregas</a></li>
+    <li><a href="#cta" class="nav-cta">📦 Cotizar ahora</a></li>
   </ul>
   <div class="hamburger" id="hbg" onclick="toggleMenu()">
     <span></span><span></span><span></span>
   </div>
 </nav>
 
-<!-- ═══════════════════════ HERO ═══════════════════════════════════ -->
+<!-- HERO -->
 <section id="hero">
-  <div class="hero-orb hero-orb-1"></div>
-  <div class="hero-orb hero-orb-2"></div>
-
+  <div class="hero-bg">
+    <div class="hero-circle hc1"></div>
+    <div class="hero-circle hc2"></div>
+  </div>
   <div class="hero-inner">
-    <!-- text -->
     <div class="hero-text">
-      <h1>Tu paquete llega<br><em>directo a tu puerta</em></h1>
-      <p>Delivery rápido, seguro y rastreable en tiempo real. Desde que sale del almacén hasta que toca tu puerta — sabemos exactamente dónde está.</p>
+      <div class="hero-tag">📍 Miami → San José</div>
+      <h1>Tu casillero<em>en Miami</em></h1>
+      <p>Comprá en cualquier tienda de EE.UU. y te lo traemos directo a la puerta de tu casa en San José. Seguro, rápido y cobrado por libra.</p>
       <div class="hero-btns">
-        <button class="btn-pri" onclick="scrollTo('#tracking')">🔍 Rastrear paquete</button>
-        <a href="#how" class="btn-ghost">▶ Cómo funciona</a>
+        <button class="btn-cream" onclick="goTo('#como')">¿Cómo funciona?</button>
+        <a href="#precios" class="btn-ghost">Ver tarifas</a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
-          <div class="num" data-target="50000" data-suffix="+">0</div>
-          <div class="lbl">Paquetes entregados</div>
+          <div class="num">3,950</div>
+          <div class="lbl">₡ por libra</div>
         </div>
         <div class="hero-stat">
-          <div class="num" data-target="120" data-suffix="">0</div>
-          <div class="lbl">Ciudades cubiertas</div>
+          <div class="num">3</div>
+          <div class="lbl">días Flash</div>
         </div>
         <div class="hero-stat">
-          <div class="num" data-target="98" data-suffix="%">0</div>
-          <div class="lbl">Satisfacción</div>
+          <div class="num">Mar & Vie</div>
+          <div class="lbl">días de entrega</div>
         </div>
       </div>
     </div>
 
-    <!-- animated card -->
     <div class="hero-visual">
       <div style="position:relative">
         <div class="hero-card">
-          <div class="hc-head">
-            <span class="hc-title">📍 Seguimiento en vivo</span>
-            <span class="badge-on">En camino</span>
-          </div>
-
-          <div class="route">
-            <div class="route-pt">
-              <div class="city">🏭 Almacén</div>
-              <div class="sub">Bogotá</div>
+          <div class="hc-label">✈️ Ruta activa</div>
+          <div class="route-visual">
+            <div class="route-city">
+              <div class="flag">🇺🇸</div>
+              <div class="city-name">Miami</div>
+              <div class="country">Florida, EE.UU.</div>
             </div>
-            <div class="route-bar">
-              <div class="route-fill" id="heroFill"></div>
-              <span class="truck-dot" id="heroTruck">🚚</span>
+            <div class="route-line">
+              <div class="route-arrow">✈️</div>
+              <div class="route-days" id="routeDays">3 días</div>
             </div>
-            <div class="route-pt">
-              <div class="city">🏠 Tu casa</div>
-              <div class="sub">Medellín</div>
+            <div class="route-city">
+              <div class="flag">🇨🇷</div>
+              <div class="city-name">San José</div>
+              <div class="country">Costa Rica</div>
             </div>
           </div>
 
-          <div class="d-steps">
-            <div class="d-step done" id="ds0"><div class="di">📦</div><div class="dl">Empacado</div></div>
-            <div class="d-step done" id="ds1"><div class="di">🚛</div><div class="dl">Recogido</div></div>
-            <div class="d-step active" id="ds2"><div class="di">🛣️</div><div class="dl">En tránsito</div></div>
-            <div class="d-step" id="ds3"><div class="di">🏠</div><div class="dl">Entregado</div></div>
+          <div class="ship-types">
+            <div class="ship-type flash active" onclick="selectShip(this,'Flash','3 días')">
+              <div class="st-icon">⚡</div>
+              <div class="st-name">Flash</div>
+              <div class="st-days">~3 días hábiles</div>
+            </div>
+            <div class="ship-type consol" onclick="selectShip(this,'Consolidado','~5 días')">
+              <div class="st-icon">📦</div>
+              <div class="st-name">Consolidado</div>
+              <div class="st-days">~5 días hábiles</div>
+            </div>
+          </div>
+
+          <div class="price-tag">
+            <span class="pt-label">💰 Tarifa</span>
+            <span class="pt-price">₡ 3,950 / libra</span>
           </div>
         </div>
 
         <div class="fc fc-1">
-          <div class="fc-ico" style="background:#E8F4F8">⚡</div>
-          <div><div class="fc-t">Entrega Express</div><div class="fc-st">Mismo día disponible</div></div>
+          <div class="fc-ico" style="background:#EEF0FF">📍</div>
+          <div><div class="fc-t">Casillero gratis</div><div class="fc-st">Dirección en Miami</div></div>
         </div>
         <div class="fc fc-2">
-          <div class="fc-ico" style="background:#E8FFF0">✅</div>
-          <div><div class="fc-t">Paquete protegido</div><div class="fc-st">Seguro incluido</div></div>
+          <div class="fc-ico" style="background:#E8FFF0">🛍️</div>
+          <div><div class="fc-t">Compramos por vos</div><div class="fc-st">Sin costo extra</div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════ TRACKING ══════════════════════════════ -->
-<section id="tracking">
+<!-- SERVICIOS -->
+<section id="servicios">
   <div class="sec-head reveal">
-    <span class="sec-tag">📡 Tiempo real</span>
-    <h2>Rastrea tu paquete</h2>
-    <p>Ingresa el número de seguimiento y conoce exactamente dónde está tu envío ahora mismo.</p>
+    <span class="sec-tag">🌟 Nuestros servicios</span>
+    <h2>Todo lo que necesitás para comprar en EE.UU.</h2>
+    <p>Desde tu dirección en Miami hasta la entrega en tu puerta en San José.</p>
   </div>
-
-  <div class="trk-box">
-    <div class="trk-search reveal">
-      <div class="trk-row">
-        <input id="trkInput" class="trk-input" type="text"
-          placeholder="Ej: LTD-2024-78542" maxlength="20"
-          onkeydown="if(event.key==='Enter') trackPkg()" />
-        <button class="trk-btn" id="trkBtn" onclick="trackPkg()">🔍 Rastrear</button>
+  <div class="serv-grid">
+    <div class="serv-card reveal d1">
+      <div class="serv-ico">📮</div>
+      <div>
+        <h3>Casillero propio</h3>
+        <p>Te damos una dirección real en Miami para que enviés todas tus compras de cualquier tienda de EE.UU. Sin complicaciones.</p>
       </div>
-      <p class="trk-hint">¿No tienes número? <span onclick="runDemo()">Usar demo: LTD-2024-78542</span></p>
     </div>
-
-    <div class="trk-result" id="trkResult">
-      <div class="trk-r-head">
-        <div>
-          <div class="trk-r-id">Número de seguimiento</div>
-          <div class="trk-r-title" id="rId">LTD-2024-78542</div>
-        </div>
-        <div class="status-pill s-transit" id="rStatus">En tránsito</div>
+    <div class="serv-card reveal d2">
+      <div class="serv-ico">🛍️</div>
+      <div>
+        <h3>Hacemos la compra por vos</h3>
+        <p>Mandanos el link del producto que querés de cualquier tienda en EE.UU. y nosotros lo compramos por vos. Sin costo extra.</p>
       </div>
-
-      <div class="info-row">
-        <div class="info-tile"><div class="il">📦 Contenido</div><div class="iv">Electrónico · Frágil</div></div>
-        <div class="info-tile"><div class="il">📅 Entrega estimada</div><div class="iv" id="rDate">Mañana, 14:00–18:00</div></div>
-        <div class="info-tile"><div class="il">🚚 Mensajero</div><div class="iv">Carlos R. · <a href="#" style="color:var(--pri)">Contactar</a></div></div>
+    </div>
+    <div class="serv-card reveal d3">
+      <div class="serv-ico">🔗</div>
+      <div>
+        <h3>Consolidación</h3>
+        <p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas.</p>
       </div>
-
-      <div class="prog-track">
-        <div class="prog-fill" id="progFill"></div>
-        <div class="prog-step">
-          <div class="prog-dot done">✅</div>
-          <div class="prog-lbl active">Recibido</div>
-        </div>
-        <div class="prog-step">
-          <div class="prog-dot done">✅</div>
-          <div class="prog-lbl active">En bodega</div>
-        </div>
-        <div class="prog-step">
-          <div class="prog-dot cur">🚚</div>
-          <div class="prog-lbl active">En camino</div>
-        </div>
-        <div class="prog-step">
-          <div class="prog-dot">🏠</div>
-          <div class="prog-lbl">Entregado</div>
-        </div>
-      </div>
-
-      <div class="timeline">
-        <div class="tl-item done">
-          <div class="tl-time">Hoy, 06:30 h</div>
-          <div class="tl-ev">Paquete recogido del remitente</div>
-          <div class="tl-loc">📍 Bodega Norte, Bogotá</div>
-        </div>
-        <div class="tl-item done">
-          <div class="tl-time">Hoy, 09:15 h</div>
-          <div class="tl-ev">Procesado y listo para envío</div>
-          <div class="tl-loc">📍 Centro de distribución, Bogotá</div>
-        </div>
-        <div class="tl-item done cur">
-          <div class="tl-time">Hoy, 11:45 h</div>
-          <div class="tl-ev">Paquete en tránsito hacia destino</div>
-          <div class="tl-loc">📍 Autopista Bogotá–Medellín, km 230</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-time">Mañana, ~14:00 h</div>
-          <div class="tl-ev">Llegada estimada a tu puerta</div>
-          <div class="tl-loc">📍 Medellín</div>
-        </div>
+    </div>
+    <div class="serv-card reveal d4">
+      <div class="serv-ico">⚖️</div>
+      <div>
+        <h3>Cobro por libra</h3>
+        <p>Precio justo y transparente: ₡3,950 por libra. Sin tarifas ocultas, sin sorpresas al momento de pagar.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════ HOW IT WORKS ══════════════════════════ -->
-<section id="how">
+<!-- CÓMO FUNCIONA -->
+<section id="como">
   <div class="sec-head reveal">
     <span class="sec-tag">🚀 Simple y rápido</span>
     <h2>¿Cómo funciona?</h2>
-    <p>En 4 pasos tu paquete va desde el remitente hasta tu puerta, con seguimiento en cada etapa.</p>
+    <p>En pocos pasos tus productos de EE.UU. llegan a la puerta de tu casa en San José.</p>
   </div>
   <div class="steps">
-    <div class="step-card reveal d1">
-      <div class="step-num">1</div>
-      <div class="step-ico">📝</div>
-      <h3>Programa tu envío</h3>
-      <p>El remitente registra el paquete en nuestra plataforma y elige la velocidad de entrega.</p>
+    <div class="step-row reveal d1">
+      <div class="step-num-big">1</div>
+      <div class="step-body">
+        <h3>Mandanos el link</h3>
+        <p>Encontraste lo que querés en Amazon, Shein, Nike o cualquier tienda de EE.UU. Nos mandás el link por WhatsApp o Instagram y listo.</p>
+      </div>
     </div>
-    <div class="step-card reveal d2">
-      <div class="step-num">2</div>
-      <div class="step-ico">🏭</div>
-      <h3>Recogemos el paquete</h3>
-      <p>Un mensajero llega al punto de origen y recoge el paquete con verificación de seguridad.</p>
+    <div class="step-row reveal d2">
+      <div class="step-num-big">2</div>
+      <div class="step-body">
+        <h3>Compramos por vos</h3>
+        <p>Nos encargamos de hacer la compra completa sin que vos tengás tarjeta internacional ni cuenta en EE.UU. Sin costo extra de gestión.</p>
+      </div>
     </div>
-    <div class="step-card reveal d3">
-      <div class="step-num">3</div>
-      <div class="step-ico">🛣️</div>
-      <h3>En tránsito seguro</h3>
-      <p>Rastreo GPS en tiempo real a través de nuestra red logística optimizada con IA.</p>
+    <div class="step-row reveal d3">
+      <div class="step-num-big">3</div>
+      <div class="step-body">
+        <h3>Llega a nuestra bodega en Miami</h3>
+        <p>El paquete llega a nuestro casillero en Miami. Lo revisamos, lo pesamos y te notificamos cuánto es el flete: ₡3,950 por libra.</p>
+      </div>
     </div>
-    <div class="step-card reveal d4">
-      <div class="step-num">4</div>
-      <div class="step-ico">🏠</div>
-      <h3>¡Entregado en tu puerta!</h3>
-      <p>Tu paquete llega con confirmación, foto y firma digital del receptor.</p>
+    <div class="step-row reveal d4">
+      <div class="step-num-big">4</div>
+      <div class="step-body">
+        <h3>Vuela a Costa Rica</h3>
+        <p>Elegís la modalidad: <strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
+      </div>
+    </div>
+    <div class="step-row reveal">
+      <div class="step-num-big">5</div>
+      <div class="step-body">
+        <h3>Entrega en tu puerta</h3>
+        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa, seguro y a tiempo.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════ PRICING ═══════════════════════════════ -->
-<section id="pricing">
+<!-- PRECIOS -->
+<section id="precios">
   <div class="sec-head reveal">
-    <span class="sec-tag" style="background:rgba(255,107,53,.22);color:#FF9F69">💰 Planes flexibles</span>
-    <h2>Elige tu plan</h2>
-    <p>Desde envíos ocasionales hasta logística empresarial — tenemos el plan perfecto.</p>
+    <span class="sec-tag">💰 Tarifas claras</span>
+    <h2>Precio justo, sin sorpresas</h2>
+    <p>Un solo precio por libra. Elegís la velocidad que más te conviene.</p>
   </div>
-
-  <div class="p-toggle reveal">
-    <span class="p-lbl">Mensual</span>
-    <div class="switch" id="pSwitch" onclick="togglePrice()"><div class="knob"></div></div>
-    <span class="p-lbl">Anual <span class="save-tag">−20%</span></span>
-  </div>
-
-  <div class="price-grid">
-    <div class="p-card reveal d1">
-      <div class="p-name">Básico</div>
-      <div class="p-price">
-        <span class="p-cur">$</span>
-        <span class="p-amt" data-m="29" data-a="23">29</span>
-        <span class="p-per">/mes</span>
-      </div>
-      <div class="p-desc">Perfecto para envíos personales y pequeños negocios.</div>
-      <ul class="p-feats">
-        <li><span class="ck">✓</span> Hasta 20 envíos/mes</li>
-        <li><span class="ck">✓</span> Rastreo en tiempo real</li>
-        <li><span class="ck">✓</span> Seguro básico incluido</li>
-        <li><span class="ck">✓</span> Entrega en 3–5 días</li>
-        <li><span class="cx">✗</span> Entrega express</li>
-        <li><span class="cx">✗</span> API de integración</li>
-      </ul>
-      <button class="btn-plan btn-outline">Comenzar gratis</button>
+  <div class="precio-main">
+    <div class="precio-rate reveal">
+      <div class="rate-label">Tarifa única</div>
+      <div class="rate-num">₡ 3,950</div>
+      <div class="rate-sub">por libra · aplica a ambas modalidades</div>
     </div>
 
-    <div class="p-card feat reveal d2">
-      <div class="feat-tag">⭐ Más popular</div>
-      <div class="p-name">Pro</div>
-      <div class="p-price">
-        <span class="p-cur" style="color:#999">$</span>
-        <span class="p-amt" data-m="79" data-a="63" style="color:var(--dark)">79</span>
-        <span class="p-per" style="color:#999">/mes</span>
+    <div class="modalidades">
+      <div class="modal-card flash reveal d1">
+        <div class="mc-icon">⚡</div>
+        <div class="mc-name">Flash</div>
+        <div class="mc-days">3 <span>días hábiles</span></div>
+        <div class="mc-desc">La opción más rápida. Tu paquete vuela en cuanto llega a la bodega de Miami. Ideal cuando lo necesitás ya.</div>
       </div>
-      <div class="p-desc">Ideal para e-commerce y negocios en crecimiento.</div>
-      <ul class="p-feats">
-        <li><span class="ck">✓</span> Hasta 150 envíos/mes</li>
-        <li><span class="ck">✓</span> Rastreo en tiempo real</li>
-        <li><span class="ck">✓</span> Seguro completo incluido</li>
-        <li><span class="ck">✓</span> Entrega en 1–2 días</li>
-        <li><span class="ck">✓</span> Entrega express same-day</li>
-        <li><span class="cx" style="color:#ccc">✗</span> API de integración</li>
-      </ul>
-      <button class="btn-plan btn-filled">Elegir Pro</button>
+      <div class="modal-card consol reveal d2">
+        <div class="mc-icon">📦</div>
+        <div class="mc-name">Consolidado</div>
+        <div class="mc-days">~5 <span>días hábiles</span></div>
+        <div class="mc-desc">Juntamos tu paquete con otros para hacer el envío más eficiente. Misma tarifa, un poco más de espera.</div>
+      </div>
     </div>
 
-    <div class="p-card reveal d3">
-      <div class="p-name">Empresarial</div>
-      <div class="p-price">
-        <span class="p-cur">$</span>
-        <span class="p-amt" data-m="199" data-a="159">199</span>
-        <span class="p-per">/mes</span>
+    <div class="calculadora reveal">
+      <div class="calc-title">🧮 Calculá tu envío</div>
+      <div class="calc-row">
+        <div class="calc-field">
+          <label>Peso en libras</label>
+          <input type="number" class="calc-input" id="calcLbs" placeholder="Ej: 2.5" min="0.1" step="0.1" oninput="calcCosto()" />
+        </div>
+        <button class="btn-calc" onclick="calcCosto()">Calcular ₡</button>
       </div>
-      <div class="p-desc">Solución completa para grandes operaciones logísticas.</div>
-      <ul class="p-feats">
-        <li><span class="ck">✓</span> Envíos ilimitados</li>
-        <li><span class="ck">✓</span> Rastreo en tiempo real</li>
-        <li><span class="ck">✓</span> Seguro premium</li>
-        <li><span class="ck">✓</span> Entrega en 24 horas</li>
-        <li><span class="ck">✓</span> Entrega express same-day</li>
-        <li><span class="ck">✓</span> API de integración completa</li>
-      </ul>
-      <button class="btn-plan btn-outline">Contactar ventas</button>
+      <div class="calc-result" id="calcResult">
+        <div>
+          <div class="cr-label">Tu paquete de <span id="crLbs">—</span> lbs costaría</div>
+        </div>
+        <div class="cr-amount" id="crAmount">₡ 0</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════ TESTIMONIALS ══════════════════════════ -->
-<section id="testimonials">
-  <div class="sec-head reveal">
-    <span class="sec-tag">💬 Opiniones reales</span>
-    <h2>Lo que dicen nuestros clientes</h2>
-    <p>Miles de personas y negocios confían en Linktodoor para sus entregas diarias.</p>
-  </div>
-  <div class="slider-wrap">
-    <div class="slider-track" id="sliderTrack">
-      <div class="t-card">
-        <div class="stars">★★★★★</div>
-        <p class="t-text">"Increíble servicio. Pedí un envío a las 8am y a las 3pm ya lo tenía en mi puerta. El rastreo en tiempo real me dio total tranquilidad durante todo el proceso."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#FF6B35">M</div>
-          <div><div class="t-name">María González</div><div class="t-role">Compradora online · Bogotá</div></div>
-        </div>
-      </div>
-      <div class="t-card">
-        <div class="stars">★★★★★</div>
-        <p class="t-text">"Usamos Linktodoor para nuestro e-commerce y las ventas aumentaron un 30%. Los clientes adoran el seguimiento en vivo y la puntualidad de las entregas."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#0F3460">A</div>
-          <div><div class="t-name">Andrés Morales</div><div class="t-role">CEO · TiendaOnline.co</div></div>
-        </div>
-      </div>
-      <div class="t-card">
-        <div class="stars">★★★★★</div>
-        <p class="t-text">"La API de integración es excelente. La conectamos a nuestro sistema en un día. El soporte técnico es de primera y siempre están disponibles."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#28C76F">L</div>
-          <div><div class="t-name">Laura Ramírez</div><div class="t-role">CTO · LogiTech Solutions</div></div>
-        </div>
-      </div>
-      <div class="t-card">
-        <div class="stars">★★★★☆</div>
-        <p class="t-text">"Muy buenos precios y cobertura excelente. Llegaron hasta mi pueblo que otros servicios no cubren. Lo recomiendo a todos mis vecinos."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#e55a28">C</div>
-          <div><div class="t-name">Carlos Jiménez</div><div class="t-role">Comerciante · Pereira</div></div>
-        </div>
-      </div>
-      <div class="t-card">
-        <div class="stars">★★★★★</div>
-        <p class="t-text">"El seguro de paquetes es real. Tuve un siniestro y en menos de 48 horas ya tenían la solución. Eso genera una confianza enorme."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#16213E">P</div>
-          <div><div class="t-name">Paula Torres</div><div class="t-role">Emprendedora · Cali</div></div>
-        </div>
-      </div>
-      <div class="t-card">
-        <div class="stars">★★★★★</div>
-        <p class="t-text">"Llevamos 2 años con el plan empresarial. Más de 500 envíos mensuales sin problemas. La confiabilidad es impecable, no cambiaríamos por nada."</p>
-        <div class="t-auth">
-          <div class="t-avatar" style="background:#FF6B35">R</div>
-          <div><div class="t-name">Roberto Sánchez</div><div class="t-role">Dir. Logística · MarketCo</div></div>
-        </div>
+<!-- ENTREGAS -->
+<section id="entregas">
+  <div class="entrega-inner">
+    <div class="entrega-text reveal">
+      <h2>Entregas en<br><em>San José</em></h2>
+      <p>Todos los martes y viernes hacemos rutas de entrega. Llevamos tus paquetes de forma segura y confiable hasta la puerta de tu casa.</p>
+      <div class="dias-badge">
+        <span class="d-icon">📅</span>
+        <span>Todos los <strong>Martes</strong> y <strong>Viernes</strong></span>
       </div>
     </div>
-    <div class="dots" id="sliderDots"></div>
+    <div class="entrega-icons reveal">
+      <div class="ei-card">
+        <div class="ei-ico">🛡️</div>
+        <div class="ei-label">Entregas seguras</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">📦</div>
+        <div class="ei-label">Manejo cuidadoso</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">⏰</div>
+        <div class="ei-label">Rutas puntuales</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">🏠</div>
+        <div class="ei-label">Hasta tu puerta</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════════════════ FOOTER ════════════════════════════════ -->
+<!-- CTA -->
+<section id="cta">
+  <h2>¿Listo para<br><em>comprar en EE.UU.?</em></h2>
+  <p>Escribinos y te ayudamos con tu primer pedido. Es más fácil de lo que pensás.</p>
+  <div class="cta-btns">
+    <a href="https://wa.me/50600000000" class="btn-wa" target="_blank">
+      💬 WhatsApp
+    </a>
+    <a href="https://instagram.com/linktodoor" class="btn-ig" target="_blank">
+      📷 @linktodoor
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <div class="foot-grid">
-    <div class="foot-brand">
-      <a href="#" class="logo"><div class="logo-box">📦</div>Linktodoor</a>
-      <p>Delivery confiable que conecta remitentes y destinatarios en todo el país. Tu paquete siempre llega.</p>
-      <div class="socials">
-        <a class="soc" href="#">f</a>
-        <a class="soc" href="#">in</a>
-        <a class="soc" href="#">tw</a>
-        <a class="soc" href="#">ig</a>
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#" class="logo">
+          <div class="logo-mark"><span class="l1">LINK</span><span class="l2">DOOR</span></div>
+          <span class="logo-text" style="color:rgba(255,255,255,.7)">Linktodoor</span>
+        </a>
+        <p>Tu casillero en Miami. Compramos y entregamos en San José todos los martes y viernes.</p>
+        <div class="foot-social" style="margin-top:1rem">
+          <a class="soc" href="https://instagram.com/linktodoor" target="_blank">ig</a>
+          <a class="soc" href="https://facebook.com/linktodoor" target="_blank">f</a>
+          <a class="soc" href="https://wa.me/50600000000" target="_blank">wa</a>
+        </div>
+      </div>
+      <div class="foot-links-group">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="#servicios">Casillero en Miami</a></li>
+          <li><a href="#servicios">Compramos por vos</a></li>
+          <li><a href="#servicios">Consolidación</a></li>
+          <li><a href="#precios">Tarifas</a></li>
+        </ul>
+      </div>
+      <div class="foot-links-group">
+        <h4>Info</h4>
+        <ul>
+          <li><a href="#como">Cómo funciona</a></li>
+          <li><a href="#entregas">Zonas de entrega</a></li>
+          <li><a href="#precios">Calculadora</a></li>
+          <li><a href="#cta">Contacto</a></li>
+        </ul>
       </div>
     </div>
-    <div class="foot-col">
-      <h4>Servicios</h4>
-      <ul>
-        <li><a href="#">Envío estándar</a></li>
-        <li><a href="#">Envío express</a></li>
-        <li><a href="#">Same-day delivery</a></li>
-        <li><a href="#">Logística empresarial</a></li>
-        <li><a href="#">Almacenamiento</a></li>
-      </ul>
-    </div>
-    <div class="foot-col">
-      <h4>Empresa</h4>
-      <ul>
-        <li><a href="#">Sobre nosotros</a></li>
-        <li><a href="#">Trabaja con nosotros</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Prensa</a></li>
-        <li><a href="#">Contacto</a></li>
-      </ul>
-    </div>
-    <div class="foot-col">
-      <h4>Soporte</h4>
-      <ul>
-        <li><a href="#">Centro de ayuda</a></li>
-        <li><a href="#">Rastrear paquete</a></li>
-        <li><a href="#">Reclamaciones</a></li>
-        <li><a href="#">API Docs</a></li>
-        <li><a href="#">Estado del sistema</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="foot-bottom">
-    <span>© 2024 Linktodoor. Todos los derechos reservados.</span>
-    <div class="foot-links">
-      <a href="#">Privacidad</a>
-      <a href="#">Términos</a>
-      <a href="#">Cookies</a>
+    <div class="foot-bottom">
+      <span>© 2024 Linktodoor · linktodoor.com</span>
+      <span>📍 Miami → San José 🇺🇸→🇨🇷</span>
     </div>
   </div>
 </footer>
 
-<!-- ═══════════════════════ SCRIPTS ═══════════════════════════════ -->
 <script>
-/* ── NAV scroll & hamburger ────────────────────────────────────── */
-const nav  = document.getElementById('nav');
-const hbg  = document.getElementById('hbg');
-const links = document.getElementById('navLinks');
+/* NAV */
+const nav = document.getElementById('nav');
+const hbg = document.getElementById('hbg');
+const navLinks = document.getElementById('navLinks');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+function toggleMenu() { navLinks.classList.toggle('open'); hbg.classList.toggle('open'); }
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  navLinks.classList.remove('open'); hbg.classList.remove('open');
+}));
+function goTo(sel) { document.querySelector(sel).scrollIntoView({ behavior:'smooth' }); }
 
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 50);
-});
-
-function toggleMenu() {
-  links.classList.toggle('open');
-  hbg.classList.toggle('open');
-}
-
-links.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => {
-    links.classList.remove('open');
-    hbg.classList.remove('open');
-  })
-);
-
-/* smooth-scroll helper */
-function scrollTo(sel) {
-  document.querySelector(sel).scrollIntoView({ behavior:'smooth' });
-}
-
-/* ── Ripple effect ─────────────────────────────────────────────── */
-document.querySelectorAll('.btn-pri').forEach(btn => {
+/* Ripple */
+document.querySelectorAll('.btn-cream').forEach(btn => {
   btn.addEventListener('click', e => {
     const r = document.createElement('span');
     r.className = 'ripple';
     const rect = btn.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
-    r.style.cssText = `width:${size}px;height:${size}px;
-      left:${e.clientX-rect.left-size/2}px;
-      top:${e.clientY-rect.top-size/2}px`;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
     btn.appendChild(r);
     setTimeout(() => r.remove(), 650);
   });
 });
 
-/* ── Hero truck animation ──────────────────────────────────────── */
-const heroFill  = document.getElementById('heroFill');
-const heroTruck = document.getElementById('heroTruck');
-const dSteps    = [0,1,2,3].map(i => document.getElementById('ds'+i));
-let heroPhase   = 2; // start at "En tránsito"
-
-function updateHeroPhase(p) {
-  dSteps.forEach((s,i) => {
-    s.classList.toggle('active', i === p);
-    s.classList.toggle('done',   i < p);
-  });
-  const pct = (p / 3) * 78;
-  heroFill.style.width  = pct + '%';
-  heroTruck.style.left  = pct + '%';
+/* Hero ship type selector */
+function selectShip(el, name, days) {
+  document.querySelectorAll('.ship-type').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('routeDays').textContent = days;
 }
 
-updateHeroPhase(heroPhase);
-setInterval(() => {
-  heroPhase = (heroPhase + 1) % 4;
-  updateHeroPhase(heroPhase);
-}, 2800);
-
-/* ── Counter animation ─────────────────────────────────────────── */
-function animateCounter(el) {
-  const target = parseInt(el.dataset.target);
-  const suffix = el.dataset.suffix || '';
-  const dur    = 1800;
-  const fps    = 60;
-  const step   = target / (dur / (1000 / fps));
-  let cur = 0;
-  const timer = setInterval(() => {
-    cur += step;
-    if (cur >= target) { cur = target; clearInterval(timer); }
-    el.textContent = Math.floor(cur).toLocaleString('es-CO') + suffix;
-  }, 1000/fps);
-}
-
-const counterObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      document.querySelectorAll('[data-target]').forEach(animateCounter);
-      counterObs.disconnect();
-    }
-  });
-}, { threshold: 0.5 });
-counterObs.observe(document.getElementById('hero'));
-
-/* ── Scroll reveal ─────────────────────────────────────────────── */
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) e.target.classList.add('visible');
-  });
+/* Scroll reveal */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
-
-/* ── Package tracking ──────────────────────────────────────────── */
-function runDemo() {
-  document.getElementById('trkInput').value = 'LTD-2024-78542';
-  trackPkg();
+/* Calculadora */
+function calcCosto() {
+  const lbs = parseFloat(document.getElementById('calcLbs').value);
+  const result = document.getElementById('calcResult');
+  if (!lbs || lbs <= 0) { result.classList.remove('show'); return; }
+  const total = Math.round(lbs * 3950);
+  document.getElementById('crLbs').textContent = lbs;
+  document.getElementById('crAmount').textContent = '₡ ' + total.toLocaleString('es-CR');
+  result.classList.add('show');
 }
-
-function trackPkg() {
-  const input = document.getElementById('trkInput');
-  const val   = input.value.trim();
-  if (!val) {
-    input.classList.add('error');
-    setTimeout(() => input.classList.remove('error'), 600);
-    return;
-  }
-
-  const btn = document.getElementById('trkBtn');
-  btn.textContent = '⏳ Buscando...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    btn.innerHTML = '🔍 Rastrear';
-    btn.disabled  = false;
-
-    document.getElementById('rId').textContent = val.toUpperCase();
-
-    const result = document.getElementById('trkResult');
-    result.classList.add('show');
-
-    setTimeout(() => {
-      document.getElementById('progFill').style.width = '63%';
-    }, 200);
-
-    setTimeout(() => {
-      result.scrollIntoView({ behavior:'smooth', block:'center' });
-    }, 350);
-  }, 1100);
-}
-
-/* ── Pricing toggle ────────────────────────────────────────────── */
-let annual = false;
-
-function togglePrice() {
-  annual = !annual;
-  document.getElementById('pSwitch').classList.toggle('on', annual);
-
-  document.querySelectorAll('.p-amt').forEach(el => {
-    const from = parseInt(el.textContent);
-    const to   = annual ? parseInt(el.dataset.a) : parseInt(el.dataset.m);
-    animateNum(el, from, to);
-  });
-}
-
-function animateNum(el, from, to) {
-  const steps = 24, ms = 18;
-  const diff  = to - from;
-  let i = 0;
-  clearInterval(el._timer);
-  el._timer = setInterval(() => {
-    i++;
-    el.textContent = Math.round(from + diff * (i / steps));
-    if (i >= steps) { el.textContent = to; clearInterval(el._timer); }
-  }, ms);
-}
-
-/* ── Testimonials slider ───────────────────────────────────────── */
-const track   = document.getElementById('sliderTrack');
-const dotsEl  = document.getElementById('sliderDots');
-const cards   = Array.from(track.children);
-let curSlide  = 0;
-let autoTimer;
-
-function visibleCount() {
-  return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
-}
-
-function buildDots() {
-  dotsEl.innerHTML = '';
-  const total = cards.length - visibleCount();
-  for (let i = 0; i <= total; i++) {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i === curSlide ? ' on' : '');
-    d.addEventListener('click', () => goSlide(i));
-    dotsEl.appendChild(d);
-  }
-}
-
-function goSlide(n) {
-  const total = cards.length - visibleCount();
-  curSlide = Math.max(0, Math.min(n, total));
-  const w = cards[0].offsetWidth + 32;
-  track.style.transform = `translateX(-${curSlide * w}px)`;
-  dotsEl.querySelectorAll('.dot').forEach((d,i) =>
-    d.classList.toggle('on', i === curSlide));
-  resetAuto();
-}
-
-function resetAuto() {
-  clearInterval(autoTimer);
-  autoTimer = setInterval(() => {
-    const total = cards.length - visibleCount();
-    goSlide(curSlide >= total ? 0 : curSlide + 1);
-  }, 4000);
-}
-
-buildDots();
-resetAuto();
-window.addEventListener('resize', () => { buildDots(); goSlide(0); });
+document.getElementById('calcLbs').addEventListener('keydown', e => { if (e.key === 'Enter') calcCosto(); });
 </script>
 </body>
 </html>
