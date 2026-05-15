@@ -26,7 +26,7 @@
     body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
       color:var(--dark);background:var(--white);overflow-x:hidden}
 
-    /* NAV */
+    /* ── NAV ── */
     nav{position:fixed;inset:0 0 auto;z-index:1000;padding:1rem 2rem;
       display:flex;align-items:center;justify-content:space-between;transition:var(--t)}
     nav.scrolled{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
@@ -52,7 +52,7 @@
     .hamburger.open span:nth-child(2){opacity:0}
     .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
-    /* HERO */
+    /* ── HERO ── */
     #hero{min-height:100vh;background:var(--pri);position:relative;
       display:flex;align-items:center;overflow:hidden}
     .hero-bg{position:absolute;inset:0}
@@ -98,6 +98,7 @@
     .hero-stat .num{font-size:1.9rem;font-weight:900;color:var(--cream)}
     .hero-stat .lbl{font-size:.78rem;color:rgba(245,240,228,.55)}
 
+    /* hero card */
     .hero-card{background:rgba(255,255,255,.1);backdrop-filter:blur(20px);
       border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:2rem;position:relative}
     .hc-label{font-size:.75rem;font-weight:700;color:rgba(245,240,228,.55);
@@ -128,6 +129,7 @@
     .price-tag .pt-label{font-size:.75rem;font-weight:700;color:var(--pri);letter-spacing:.3px}
     .price-tag .pt-price{font-size:1.3rem;font-weight:900;color:var(--pri)}
 
+    /* float cards */
     .fc{position:absolute;background:var(--white);border-radius:14px;
       padding:.85rem 1.1rem;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:.7rem}
     .fc-1{top:-28px;right:-18px;animation:fcFloat 4s ease-in-out infinite}
@@ -137,14 +139,14 @@
     .fc-t{font-size:.75rem;font-weight:700;color:var(--dark)}
     .fc-st{font-size:.68rem;color:var(--gray)}
 
-    /* SEC COMMON */
+    /* ── SEC COMMON ── */
     .sec-head{text-align:center;max-width:620px;margin:0 auto 3rem}
     .sec-tag{display:inline-block;background:rgba(91,91,214,.1);color:var(--pri);
       padding:.35rem .9rem;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:.9rem}
     .sec-head h2{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800;line-height:1.2;margin-bottom:.9rem}
     .sec-head p{color:var(--gray);font-size:1.05rem;line-height:1.7}
 
-    /* SERVICIOS */
+    /* ── SERVICIOS ── */
     #servicios{background:var(--cream);padding:5rem 2rem}
     .serv-grid{max-width:1100px;margin:0 auto;
       display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
@@ -157,7 +159,7 @@
     .serv-card h3{font-size:1.05rem;font-weight:800;letter-spacing:.3px;margin-bottom:.4rem;color:var(--dark)}
     .serv-card p{font-size:.9rem;color:var(--gray);line-height:1.6}
 
-    /* COMO FUNCIONA */
+    /* ── CÓMO FUNCIONA ── */
     #como{padding:5rem 2rem;background:var(--white)}
     .steps{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:0}
     .step-row{display:flex;align-items:flex-start;gap:2rem;padding:2rem 0;
@@ -171,7 +173,7 @@
       text-transform:uppercase;margin-bottom:.4rem;color:var(--dark)}
     .step-body p{font-size:.92rem;color:var(--gray);line-height:1.65;max-width:600px}
 
-    /* PRECIOS */
+    /* ── PRECIOS ── */
     #precios{background:var(--dark2);padding:5rem 2rem}
     #precios .sec-head h2{color:var(--cream)}
     #precios .sec-head p{color:rgba(245,240,228,.5)}
@@ -202,6 +204,7 @@
     .mc-days span{font-size:.85rem;font-weight:500;color:rgba(245,240,228,.5)}
     .mc-desc{font-size:.85rem;color:rgba(245,240,228,.55);line-height:1.6}
 
+    /* calculadora */
     .calculadora{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
       border-radius:var(--r);padding:2rem}
     .calc-title{font-size:.9rem;font-weight:700;color:var(--cream);margin-bottom:1.2rem;
@@ -226,7 +229,7 @@
     .cr-label{font-size:.82rem;color:rgba(245,240,228,.6)}
     .cr-amount{font-size:1.6rem;font-weight:900;color:var(--cream)}
 
-    /* ENTREGAS */
+    /* ── ENTREGAS ── */
     #entregas{background:var(--cream);padding:5rem 2rem}
     .entrega-inner{max-width:1000px;margin:0 auto;
       display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
@@ -246,7 +249,7 @@
     .ei-card .ei-ico{font-size:2rem;margin-bottom:.6rem}
     .ei-card .ei-label{font-size:.8rem;font-weight:700;color:var(--dark);letter-spacing:.3px;text-transform:uppercase}
 
-    /* CTA */
+    /* ── CTA ── */
     #cta{background:var(--pri);padding:5rem 2rem;text-align:center;position:relative;overflow:hidden}
     #cta::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;
       background:rgba(255,255,255,.05);top:-200px;left:50%;transform:translateX(-50%)}
@@ -265,7 +268,7 @@
       gap:.6rem;transition:var(--t)}
     .btn-ig:hover{background:rgba(255,255,255,.22)}
 
-    /* FOOTER */
+    /* ── FOOTER ── */
     footer{background:var(--dark);color:rgba(255,255,255,.45);padding:3rem 2rem 1.5rem}
     .foot-inner{max-width:1100px;margin:0 auto}
     .foot-top{display:flex;align-items:flex-start;justify-content:space-between;
@@ -285,12 +288,12 @@
       color:rgba(255,255,255,.5);font-size:.8rem;font-weight:700;transition:var(--t)}
     .soc:hover{background:var(--pri);color:var(--white)}
 
-    /* SCROLL REVEAL */
-    .reveal{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+    /* ── SCROLL REVEAL ── */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
-    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
 
-    /* RESPONSIVE */
+    /* ── RESPONSIVE ── */
     @media(max-width:1024px){
       .serv-grid{grid-template-columns:1fr}
       .modalidades{grid-template-columns:1fr}
@@ -320,6 +323,7 @@
 </head>
 <body>
 
+<!-- NAV -->
 <nav id="nav">
   <a href="#" class="logo">
     <div class="logo-mark"><span class="l1">LINK</span><span class="l2">DOOR</span></div>
@@ -337,6 +341,7 @@
   </div>
 </nav>
 
+<!-- HERO -->
 <section id="hero">
   <div class="hero-bg">
     <div class="hero-circle hc1"></div>
@@ -361,11 +366,12 @@
           <div class="lbl">días Flash</div>
         </div>
         <div class="hero-stat">
-          <div class="num">Mar &amp; Vie</div>
+          <div class="num">Mar & Vie</div>
           <div class="lbl">días de entrega</div>
         </div>
       </div>
     </div>
+
     <div class="hero-visual">
       <div style="position:relative">
         <div class="hero-card">
@@ -386,6 +392,7 @@
               <div class="country">Costa Rica</div>
             </div>
           </div>
+
           <div class="ship-types">
             <div class="ship-type flash active" onclick="selectShip(this,'Flash','3 días')">
               <div class="st-icon">⚡</div>
@@ -398,11 +405,13 @@
               <div class="st-days">~5 días hábiles</div>
             </div>
           </div>
+
           <div class="price-tag">
             <span class="pt-label">💰 Tarifa</span>
             <span class="pt-price">₡ 3,950 / libra</span>
           </div>
         </div>
+
         <div class="fc fc-1">
           <div class="fc-ico" style="background:#EEF0FF">📍</div>
           <div><div class="fc-t">Casillero gratis</div><div class="fc-st">Dirección en Miami</div></div>
@@ -416,6 +425,7 @@
   </div>
 </section>
 
+<!-- SERVICIOS -->
 <section id="servicios">
   <div class="sec-head reveal">
     <span class="sec-tag">🌟 Nuestros servicios</span>
@@ -425,23 +435,36 @@
   <div class="serv-grid">
     <div class="serv-card reveal d1">
       <div class="serv-ico">📮</div>
-      <div><h3>Casillero propio</h3><p>Te damos una dirección real en Miami para que enviés todas tus compras de cualquier tienda de EE.UU. Sin complicaciones.</p></div>
+      <div>
+        <h3>Casillero propio</h3>
+        <p>Te damos una dirección real en Miami para que enviés todas tus compras de cualquier tienda de EE.UU. Sin complicaciones.</p>
+      </div>
     </div>
     <div class="serv-card reveal d2">
       <div class="serv-ico">🛍️</div>
-      <div><h3>Hacemos la compra por vos</h3><p>Mandános el link del producto que querés de cualquier tienda en EE.UU. y nosotros lo compramos por vos. Sin costo extra.</p></div>
+      <div>
+        <h3>Hacemos la compra por vos</h3>
+        <p>Mandanos el link del producto que querés de cualquier tienda en EE.UU. y nosotros lo compramos por vos. Sin costo extra.</p>
+      </div>
     </div>
     <div class="serv-card reveal d3">
       <div class="serv-ico">🔗</div>
-      <div><h3>Consolidación</h3><p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas.</p></div>
+      <div>
+        <h3>Consolidación</h3>
+        <p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas.</p>
+      </div>
     </div>
     <div class="serv-card reveal d4">
       <div class="serv-ico">⚖️</div>
-      <div><h3>Cobro por libra</h3><p>Precio justo y transparente: ₡3,950 por libra. Sin tarifas ocultas, sin sorpresas al momento de pagar.</p></div>
+      <div>
+        <h3>Cobro por libra</h3>
+        <p>Precio justo y transparente: ₡3,950 por libra. Sin tarifas ocultas, sin sorpresas al momento de pagar.</p>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- CÓMO FUNCIONA -->
 <section id="como">
   <div class="sec-head reveal">
     <span class="sec-tag">🚀 Simple y rápido</span>
@@ -451,27 +474,43 @@
   <div class="steps">
     <div class="step-row reveal d1">
       <div class="step-num-big">1</div>
-      <div class="step-body"><h3>Mandános el link</h3><p>Encontraste lo que querés en Amazon, Shein, Nike o cualquier tienda de EE.UU. Nos mandás el link por WhatsApp o Instagram y listo.</p></div>
+      <div class="step-body">
+        <h3>Mandanos el link</h3>
+        <p>Encontraste lo que querés en Amazon, Shein, Nike o cualquier tienda de EE.UU. Nos mandás el link por WhatsApp o Instagram y listo.</p>
+      </div>
     </div>
     <div class="step-row reveal d2">
       <div class="step-num-big">2</div>
-      <div class="step-body"><h3>Compramos por vos</h3><p>Nos encargamos de hacer la compra completa sin que vos tengás tarjeta internacional ni cuenta en EE.UU. Sin costo extra de gestión.</p></div>
+      <div class="step-body">
+        <h3>Compramos por vos</h3>
+        <p>Nos encargamos de hacer la compra completa sin que vos tengás tarjeta internacional ni cuenta en EE.UU. Sin costo extra de gestión.</p>
+      </div>
     </div>
     <div class="step-row reveal d3">
       <div class="step-num-big">3</div>
-      <div class="step-body"><h3>Llega a nuestra bodega en Miami</h3><p>El paquete llega a nuestro casillero en Miami. Lo revisamos, lo pesamos y te notificamos cuánto es el flete: ₡3,950 por libra.</p></div>
+      <div class="step-body">
+        <h3>Llega a nuestra bodega en Miami</h3>
+        <p>El paquete llega a nuestro casillero en Miami. Lo revisamos, lo pesamos y te notificamos cuánto es el flete: ₡3,950 por libra.</p>
+      </div>
     </div>
     <div class="step-row reveal d4">
       <div class="step-num-big">4</div>
-      <div class="step-body"><h3>Vuela a Costa Rica</h3><p>Elegís la modalidad: <strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p></div>
+      <div class="step-body">
+        <h3>Vuela a Costa Rica</h3>
+        <p>Elegís la modalidad: <strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
+      </div>
     </div>
     <div class="step-row reveal">
       <div class="step-num-big">5</div>
-      <div class="step-body"><h3>Entrega en tu puerta</h3><p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa, seguro y a tiempo.</p></div>
+      <div class="step-body">
+        <h3>Entrega en tu puerta</h3>
+        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa, seguro y a tiempo.</p>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- PRECIOS -->
 <section id="precios">
   <div class="sec-head reveal">
     <span class="sec-tag">💰 Tarifas claras</span>
@@ -484,6 +523,7 @@
       <div class="rate-num">₡ 3,950</div>
       <div class="rate-sub">por libra · aplica a ambas modalidades</div>
     </div>
+
     <div class="modalidades">
       <div class="modal-card flash reveal d1">
         <div class="mc-icon">⚡</div>
@@ -498,6 +538,7 @@
         <div class="mc-desc">Juntamos tu paquete con otros para hacer el envío más eficiente. Misma tarifa, un poco más de espera.</div>
       </div>
     </div>
+
     <div class="calculadora reveal">
       <div class="calc-title">🧮 Calculá tu envío</div>
       <div class="calc-row">
@@ -508,13 +549,16 @@
         <button class="btn-calc" onclick="calcCosto()">Calcular ₡</button>
       </div>
       <div class="calc-result" id="calcResult">
-        <div><div class="cr-label">Tu paquete de <span id="crLbs">—</span> lbs costaría</div></div>
+        <div>
+          <div class="cr-label">Tu paquete de <span id="crLbs">—</span> lbs costaría</div>
+        </div>
         <div class="cr-amount" id="crAmount">₡ 0</div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ENTREGAS -->
 <section id="entregas">
   <div class="entrega-inner">
     <div class="entrega-text reveal">
@@ -526,23 +570,41 @@
       </div>
     </div>
     <div class="entrega-icons reveal">
-      <div class="ei-card"><div class="ei-ico">🛡️</div><div class="ei-label">Entregas seguras</div></div>
-      <div class="ei-card"><div class="ei-ico">📦</div><div class="ei-label">Manejo cuidadoso</div></div>
-      <div class="ei-card"><div class="ei-ico">⏰</div><div class="ei-label">Rutas puntuales</div></div>
-      <div class="ei-card"><div class="ei-ico">🏠</div><div class="ei-label">Hasta tu puerta</div></div>
+      <div class="ei-card">
+        <div class="ei-ico">🛡️</div>
+        <div class="ei-label">Entregas seguras</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">📦</div>
+        <div class="ei-label">Manejo cuidadoso</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">⏰</div>
+        <div class="ei-label">Rutas puntuales</div>
+      </div>
+      <div class="ei-card">
+        <div class="ei-ico">🏠</div>
+        <div class="ei-label">Hasta tu puerta</div>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- CTA -->
 <section id="cta">
   <h2>¿Listo para<br><em>comprar en EE.UU.?</em></h2>
-  <p>Escribínos y te ayudamos con tu primer pedido. Es más fácil de lo que pensás.</p>
+  <p>Escribinos y te ayudamos con tu primer pedido. Es más fácil de lo que pensás.</p>
   <div class="cta-btns">
-    <a href="https://wa.me/50600000000" class="btn-wa" target="_blank">💬 WhatsApp</a>
-    <a href="https://instagram.com/linktodoor" class="btn-ig" target="_blank">📷 @linktodoor</a>
+    <a href="https://wa.me/50600000000" class="btn-wa" target="_blank">
+      💬 WhatsApp
+    </a>
+    <a href="https://instagram.com/linktodoor" class="btn-ig" target="_blank">
+      📷 @linktodoor
+    </a>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
   <div class="foot-inner">
     <div class="foot-top">
@@ -585,6 +647,7 @@
 </footer>
 
 <script>
+/* NAV */
 const nav = document.getElementById('nav');
 const hbg = document.getElementById('hbg');
 const navLinks = document.getElementById('navLinks');
@@ -594,24 +657,37 @@ navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
   navLinks.classList.remove('open'); hbg.classList.remove('open');
 }));
 function goTo(sel) { document.querySelector(sel).scrollIntoView({ behavior:'smooth' }); }
+
+/* Ripple */
 document.querySelectorAll('.btn-cream').forEach(btn => {
   btn.addEventListener('click', e => {
-    const r = document.createElement('span'); r.className = 'ripple';
+    const r = document.createElement('span');
+    r.className = 'ripple';
     const rect = btn.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
     r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
-    btn.appendChild(r); setTimeout(() => r.remove(), 650);
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 650);
   });
 });
+
+/* Hero ship type selector */
 function selectShip(el, name, days) {
   document.querySelectorAll('.ship-type').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('routeDays').textContent = days;
 }
+
+/* Scroll reveal */
+const revealEls = document.querySelectorAll('.reveal');
 const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
+revealEls.forEach(el => obs.observe(el));
+/* Fallback: reveal everything after 800ms in case observer doesn't fire */
+setTimeout(() => revealEls.forEach(el => el.classList.add('visible')), 800);
+
+/* Calculadora */
 function calcCosto() {
   const lbs = parseFloat(document.getElementById('calcLbs').value);
   const result = document.getElementById('calcResult');
@@ -622,6 +698,6 @@ function calcCosto() {
   result.classList.add('show');
 }
 document.getElementById('calcLbs').addEventListener('keydown', e => { if (e.key === 'Enter') calcCosto(); });
-<\/script>
+</script>
 </body>
 </html>
