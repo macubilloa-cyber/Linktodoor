@@ -288,6 +288,13 @@
       color:rgba(255,255,255,.5);font-size:.8rem;font-weight:700;transition:var(--t)}
     .soc:hover{background:var(--pri);color:var(--white)}
 
+    /* ── TABS ── */
+    .tab-btn{background:rgba(91,91,214,.08);color:var(--pri);border:2px solid rgba(91,91,214,.2);
+      padding:.7rem 1.4rem;border-radius:50px;font-weight:700;font-size:.9rem;
+      cursor:pointer;transition:var(--t);font-family:inherit}
+    .tab-btn.active{background:var(--pri);color:var(--white);border-color:var(--pri)}
+    .tab-btn:not(.active):hover{background:rgba(91,91,214,.15)}
+
     /* ── SCROLL REVEAL ── */
     .reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
@@ -429,36 +436,53 @@
 <section id="servicios">
   <div class="sec-head reveal">
     <span class="sec-tag">🌟 Nuestros servicios</span>
-    <h2>Todo lo que necesitás para comprar en EE.UU.</h2>
-    <p>Desde tu dirección en Miami hasta la entrega en tu puerta en San José.</p>
+    <h2>Dos formas de comprar en EE.UU.</h2>
+    <p>Vos elegís cómo querés hacerlo — nosotros nos encargamos del resto.</p>
   </div>
+
+  <!-- Opciones de compra destacadas -->
+  <div style="max-width:1100px;margin:0 auto 2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="reveal">
+    <div style="background:var(--pri);border-radius:var(--r);padding:2rem;color:var(--cream)">
+      <div style="font-size:2rem;margin-bottom:.8rem">🛍️</div>
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;opacity:.65;margin-bottom:.4rem">Opción 1</div>
+      <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:.7rem;color:var(--cream)">Nosotros compramos por vos</h3>
+      <p style="font-size:.9rem;line-height:1.65;opacity:.8">Encontraste algo que querés en Amazon, Shein, Nike o cualquier tienda. <strong style="color:var(--lblue)">Mandanos el link</strong> y nosotros hacemos la compra completa. Sin tarjeta internacional, sin cuenta en EE.UU., sin complicaciones.</p>
+    </div>
+    <div style="background:var(--cream2);border-radius:var(--r);padding:2rem;border:2px solid var(--pri)">
+      <div style="font-size:2rem;margin-bottom:.8rem">📮</div>
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--pri);opacity:.7;margin-bottom:.4rem">Opción 2</div>
+      <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:.7rem;color:var(--dark)">Vos comprás, nosotros traemos</h3>
+      <p style="font-size:.9rem;line-height:1.65;color:var(--gray)">¿Preferís hacer vos mismo la compra? Te damos tu <strong style="color:var(--pri)">dirección personal en Miami</strong>. Enviás tus compras ahí y nosotros las recibimos y las traemos a San José.</p>
+    </div>
+  </div>
+
   <div class="serv-grid">
     <div class="serv-card reveal d1">
-      <div class="serv-ico">📮</div>
-      <div>
-        <h3>Casillero propio</h3>
-        <p>Te damos una dirección real en Miami para que enviés todas tus compras de cualquier tienda de EE.UU. Sin complicaciones.</p>
-      </div>
-    </div>
-    <div class="serv-card reveal d2">
-      <div class="serv-ico">🛍️</div>
-      <div>
-        <h3>Hacemos la compra por vos</h3>
-        <p>Mandanos el link del producto que querés de cualquier tienda en EE.UU. y nosotros lo compramos por vos. Sin costo extra.</p>
-      </div>
-    </div>
-    <div class="serv-card reveal d3">
       <div class="serv-ico">🔗</div>
       <div>
         <h3>Consolidación</h3>
-        <p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas.</p>
+        <p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas a la vez.</p>
       </div>
     </div>
-    <div class="serv-card reveal d4">
+    <div class="serv-card reveal d2">
       <div class="serv-ico">⚖️</div>
       <div>
         <h3>Cobro por libra</h3>
         <p>Precio justo y transparente: ₡3,950 por libra. Sin tarifas ocultas, sin sorpresas al momento de pagar.</p>
+      </div>
+    </div>
+    <div class="serv-card reveal d3">
+      <div class="serv-ico">⚡</div>
+      <div>
+        <h3>Envío Flash</h3>
+        <p>Tu paquete vuela en cuanto llega a Miami. En solo 3 días hábiles está en San José, ideal cuando lo necesitás urgente.</p>
+      </div>
+    </div>
+    <div class="serv-card reveal d4">
+      <div class="serv-ico">📦</div>
+      <div>
+        <h3>Envío Consolidado</h3>
+        <p>Juntamos tu envío con otros para mayor eficiencia. Misma tarifa por libra, ~5 días hábiles de tiempo de entrega.</p>
       </div>
     </div>
   </div>
@@ -471,7 +495,13 @@
     <h2>¿Cómo funciona?</h2>
     <p>En pocos pasos tus productos de EE.UU. llegan a la puerta de tu casa en San José.</p>
   </div>
-  <div class="steps">
+  <!-- tabs -->
+  <div style="max-width:1000px;margin:0 auto 2rem;display:flex;gap:.8rem;flex-wrap:wrap" class="reveal">
+    <button class="tab-btn active" onclick="showTab('tab-nosotros',this)">🛍️ Nosotros compramos por vos</button>
+    <button class="tab-btn" onclick="showTab('tab-vos',this)">📮 Vos comprás, nosotros traemos</button>
+  </div>
+
+  <div class="steps" id="tab-nosotros">
     <div class="step-row reveal d1">
       <div class="step-num-big">1</div>
       <div class="step-body">
@@ -483,28 +513,66 @@
       <div class="step-num-big">2</div>
       <div class="step-body">
         <h3>Compramos por vos</h3>
-        <p>Nos encargamos de hacer la compra completa sin que vos tengás tarjeta internacional ni cuenta en EE.UU. Sin costo extra de gestión.</p>
+        <p>Nos encargamos de hacer la compra completa. Sin tarjeta internacional, sin cuenta en EE.UU., sin costo extra de gestión.</p>
       </div>
     </div>
     <div class="step-row reveal d3">
       <div class="step-num-big">3</div>
       <div class="step-body">
         <h3>Llega a nuestra bodega en Miami</h3>
-        <p>El paquete llega a nuestro casillero en Miami. Lo revisamos, lo pesamos y te notificamos cuánto es el flete: ₡3,950 por libra.</p>
+        <p>El paquete llega a nuestro casillero. Lo revisamos, pesamos y te notificamos el costo del flete: ₡3,950 por libra.</p>
       </div>
     </div>
     <div class="step-row reveal d4">
       <div class="step-num-big">4</div>
       <div class="step-body">
-        <h3>Vuela a Costa Rica</h3>
-        <p>Elegís la modalidad: <strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
+        <h3>Elegís la modalidad</h3>
+        <p><strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
       </div>
     </div>
     <div class="step-row reveal">
       <div class="step-num-big">5</div>
       <div class="step-body">
         <h3>Entrega en tu puerta</h3>
-        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa, seguro y a tiempo.</p>
+        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps" id="tab-vos" style="display:none">
+    <div class="step-row reveal d1">
+      <div class="step-num-big">1</div>
+      <div class="step-body">
+        <h3>Te damos tu dirección en Miami</h3>
+        <p>Escribinos por WhatsApp y te asignamos tu dirección personal en Miami. La usás como dirección de envío en cualquier tienda de EE.UU.</p>
+      </div>
+    </div>
+    <div class="step-row reveal d2">
+      <div class="step-num-big">2</div>
+      <div class="step-body">
+        <h3>Hacés la compra vos mismo</h3>
+        <p>Comprás en Amazon, Shein, Nike o donde quieras usando tu dirección de Miami como destino. Vos manejás tu tarjeta y tu cuenta.</p>
+      </div>
+    </div>
+    <div class="step-row reveal d3">
+      <div class="step-num-big">3</div>
+      <div class="step-body">
+        <h3>Lo recibimos en Miami</h3>
+        <p>El paquete llega a nuestra bodega. Lo revisamos, pesamos y te avisamos el costo del flete: ₡3,950 por libra.</p>
+      </div>
+    </div>
+    <div class="step-row reveal d4">
+      <div class="step-num-big">4</div>
+      <div class="step-body">
+        <h3>Elegís la modalidad</h3>
+        <p><strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
+      </div>
+    </div>
+    <div class="step-row reveal">
+      <div class="step-num-big">5</div>
+      <div class="step-body">
+        <h3>Entrega en tu puerta</h3>
+        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa.</p>
       </div>
     </div>
   </div>
@@ -595,7 +663,7 @@
   <h2>¿Listo para<br><em>comprar en EE.UU.?</em></h2>
   <p>Escribinos y te ayudamos con tu primer pedido. Es más fácil de lo que pensás.</p>
   <div class="cta-btns">
-    <a href="https://wa.me/50600000000" class="btn-wa" target="_blank">
+    <a href="https://wa.me/50685173813" class="btn-wa" target="_blank">
       💬 WhatsApp
     </a>
     <a href="https://instagram.com/linktodoor" class="btn-ig" target="_blank">
@@ -617,7 +685,7 @@
         <div class="foot-social" style="margin-top:1rem">
           <a class="soc" href="https://instagram.com/linktodoor" target="_blank">ig</a>
           <a class="soc" href="https://facebook.com/linktodoor" target="_blank">f</a>
-          <a class="soc" href="https://wa.me/50600000000" target="_blank">wa</a>
+          <a class="soc" href="https://wa.me/50685173813" target="_blank">wa</a>
         </div>
       </div>
       <div class="foot-links-group">
@@ -686,6 +754,15 @@ const obs = new IntersectionObserver(entries => {
 revealEls.forEach(el => obs.observe(el));
 /* Fallback: reveal everything after 800ms in case observer doesn't fire */
 setTimeout(() => revealEls.forEach(el => el.classList.add('visible')), 800);
+
+/* Tabs cómo funciona */
+function showTab(id, btn) {
+  document.getElementById('tab-nosotros').style.display = 'none';
+  document.getElementById('tab-vos').style.display = 'none';
+  document.getElementById(id).style.display = 'flex';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
 
 /* Calculadora */
 function calcCosto() {
