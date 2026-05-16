@@ -585,6 +585,9 @@
               <tr>
                 <th>Nombre</th>
                 <th>Teléfono</th>
+                <th>Total lbs</th>
+                <th>Total kg</th>
+                <th>Cargas</th>
                 <th>Notas</th>
                 <th></th>
               </tr>
@@ -972,11 +975,30 @@ function renderClientes() {
   }
   empty.style.display = 'none';
 
+  const cargas = DB.getCargas();
+
   const sorted = [...clients].sort((a,b) => a.name.localeCompare(b.name));
-  tbody.innerHTML = sorted.map(c => `
+  tbody.innerHTML = sorted.map(c => {
+    // Sum all lbs and count cargas for this client (match by name, case-insensitive)
+    let totalLbs = 0, cargaCount = 0;
+    cargas.forEach(cg => {
+      cg.clients.forEach(cl => {
+        if (cl.clientName.toLowerCase() === c.name.toLowerCase()) {
+          totalLbs += cl.weightLbs;
+          cargaCount++;
+        }
+      });
+    });
+    const lbsStr   = totalLbs > 0 ? `<strong>${fLbs(totalLbs)}</strong>` : '<span style="color:var(--gray)">—</span>';
+    const kgStr    = totalLbs > 0 ? fKg(totalLbs) : '—';
+    const cargaStr = cargaCount > 0 ? cargaCount : '—';
+    return `
     <tr>
       <td><strong>${esc(c.name)}</strong></td>
       <td>${esc(c.phone || '—')}</td>
+      <td>${lbsStr}</td>
+      <td style="color:var(--gray)">${kgStr}</td>
+      <td style="text-align:center;color:var(--purple);font-weight:700">${cargaStr}</td>
       <td style="color:var(--gray);font-size:.82rem">${esc(c.notes || '—')}</td>
       <td>
         <div style="display:flex;gap:.35rem">
@@ -984,7 +1006,8 @@ function renderClientes() {
           <button class="btn btn-sm btn-danger"    onclick="deleteCliente('${c.id}')">✕</button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 /* ─────────────────────────────────────────────────
