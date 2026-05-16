@@ -609,6 +609,9 @@
 </div>
 
 <script>
+/* ─────────────────────────────────────────────────
+   UTILS
+───────────────────────────────────────────────── */
 const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36);
 const KG_TO_LBS = 2.20462;
 const RATE_PER_LB = 3950;
@@ -622,6 +625,9 @@ const fDate = d => {
   return new Date(+y, +m-1, +day).toLocaleDateString('es-CR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
 };
 
+/* ─────────────────────────────────────────────────
+   DB  (localStorage)
+───────────────────────────────────────────────── */
 const DB = {
   getCargas:    () => JSON.parse(localStorage.getItem('ltd_cargas')  || '[]'),
   saveCargas:   d  => localStorage.setItem('ltd_cargas',  JSON.stringify(d)),
@@ -634,6 +640,9 @@ const DB = {
   logout:       () => sessionStorage.removeItem('ltd_auth'),
 };
 
+/* ─────────────────────────────────────────────────
+   AUTH
+───────────────────────────────────────────────── */
 function doLogin() {
   const pw = document.getElementById('login-pw').value;
   const err = document.getElementById('login-err');
@@ -656,6 +665,9 @@ function doLogout() {
   document.getElementById('login-pw').value = '';
 }
 
+/* ─────────────────────────────────────────────────
+   VIEWS
+───────────────────────────────────────────────── */
 let currentView = null;
 let currentCargaId = null;
 
@@ -666,6 +678,7 @@ function showView(name) {
   const nb = document.getElementById('nav-' + name);
   if (nb) nb.classList.add('active');
   currentView = name;
+
   if (name === 'cargas')   renderCargas();
   if (name === 'clientes') renderClientes();
 }
@@ -689,12 +702,16 @@ function showCierre(cargaId) {
   renderCierre(cargaId);
 }
 
+/* ─────────────────────────────────────────────────
+   CARGAS LIST
+───────────────────────────────────────────────── */
 function renderCargas() {
   const cargas = DB.getCargas();
   const tbody  = document.getElementById('cargas-tbody');
   const empty  = document.getElementById('cargas-empty');
   const stats  = document.getElementById('cargas-stats');
 
+  // Stats
   const totalCargas   = cargas.length;
   const openCargas    = cargas.filter(c => c.status === 'open').length;
   const totalPagado   = cargas.reduce((s,c) => s + c.totalCostCRC, 0);
@@ -724,9 +741,9 @@ function renderCargas() {
         <td><strong>${esc(c.reference)}</strong></td>
         <td>${fDate(c.date)}</td>
         <td>${fLbs(c.totalWeightLbs)} / ${fKg(c.totalWeightLbs)}</td>
-        <td style="color:var(--red);font-weight:700">${fCRC(c.totalCostCRC)}</td>
+        <td class="red" style="color:var(--red);font-weight:700">${fCRC(c.totalCostCRC)}</td>
         <td style="font-weight:700">${fCRC(cobrado)}</td>
-        <td style="text-align:center">${c.clients.length}</td>
+        <td class="td-center">${c.clients.length}</td>
         <td><span class="badge badge-${c.status}">${c.status === 'open' ? 'Abierta' : 'Cerrada'}</span></td>
         <td>
           <div style="display:flex;gap:.35rem">
@@ -739,6 +756,9 @@ function renderCargas() {
   }).join('');
 }
 
+/* ─────────────────────────────────────────────────
+   CARGA DETAIL
+───────────────────────────────────────────────── */
 function renderDetail(cargaId) {
   const cargas  = DB.getCargas();
   const carga   = cargas.find(c => c.id === cargaId);
@@ -747,11 +767,12 @@ function renderDetail(cargaId) {
   document.getElementById('detail-title').textContent = carga.reference;
   document.getElementById('detail-sub').textContent   = fDate(carga.date) + ' · ' + (carga.status === 'open' ? 'Carga abierta' : 'Carga cerrada');
 
-  const cobrado     = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
-  const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
-  const pendingLbs  = carga.totalWeightLbs - assignedLbs;
-  const ganancia    = cobrado - carga.totalCostCRC;
+  const cobrado       = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+  const assignedLbs   = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
+  const pendingLbs    = carga.totalWeightLbs - assignedLbs;
+  const ganancia      = cobrado - carga.totalCostCRC;
 
+  // Actions
   const actionsEl = document.getElementById('detail-actions');
   if (carga.status === 'open') {
     actionsEl.innerHTML = `
@@ -766,8 +787,11 @@ function renderDetail(cargaId) {
     `;
   }
 
-  document.getElementById('btn-add-client').disabled = carga.status === 'closed';
+  // Add client btn
+  const addBtn = document.getElementById('btn-add-client');
+  addBtn.disabled = carga.status === 'closed';
 
+  // Stats
   document.getElementById('detail-stats').innerHTML = `
     <div class="stat"><div class="stat-label">Peso total</div><div class="stat-val purple">${fLbs(carga.totalWeightLbs)}</div></div>
     <div class="stat"><div class="stat-label">Peso asignado</div><div class="stat-val">${fLbs(assignedLbs)}</div></div>
@@ -777,6 +801,7 @@ function renderDetail(cargaId) {
     <div class="stat"><div class="stat-label">Ganancia</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
   `;
 
+  // Table
   const tbody = document.getElementById('detail-tbody');
   const empty = document.getElementById('detail-empty');
 
@@ -785,6 +810,11 @@ function renderDetail(cargaId) {
     empty.style.display = '';
   } else {
     empty.style.display = 'none';
+    const totalCobrado = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+    const diffLbs = assignedLbs - carga.totalWeightLbs;
+    const diffColor = diffLbs > 0.01 ? 'var(--red)' : diffLbs < -0.01 ? 'var(--green)' : 'var(--gray)';
+    const diffLabel = diffLbs > 0.01 ? `+${fLbs(diffLbs)} de más` : diffLbs < -0.01 ? `${fLbs(diffLbs)} pendiente` : 'Cuadra ✓';
+
     tbody.innerHTML = carga.clients.map((cl, i) => {
       const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
       const editBtns = carga.status === 'open'
@@ -793,7 +823,7 @@ function renderDetail(cargaId) {
         : '';
       return `
         <tr>
-          <td style="text-align:center;color:var(--gray);font-size:.78rem">${i+1}</td>
+          <td class="td-center" style="color:var(--gray);font-size:.78rem">${i+1}</td>
           <td><strong>${esc(cl.clientName)}</strong></td>
           <td>${fLbs(cl.weightLbs)}</td>
           <td style="color:var(--gray)">${fKg(cl.weightLbs)}</td>
@@ -802,13 +832,24 @@ function renderDetail(cargaId) {
           <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes || '')}</td>
           <td class="no-print"><div style="display:flex;gap:.3rem">${editBtns}</div></td>
         </tr>`;
-    }).join('');
+    }).join('') + `
+      <tr style="background:var(--light);border-top:2px solid var(--border)">
+        <td></td>
+        <td style="font-weight:800;font-size:.82rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">TOTAL</td>
+        <td style="font-weight:900">${fLbs(assignedLbs)}</td>
+        <td style="font-weight:700;color:var(--gray)">${fKg(assignedLbs)}</td>
+        <td style="font-weight:700">100%</td>
+        <td style="font-weight:900;color:var(--purple)">${fCRC(totalCobrado)}</td>
+        <td style="font-size:.8rem;font-weight:700;color:${diffColor}">${diffLabel}</td>
+        <td></td>
+      </tr>`;
   }
 
+  // Weight warning
   const alertEl = document.getElementById('detail-weight-alert');
   if (pendingLbs < -0.01) {
     alertEl.style.display = '';
-    alertEl.innerHTML = `<div class="alert alert-danger">⚠ El peso asignado (${fLbs(assignedLbs)}) supera el peso total de la carga (${fLbs(carga.totalWeightLbs)}).</div>`;
+    alertEl.innerHTML = `<div class="alert alert-danger">⚠ El peso asignado a clientes (${fLbs(assignedLbs)}) supera el peso total de la carga (${fLbs(carga.totalWeightLbs)}).</div>`;
   } else if (pendingLbs > 0.01 && carga.clients.length > 0) {
     alertEl.style.display = '';
     alertEl.innerHTML = `<div class="alert alert-warn">Quedan ${fLbs(pendingLbs)} sin asignar a ningún cliente.</div>`;
@@ -817,13 +858,16 @@ function renderDetail(cargaId) {
   }
 }
 
+/* ─────────────────────────────────────────────────
+   CIERRE CONTABLE
+───────────────────────────────────────────────── */
 function renderCierre(cargaId) {
-  const cargas = DB.getCargas();
-  const carga  = cargas.find(c => c.id === cargaId);
+  const cargas  = DB.getCargas();
+  const carga   = cargas.find(c => c.id === cargaId);
   if (!carga) return;
 
-  const cobrado     = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
-  const ganancia    = cobrado - carga.totalCostCRC;
+  const cobrado    = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+  const ganancia   = cobrado - carga.totalCostCRC;
   const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
 
   const rows = carga.clients.map((cl, i) => {
@@ -859,6 +903,7 @@ function renderCierre(cargaId) {
       <p>${esc(carga.reference)} · ${fDate(carga.date)}</p>
       <p style="margin-top:.3rem"><span class="badge badge-${carga.status}">${carga.status === 'open' ? 'Carga abierta (preliminar)' : 'Carga cerrada'}</span></p>
     </div>
+
     <div class="two-col">
       <div>
         <div class="kv"><div class="k">Referencia</div><div class="v">${esc(carga.reference)}</div></div>
@@ -871,34 +916,50 @@ function renderCierre(cargaId) {
         <div class="kv"><div class="k">Clientes</div><div class="v">${carga.clients.length}</div></div>
       </div>
     </div>
+
     <hr class="div">
+
     <div class="stats" style="margin-bottom:0">
       <div class="stat"><div class="stat-label">Costo pagado</div><div class="stat-val red">${fCRC(carga.totalCostCRC)}</div></div>
       <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(cobrado)}</div></div>
     </div>
+
     <div class="profit-box ${ganancia >= 0 ? 'pos' : 'neg'}">
       <div class="lbl">GANANCIA NETA</div>
       <div class="amt">${fCRC(ganancia)}</div>
     </div>
+
     <hr class="div">
+
     <div style="margin-bottom:.75rem"><strong>Detalle por cliente</strong></div>
     ${carga.clients.length ? `
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th></tr>
+          <tr>
+            <th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th>
+            <th>% del total</th><th>Cobrado</th><th>Notas</th>
+          </tr>
         </thead>
-        <tbody>${rows}${totalsRow}</tbody>
+        <tbody>
+          ${rows}
+          ${totalsRow}
+        </tbody>
       </table>
     </div>` : `<div class="empty"><div class="ico">📋</div><p>No hay clientes en esta carga.</p></div>`}
+
     <div style="margin-top:1.5rem;color:var(--gray);font-size:.75rem;text-align:right">
       Generado el ${new Date().toLocaleString('es-CR')} · Linktodoor
     </div>
   `;
 
+  // CSV export
   document.getElementById('btn-exportcsv').onclick = () => exportCSV(cargaId);
 }
 
+/* ─────────────────────────────────────────────────
+   CLIENTES LIST
+───────────────────────────────────────────────── */
 function renderClientes() {
   const clients = DB.getClients();
   const tbody   = document.getElementById('clientes-tbody');
@@ -926,6 +987,9 @@ function renderClientes() {
     </tr>`).join('');
 }
 
+/* ─────────────────────────────────────────────────
+   MODAL SYSTEM
+───────────────────────────────────────────────── */
 function openModal(html) {
   document.getElementById('modal-box').innerHTML = html;
   document.getElementById('modal-bg').classList.add('open');
@@ -937,6 +1001,9 @@ function onModalBgClick(e) {
   if (e.target === document.getElementById('modal-bg')) closeModal();
 }
 
+/* ─────────────────────────────────────────────────
+   NUEVA / EDITAR CARGA
+───────────────────────────────────────────────── */
 function openNuevaCarga() {
   const today = new Date().toISOString().slice(0,10);
   openModal(`
@@ -944,16 +1011,28 @@ function openNuevaCarga() {
       <span class="modal-title">Nueva Carga</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg"><label>Referencia / nombre de la carga</label><input type="text" id="m-ref" placeholder="Ej: Carga mayo #1" /></div>
-    <div class="fg"><label>Fecha de recepción</label><input type="date" id="m-date" value="${today}" /></div>
+    <div class="fg">
+      <label>Referencia / nombre de la carga</label>
+      <input type="text" id="m-ref" placeholder="Ej: Carga mayo #1" />
+    </div>
+    <div class="fg">
+      <label>Fecha de recepción</label>
+      <input type="date" id="m-date" value="${today}" />
+    </div>
     <div class="fg">
       <label>Peso total recibido</label>
       <div class="inline-row">
         <input type="number" id="m-weight" placeholder="0.00" min="0" step="0.01" />
-        <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+        <select id="m-unit">
+          <option value="lbs">lbs</option>
+          <option value="kg">kg</option>
+        </select>
       </div>
     </div>
-    <div class="fg"><label>Costo total pagado (₡ colones)</label><input type="number" id="m-cost" placeholder="0" min="0" step="1" /></div>
+    <div class="fg">
+      <label>Costo total pagado (₡ colones)</label>
+      <input type="number" id="m-cost" placeholder="0" min="0" step="1" />
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveCarga(null)">Guardar</button>
@@ -970,16 +1049,25 @@ function openEditCarga(cargaId) {
       <span class="modal-title">Editar Carga</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg"><label>Referencia</label><input type="text" id="m-ref" value="${esc(carga.reference)}" /></div>
-    <div class="fg"><label>Fecha</label><input type="date" id="m-date" value="${carga.date}" /></div>
     <div class="fg">
-      <label>Peso total (lbs)</label>
+      <label>Referencia</label>
+      <input type="text" id="m-ref" value="${esc(carga.reference)}" />
+    </div>
+    <div class="fg">
+      <label>Fecha de recepción</label>
+      <input type="date" id="m-date" value="${carga.date}" />
+    </div>
+    <div class="fg">
+      <label>Peso total recibido (lbs)</label>
       <div class="inline-row">
         <input type="number" id="m-weight" value="${carga.totalWeightLbs.toFixed(3)}" min="0" step="0.01" />
         <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
       </div>
     </div>
-    <div class="fg"><label>Costo pagado (₡)</label><input type="number" id="m-cost" value="${carga.totalCostCRC}" min="0" step="1" /></div>
+    <div class="fg">
+      <label>Costo total pagado (₡)</label>
+      <input type="number" id="m-cost" value="${carga.totalCostCRC}" min="0" step="1" />
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveCarga('${cargaId}')">Guardar</button>
@@ -993,15 +1081,20 @@ function saveCarga(editId) {
   const wRaw   = parseFloat(document.getElementById('m-weight').value) || 0;
   const unit   = document.getElementById('m-unit').value;
   const cost   = parseFloat(document.getElementById('m-cost').value) || 0;
-  if (!ref)  { alert('Ingresá una referencia.'); return; }
+
+  if (!ref)  { alert('Ingresá una referencia para la carga.'); return; }
   if (!date) { alert('Seleccioná la fecha.'); return; }
+
   const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+
   const cargas = DB.getCargas();
   if (editId) {
     const idx = cargas.findIndex(c => c.id === editId);
     if (idx === -1) return;
-    cargas[idx].reference = ref; cargas[idx].date = date;
-    cargas[idx].totalWeightLbs = weightLbs; cargas[idx].totalCostCRC = cost;
+    cargas[idx].reference    = ref;
+    cargas[idx].date         = date;
+    cargas[idx].totalWeightLbs = weightLbs;
+    cargas[idx].totalCostCRC = cost;
   } else {
     cargas.push({ id: uid(), reference: ref, date, totalWeightLbs: weightLbs, totalCostCRC: cost, status: 'open', clients: [], createdAt: Date.now() });
   }
@@ -1011,13 +1104,13 @@ function saveCarga(editId) {
 }
 
 function deleteCarga(cargaId) {
-  if (!confirm('¿Eliminar esta carga y todos sus clientes?')) return;
+  if (!confirm('¿Eliminar esta carga y todos sus clientes? Esta acción no se puede deshacer.')) return;
   DB.saveCargas(DB.getCargas().filter(c => c.id !== cargaId));
   renderCargas();
 }
 
 function closeCarga(cargaId) {
-  if (!confirm('¿Cerrar esta carga?')) return;
+  if (!confirm('¿Cerrar esta carga? Quedará marcada como cerrada y no se podrán agregar más clientes.')) return;
   const cargas = DB.getCargas();
   const idx = cargas.findIndex(c => c.id === cargaId);
   if (idx !== -1) { cargas[idx].status = 'closed'; DB.saveCargas(cargas); renderDetail(cargaId); }
@@ -1029,18 +1122,26 @@ function reopenCarga(cargaId) {
   if (idx !== -1) { cargas[idx].status = 'open'; DB.saveCargas(cargas); renderDetail(cargaId); }
 }
 
+/* ─────────────────────────────────────────────────
+   AGREGAR / EDITAR CLIENTE EN CARGA
+───────────────────────────────────────────────── */
 function openAddClient() {
   const carga = DB.getCargas().find(c => c.id === currentCargaId);
   if (!carga || carga.status === 'closed') return;
+
   const savedClients = DB.getClients();
   const assignedLbs  = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
   const pendingLbs   = Math.max(0, carga.totalWeightLbs - assignedLbs);
+
   const clientOptions = savedClients.length
-    ? savedClients.sort((a,b) => a.name.localeCompare(b.name)).map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')
+    ? savedClients.sort((a,b) => a.name.localeCompare(b.name))
+        .map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')
     : '';
+
   const pendingInfo = pendingLbs > 0.001
-    ? `<div class="alert alert-info" style="margin-top:.5rem;margin-bottom:0">Peso pendiente: ${fLbs(pendingLbs)} / ${fKg(pendingLbs)}</div>`
+    ? `<div class="alert alert-info" style="margin-top:.5rem;margin-bottom:0">Peso pendiente en esta carga: ${fLbs(pendingLbs)} / ${fKg(pendingLbs)}</div>`
     : '';
+
   openModal(`
     <div class="modal-head">
       <span class="modal-title">Agregar Cliente</span>
@@ -1054,17 +1155,26 @@ function openAddClient() {
     <div class="fg">
       <label>Peso del cliente</label>
       <div class="inline-row">
-        <input type="number" id="m-cweight" placeholder="0.00" min="0" step="0.01" oninput="autoCalcCharge()" />
-        <select id="m-cunit" onchange="autoCalcCharge()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+        <input type="number" id="m-cweight" placeholder="0.00" min="0" step="0.01"
+               oninput="autoCalcCharge()" />
+        <select id="m-cunit" onchange="autoCalcCharge()">
+          <option value="lbs">lbs</option>
+          <option value="kg">kg</option>
+        </select>
       </div>
       ${pendingInfo}
     </div>
     <div class="fg">
-      <label>Monto cobrado (₡)</label>
+      <label>Monto cobrado (₡ colones)</label>
       <input type="number" id="m-ccharge" placeholder="Se calcula automáticamente" min="0" step="1" />
-      <p style="font-size:.75rem;color:var(--gray);margin-top:.25rem">Tarifa base: ${fCRC(RATE_PER_LB)}/lb</p>
+      <p style="font-size:.75rem;color:var(--gray);margin-top:.25rem">
+        Tarifa base: ${fCRC(RATE_PER_LB)}/lb — se calcula automáticamente al ingresar el peso
+      </p>
     </div>
-    <div class="fg"><label>Notas (opcional)</label><textarea id="m-cnotes" placeholder="Rastreo, descripción, etc."></textarea></div>
+    <div class="fg">
+      <label>Notas (opcional)</label>
+      <textarea id="m-cnotes" placeholder="Número de rastreo, descripción, etc."></textarea>
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveClient(null)">Agregar</button>
@@ -1077,21 +1187,35 @@ function openEditClient(cargaId, clientId) {
   const carga  = DB.getCargas().find(c => c.id === cargaId);
   const client = carga?.clients.find(cl => cl.id === clientId);
   if (!client) return;
+
   openModal(`
     <div class="modal-head">
       <span class="modal-title">Editar Cliente</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg"><label>Nombre</label><input type="text" id="m-cname" value="${esc(client.clientName)}" /></div>
+    <div class="fg">
+      <label>Nombre del cliente</label>
+      <input type="text" id="m-cname" value="${esc(client.clientName)}" />
+    </div>
     <div class="fg">
       <label>Peso (lbs)</label>
       <div class="inline-row">
-        <input type="number" id="m-cweight" value="${client.weightLbs.toFixed(3)}" min="0" step="0.01" oninput="autoCalcCharge()" />
-        <select id="m-cunit" onchange="autoCalcCharge()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+        <input type="number" id="m-cweight" value="${client.weightLbs.toFixed(3)}"
+               min="0" step="0.01" oninput="autoCalcCharge()" />
+        <select id="m-cunit" onchange="autoCalcCharge()">
+          <option value="lbs">lbs</option>
+          <option value="kg">kg</option>
+        </select>
       </div>
     </div>
-    <div class="fg"><label>Monto cobrado (₡)</label><input type="number" id="m-ccharge" value="${client.chargedCRC}" min="0" step="1" /></div>
-    <div class="fg"><label>Notas</label><textarea id="m-cnotes">${esc(client.notes || '')}</textarea></div>
+    <div class="fg">
+      <label>Monto cobrado (₡)</label>
+      <input type="number" id="m-ccharge" value="${client.chargedCRC}" min="0" step="1" />
+    </div>
+    <div class="fg">
+      <label>Notas</label>
+      <textarea id="m-cnotes">${esc(client.notes || '')}</textarea>
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveClient('${clientId}')">Guardar</button>
@@ -1100,11 +1224,13 @@ function openEditClient(cargaId, clientId) {
 }
 
 function autoCalcCharge() {
-  const wRaw = parseFloat(document.getElementById('m-cweight')?.value) || 0;
-  const unit = document.getElementById('m-cunit')?.value || 'lbs';
-  const wLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+  const wRaw  = parseFloat(document.getElementById('m-cweight')?.value) || 0;
+  const unit  = document.getElementById('m-cunit')?.value || 'lbs';
+  const wLbs  = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
   const chargeEl = document.getElementById('m-ccharge');
-  if (chargeEl && !chargeEl._userEdited) chargeEl.value = Math.round(wLbs * RATE_PER_LB);
+  if (chargeEl && !chargeEl._userEdited) {
+    chargeEl.value = Math.round(wLbs * RATE_PER_LB);
+  }
 }
 
 function saveClient(editId) {
@@ -1113,23 +1239,31 @@ function saveClient(editId) {
   const unit   = document.getElementById('m-cunit').value;
   const charge = parseFloat(document.getElementById('m-ccharge').value) || 0;
   const notes  = document.getElementById('m-cnotes').value.trim();
-  if (!name)    { alert('Ingresá el nombre.'); return; }
-  if (wRaw <= 0){ alert('Ingresá un peso válido.'); return; }
+
+  if (!name) { alert('Ingresá el nombre del cliente.'); return; }
+  if (wRaw <= 0) { alert('Ingresá un peso válido.'); return; }
+
   const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+
   const cargas = DB.getCargas();
   const idx    = cargas.findIndex(c => c.id === currentCargaId);
   if (idx === -1) return;
+
   if (editId) {
     const ci = cargas[idx].clients.findIndex(cl => cl.id === editId);
-    if (ci !== -1) cargas[idx].clients[ci] = { ...cargas[idx].clients[ci], clientName: name, weightLbs, chargedCRC: charge, notes };
+    if (ci !== -1) {
+      cargas[idx].clients[ci] = { ...cargas[idx].clients[ci], clientName: name, weightLbs, chargedCRC: charge, notes };
+    }
   } else {
     cargas[idx].clients.push({ id: uid(), clientName: name, weightLbs, chargedCRC: charge, notes, createdAt: Date.now() });
+    // Auto-save to saved clients if not already there
     const clients = DB.getClients();
     if (!clients.find(c => c.name.toLowerCase() === name.toLowerCase())) {
       clients.push({ id: uid(), name, phone: '', notes: '' });
       DB.saveClients(clients);
     }
   }
+
   DB.saveCargas(cargas);
   closeModal();
   renderDetail(currentCargaId);
@@ -1139,15 +1273,34 @@ function deleteClient(cargaId, clientId) {
   if (!confirm('¿Eliminar este cliente de la carga?')) return;
   const cargas = DB.getCargas();
   const idx    = cargas.findIndex(c => c.id === cargaId);
-  if (idx !== -1) { cargas[idx].clients = cargas[idx].clients.filter(cl => cl.id !== clientId); DB.saveCargas(cargas); renderDetail(cargaId); }
+  if (idx !== -1) {
+    cargas[idx].clients = cargas[idx].clients.filter(cl => cl.id !== clientId);
+    DB.saveCargas(cargas);
+    renderDetail(cargaId);
+  }
 }
 
+/* ─────────────────────────────────────────────────
+   CLIENTES GUARDADOS
+───────────────────────────────────────────────── */
 function openNuevoCliente() {
   openModal(`
-    <div class="modal-head"><span class="modal-title">Nuevo Cliente</span><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <div class="fg"><label>Nombre</label><input type="text" id="m-clname" placeholder="Nombre completo" /></div>
-    <div class="fg"><label>Teléfono (opcional)</label><input type="tel" id="m-clphone" placeholder="+506 ..." /></div>
-    <div class="fg"><label>Notas (opcional)</label><textarea id="m-clnotes" placeholder="Dirección, indicaciones..."></textarea></div>
+    <div class="modal-head">
+      <span class="modal-title">Nuevo Cliente</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>Nombre</label>
+      <input type="text" id="m-clname" placeholder="Nombre completo" />
+    </div>
+    <div class="fg">
+      <label>Teléfono (opcional)</label>
+      <input type="tel" id="m-clphone" placeholder="+506 ..." />
+    </div>
+    <div class="fg">
+      <label>Notas (opcional)</label>
+      <textarea id="m-clnotes" placeholder="Dirección, indicaciones, etc."></textarea>
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveCliente(null)">Guardar</button>
@@ -1160,10 +1313,22 @@ function openEditCliente(clientId) {
   const client = DB.getClients().find(c => c.id === clientId);
   if (!client) return;
   openModal(`
-    <div class="modal-head"><span class="modal-title">Editar Cliente</span><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <div class="fg"><label>Nombre</label><input type="text" id="m-clname" value="${esc(client.name)}" /></div>
-    <div class="fg"><label>Teléfono</label><input type="tel" id="m-clphone" value="${esc(client.phone || '')}" /></div>
-    <div class="fg"><label>Notas</label><textarea id="m-clnotes">${esc(client.notes || '')}</textarea></div>
+    <div class="modal-head">
+      <span class="modal-title">Editar Cliente</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>Nombre</label>
+      <input type="text" id="m-clname" value="${esc(client.name)}" />
+    </div>
+    <div class="fg">
+      <label>Teléfono</label>
+      <input type="tel" id="m-clphone" value="${esc(client.phone || '')}" />
+    </div>
+    <div class="fg">
+      <label>Notas</label>
+      <textarea id="m-clnotes">${esc(client.notes || '')}</textarea>
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary"   onclick="saveCliente('${clientId}')">Guardar</button>
@@ -1175,7 +1340,9 @@ function saveCliente(editId) {
   const name  = document.getElementById('m-clname').value.trim();
   const phone = document.getElementById('m-clphone').value.trim();
   const notes = document.getElementById('m-clnotes').value.trim();
-  if (!name) { alert('Ingresá el nombre.'); return; }
+
+  if (!name) { alert('Ingresá el nombre del cliente.'); return; }
+
   const clients = DB.getClients();
   if (editId) {
     const idx = clients.findIndex(c => c.id === editId);
@@ -1189,17 +1356,32 @@ function saveCliente(editId) {
 }
 
 function deleteCliente(clientId) {
-  if (!confirm('¿Eliminar este cliente?')) return;
+  if (!confirm('¿Eliminar este cliente de la lista?')) return;
   DB.saveClients(DB.getClients().filter(c => c.id !== clientId));
   renderClientes();
 }
 
+/* ─────────────────────────────────────────────────
+   CAMBIAR CONTRASEÑA
+───────────────────────────────────────────────── */
 function openChangePw() {
   openModal(`
-    <div class="modal-head"><span class="modal-title">Cambiar Contraseña</span><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <div class="fg"><label>Contraseña actual</label><input type="password" id="m-pw-old" /></div>
-    <div class="fg"><label>Nueva contraseña</label><input type="password" id="m-pw-new" /></div>
-    <div class="fg"><label>Confirmar nueva</label><input type="password" id="m-pw-confirm" /></div>
+    <div class="modal-head">
+      <span class="modal-title">Cambiar Contraseña</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>Contraseña actual</label>
+      <input type="password" id="m-pw-old" placeholder="Contraseña actual" />
+    </div>
+    <div class="fg">
+      <label>Nueva contraseña</label>
+      <input type="password" id="m-pw-new" placeholder="Nueva contraseña" />
+    </div>
+    <div class="fg">
+      <label>Confirmar nueva contraseña</label>
+      <input type="password" id="m-pw-confirm" placeholder="Repetir contraseña" />
+    </div>
     <p id="m-pw-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -1213,48 +1395,80 @@ function doChangePw() {
   const nw   = document.getElementById('m-pw-new').value;
   const conf = document.getElementById('m-pw-confirm').value;
   const err  = document.getElementById('m-pw-err');
+
   if (old !== DB.getPassword()) { err.textContent = 'Contraseña actual incorrecta.'; err.style.display = ''; return; }
   if (!nw)                      { err.textContent = 'Ingresá una nueva contraseña.'; err.style.display = ''; return; }
   if (nw !== conf)              { err.textContent = 'Las contraseñas no coinciden.'; err.style.display = ''; return; }
+
   DB.setPassword(nw);
   closeModal();
-  alert('Contraseña cambiada.');
+  alert('Contraseña cambiada exitosamente.');
 }
 
+/* ─────────────────────────────────────────────────
+   EXPORT CSV
+───────────────────────────────────────────────── */
 function exportCSV(cargaId) {
   const carga = DB.getCargas().find(c => c.id === cargaId);
   if (!carga) return;
+
   const cobrado  = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
   const ganancia = cobrado - carga.totalCostCRC;
-  const header = ['#','Cliente','Peso (lbs)','Peso (kg)','% del total','Cobrado','Notas'].join(',');
+
+  const header = ['#','Cliente','Peso (lbs)','Peso (kg)','% del total','Cobrado (₡)','Notas'].join(',');
   const rows   = carga.clients.map((cl, i) => {
     const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100).toFixed(1) : '0';
     return [i+1, `"${cl.clientName}"`, cl.weightLbs.toFixed(2), (cl.weightLbs/KG_TO_LBS).toFixed(2), pct, Math.round(cl.chargedCRC), `"${cl.notes || ''}"`].join(',');
   });
-  const summary = ['','Resumen',`Referencia,"${carga.reference}"`,`Fecha,${carga.date}`,`Peso total (lbs),${carga.totalWeightLbs.toFixed(2)}`,`Costo pagado,${carga.totalCostCRC}`,`Total cobrado,${cobrado}`,`Ganancia,${ganancia}`];
-  const csv  = [header, ...rows, ...summary].join('\n');
+
+  const summary = [
+    '',
+    'Resumen',
+    `Referencia,"${carga.reference}"`,
+    `Fecha,${carga.date}`,
+    `Peso total (lbs),${carga.totalWeightLbs.toFixed(2)}`,
+    `Costo pagado,${carga.totalCostCRC}`,
+    `Total cobrado,${cobrado}`,
+    `Ganancia,${ganancia}`,
+  ];
+
+  const csv = [header, ...rows, ...summary].join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = `cierre-${carga.reference.replace(/\s+/g,'-')}-${carga.date}.csv`;
-  a.click(); URL.revokeObjectURL(url);
+  a.href = url;
+  a.download = `cierre-${carga.reference.replace(/\s+/g,'-')}-${carga.date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
+/* ─────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────── */
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-document.addEventListener('focusin', e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
-document.addEventListener('input',   e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
+// Prevent auto-overwrite of manually entered charge amount
+document.addEventListener('focusin', e => {
+  if (e.target.id === 'm-ccharge') e.target._userEdited = true;
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'm-ccharge') e.target._userEdited = true;
+});
 
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
 if (DB.isLoggedIn()) {
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').hidden = false;
   showView('cargas');
 }
 
+// First time notice
 if (!localStorage.getItem('ltd_pw')) {
-  window.addEventListener('load', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     const info = document.createElement('div');
     info.className = 'alert alert-warn';
     info.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:300;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.15)';
