@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel — Linktodoor</title>
+  <style>
+    :root {
+      --purple:       #5B5BD6;
+      --purple-dark:  #4848b8;
+      --purple-light: #EEEEF8;
+      --cream:        #F5F0E4;
+      --dark:         #12121F;
+      --gray:         #6B7280;
+      --border:       #E5E7EB;
+      --light:        #F9FAFB;
+      --green:        #10B981;
+      --green-light:  #D1FAE5;
+      --red:          #EF4444;
+      --red-light:    #FEE2E2;
+      --yellow:       #F59E0B;
+      --yellow-light: #FEF3C7;
+      --radius:       12px;
+      --shadow:       0 2px 12px rgba(0,0,0,.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      min-height: 100vh;
+      font-size: 15px;
+    }
+
+    /* ───── LOGIN ───── */
+    #screen-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+      padding: 1rem;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.25);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    /* ───── LOGO ───── */
+    .logo-wrap { display: inline-flex; gap: 2px; margin-bottom: .4rem; }
+    .logo-l {
+      background: var(--purple);
+      color: white;
+      padding: 7px 9px;
+      border-radius: 6px 0 0 6px;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: .5px;
+    }
+    .logo-r {
+      background: var(--dark);
+      color: white;
+      padding: 7px 9px;
+      border-radius: 0 6px 6px 0;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: .5px;
+    }
+
+    .login-sub {
+      font-size: .82rem;
+      color: var(--gray);
+      display: block;
+      margin-top: .25rem;
+    }
+
+    /* ───── FORMS ───── */
+    .fg { margin-bottom: 1rem; }
+    .fg label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: .3rem;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: .58rem .85rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .92rem;
+      color: var(--dark);
+      background: white;
+      transition: border-color .15s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+    textarea { resize: vertical; min-height: 72px; }
+
+    .inline-row {
+      display: flex;
+      gap: .5rem;
+    }
+    .inline-row input { flex: 1; }
+    .inline-row select { width: 90px; flex-shrink: 0; }
+
+    /* ───── BUTTONS ───── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .58rem 1.1rem;
+      border-radius: 8px;
+      border: none;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary   { background: var(--purple);       color: white; }
+    .btn-primary:hover   { background: var(--purple-dark); }
+    .btn-secondary { background: white; color: var(--dark); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-danger    { background: var(--red-light); color: var(--red); }
+    .btn-danger:hover    { background: #fecaca; }
+    .btn-success   { background: var(--green-light); color: #065f46; }
+    .btn-success:hover   { background: #a7f3d0; }
+    .btn-warn      { background: var(--yellow-light); color: #78350f; }
+    .btn-warn:hover      { background: #fde68a; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-sm { padding: .32rem .7rem; font-size: .78rem; }
+    .btn-icon { padding: .38rem .55rem; }
+
+    /* ───── HEADER ───── */
+    #screen-app { min-height: 100vh; }
+
+    header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 58px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .header-badge {
+      background: var(--purple-light);
+      color: var(--purple);
+      font-size: .68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: .3px;
+    }
+
+    nav { display: flex; gap: .2rem; flex: 1; }
+
+    .nav-btn {
+      padding: .38rem .85rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--gray);
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: var(--purple-light);
+      color: var(--purple);
+    }
+
+    .header-actions { display: flex; gap: .5rem; align-items: center; }
+
+    /* ───── LAYOUT ───── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ───── PAGE HEADER ───── */
+    .ph {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .ph-title { font-size: 1.35rem; font-weight: 800; }
+    .ph-sub { color: var(--gray); font-size: .82rem; margin-top: .2rem; }
+    .ph-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+    /* ───── CARDS ───── */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* ───── STATS ───── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+    }
+    .stat-label {
+      font-size: .72rem;
+      color: var(--gray);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: .25rem;
+    }
+    .stat-val { font-size: 1.35rem; font-weight: 900; }
+    .stat-val.green  { color: var(--green); }
+    .stat-val.red    { color: var(--red); }
+    .stat-val.purple { color: var(--purple); }
+
+    /* ───── TABLE ───── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    thead th {
+      text-align: left;
+      padding: .55rem .75rem;
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: var(--gray);
+      border-bottom: 2px solid var(--border);
+    }
+    td {
+      padding: .7rem .75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--light); }
+    .td-right { text-align: right; }
+    .td-center { text-align: center; }
+
+    /* ───── BADGE ───── */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .badge-open   { background: #DBEAFE; color: #1d4ed8; }
+    .badge-closed { background: var(--green-light); color: #065f46; }
+
+    /* ───── MODAL ───── */
+    #modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #modal-bg.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 14px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,.28);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 800; }
+    .modal-x {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--gray);
+      line-height: 1;
+      padding: 2px 5px;
+    }
+    .modal-x:hover { color: var(--dark); }
+
+    /* ───── MISC ───── */
+    hr.div { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      font-size: .88rem;
+      font-weight: 600;
+      padding: 0;
+      margin-bottom: 1.1rem;
+      font-family: inherit;
+    }
+    .back-btn:hover { color: var(--purple); }
+
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray);
+    }
+    .empty .ico { font-size: 2.2rem; margin-bottom: .75rem; }
+
+    .alert {
+      padding: .6rem .9rem;
+      border-radius: 8px;
+      font-size: .83rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .alert-info   { background: var(--purple-light); color: var(--purple); }
+    .alert-warn   { background: var(--yellow-light); color: #78350f; }
+    .alert-danger { background: var(--red-light); color: #991b1b; }
+
+    /* ───── PROFIT BOX ───── */
+    .profit-box {
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      margin: 1rem 0;
+      border: 2px solid var(--border);
+      background: var(--light);
+    }
+    .profit-box.pos { background: var(--green-light); border-color: var(--green); }
+    .profit-box.neg { background: var(--red-light);   border-color: var(--red);   }
+    .profit-box .lbl { font-size: .8rem; font-weight: 700; color: var(--gray); margin-bottom: .35rem; }
+    .profit-box .amt { font-size: 1.85rem; font-weight: 900; }
+    .profit-box.pos .amt { color: var(--green); }
+    .profit-box.neg .amt { color: var(--red); }
+
+    /* ───── CIERRE PRINT ───── */
+    .cierre-header {
+      text-align: center;
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .cierre-header h2 { font-size: 1.5rem; font-weight: 900; }
+    .cierre-header p { color: var(--gray); font-size: .88rem; margin-top: .25rem; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .kv { margin-bottom: .5rem; }
+    .kv .k { font-size: .78rem; color: var(--gray); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+    .kv .v { font-size: 1rem; font-weight: 700; }
+
+    /* ───── PRINT MEDIA ───── */
+    @media print {
+      body { background: white; }
+      header, .no-print { display: none !important; }
+      main { padding: 0; max-width: 100%; }
+      #view-cargas, #view-carga-detail, #view-clientes { display: none !important; }
+      #view-cierre { display: block !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+    }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 600px) {
+      main { padding: 1.25rem 1rem; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      header { padding: 0 1rem; }
+      .header-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-wrap">
+        <span class="logo-l">LINK</span>
+        <span class="logo-r">DOOR</span>
+      </div>
+      <span class="login-sub">Panel Interno</span>
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <input type="password" id="login-pw" placeholder="Ingresá tu contraseña"
+             onkeydown="if(event.key==='Enter')doLogin()" autofocus />
+    </div>
+    <p id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none">
+      Contraseña incorrecta
+    </p>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="screen-app" hidden>
+
+  <header class="no-print">
+    <div class="logo-wrap">
+      <span class="logo-l">LINK</span>
+      <span class="logo-r">DOOR</span>
+    </div>
+    <span class="header-badge">PANEL INTERNO</span>
+    <nav>
+      <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
+      <button class="nav-btn" id="nav-clientes" onclick="showView('clientes')">Clientes</button>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-secondary" onclick="openChangePw()" title="Cambiar contraseña">⚙</button>
+      <button class="btn btn-sm btn-secondary" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── VIEW: CARGAS LIST ── -->
+    <div id="view-cargas" class="view">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Cargas</div>
+          <div class="ph-sub">Historial de envíos recibidos</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-primary" onclick="openNuevaCarga()">+ Nueva Carga</button>
+        </div>
+      </div>
+      <div id="cargas-stats" class="stats"></div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Referencia</th>
+                <th>Fecha</th>
+                <th>Peso total</th>
+                <th>Costo pagado</th>
+                <th>Cobrado</th>
+                <th>Clientes</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cargas-tbody"></tbody>
+          </table>
+        </div>
+        <div id="cargas-empty" class="empty" style="display:none">
+          <div class="ico">📦</div>
+          <p>No hay cargas aún.</p>
+          <button class="btn btn-primary" onclick="openNuevaCarga()">+ Crear primera carga</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: CARGA DETAIL ── -->
+    <div id="view-carga-detail" class="view">
+      <button class="back-btn no-print" onclick="showView('cargas')">← Volver a cargas</button>
+      <div class="ph">
+        <div>
+          <div class="ph-title" id="detail-title"></div>
+          <div class="ph-sub"   id="detail-sub"></div>
+        </div>
+        <div class="ph-actions" id="detail-actions"></div>
+      </div>
+      <div class="stats" id="detail-stats"></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <strong style="font-size:.95rem">Clientes en esta carga</strong>
+          <button class="btn btn-primary btn-sm no-print" id="btn-add-client" onclick="openAddClient()">+ Agregar cliente</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Peso (lbs)</th>
+                <th>Peso (kg)</th>
+                <th>% del total</th>
+                <th>Cobrado</th>
+                <th>Notas</th>
+                <th class="no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="detail-tbody"></tbody>
+          </table>
+        </div>
+        <div id="detail-empty" class="empty" style="display:none">
+          <div class="ico">👤</div>
+          <p>No hay clientes registrados en esta carga.</p>
+        </div>
+        <div id="detail-weight-alert" style="margin-top:1rem;display:none"></div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: CIERRE CONTABLE ── -->
+    <div id="view-cierre" class="view">
+      <button class="back-btn no-print" id="cierre-back-btn">← Volver al detalle</button>
+      <div class="ph no-print">
+        <div>
+          <div class="ph-title">Cierre Contable</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+          <button class="btn btn-secondary" id="btn-exportcsv">⬇ Exportar CSV</button>
+        </div>
+      </div>
+      <div class="card" id="cierre-content"></div>
+    </div>
+
+    <!-- ── VIEW: CLIENTES ── -->
+    <div id="view-clientes" class="view">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Clientes</div>
+          <div class="ph-sub">Lista de clientes frecuentes</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-primary" onclick="openNuevoCliente()">+ Nuevo Cliente</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Notas</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientes-tbody"></tbody>
+          </table>
+        </div>
+        <div id="clientes-empty" class="empty" style="display:none">
+          <div class="ico">👥</div>
+          <p>No hay clientes guardados.</p>
+          <button class="btn btn-primary" onclick="openNuevoCliente()">+ Agregar cliente</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════ MODAL ══════════════ -->
+<div id="modal-bg" onclick="onModalBgClick(event)">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<script>
+const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36);
+const KG_TO_LBS = 2.20462;
+const RATE_PER_LB = 3950;
+
+const fCRC  = n => '₡' + Math.round(n).toLocaleString('es-CR');
+const fLbs  = n => (+n).toFixed(2) + ' lbs';
+const fKg   = n => (+n / KG_TO_LBS).toFixed(2) + ' kg';
+const fPct  = n => (+n).toFixed(1) + '%';
+const fDate = d => {
+  const [y,m,day] = d.split('-');
+  return new Date(+y, +m-1, +day).toLocaleDateString('es-CR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+};
+
+const DB = {
+  getCargas:    () => JSON.parse(localStorage.getItem('ltd_cargas')  || '[]'),
+  saveCargas:   d  => localStorage.setItem('ltd_cargas',  JSON.stringify(d)),
+  getClients:   () => JSON.parse(localStorage.getItem('ltd_clients') || '[]'),
+  saveClients:  d  => localStorage.setItem('ltd_clients', JSON.stringify(d)),
+  getPassword:  () => localStorage.getItem('ltd_pw') || 'linktodoor',
+  setPassword:  p  => localStorage.setItem('ltd_pw', p),
+  isLoggedIn:   () => sessionStorage.getItem('ltd_auth') === '1',
+  login:        () => sessionStorage.setItem('ltd_auth', '1'),
+  logout:       () => sessionStorage.removeItem('ltd_auth'),
+};
+
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-err');
+  if (pw === DB.getPassword()) {
+    err.style.display = 'none';
+    DB.login();
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-app').hidden = false;
+    showView('cargas');
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-pw').select();
+  }
+}
+
+function doLogout() {
+  DB.logout();
+  document.getElementById('screen-app').hidden = true;
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+}
+
+let currentView = null;
+let currentCargaId = null;
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const nb = document.getElementById('nav-' + name);
+  if (nb) nb.classList.add('active');
+  currentView = name;
+  if (name === 'cargas')   renderCargas();
+  if (name === 'clientes') renderClientes();
+}
+
+function showDetail(cargaId) {
+  currentCargaId = cargaId;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-carga-detail').classList.add('active');
+  document.getElementById('nav-cargas').classList.add('active');
+  currentView = 'carga-detail';
+  renderDetail(cargaId);
+}
+
+function showCierre(cargaId) {
+  currentCargaId = cargaId;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-cierre').classList.add('active');
+  currentView = 'cierre';
+  document.getElementById('cierre-back-btn').onclick = () => showDetail(cargaId);
+  renderCierre(cargaId);
+}
+
+function renderCargas() {
+  const cargas = DB.getCargas();
+  const tbody  = document.getElementById('cargas-tbody');
+  const empty  = document.getElementById('cargas-empty');
+  const stats  = document.getElementById('cargas-stats');
+
+  const totalCargas   = cargas.length;
+  const openCargas    = cargas.filter(c => c.status === 'open').length;
+  const totalPagado   = cargas.reduce((s,c) => s + c.totalCostCRC, 0);
+  const totalCobrado  = cargas.reduce((s,c) => s + c.clients.reduce((ss,cl) => ss + cl.chargedCRC, 0), 0);
+  const ganancia      = totalCobrado - totalPagado;
+
+  stats.innerHTML = `
+    <div class="stat"><div class="stat-label">Total cargas</div><div class="stat-val purple">${totalCargas}</div></div>
+    <div class="stat"><div class="stat-label">Cargas abiertas</div><div class="stat-val" style="color:var(--yellow)">${openCargas}</div></div>
+    <div class="stat"><div class="stat-label">Total pagado</div><div class="stat-val red">${fCRC(totalPagado)}</div></div>
+    <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(totalCobrado)}</div></div>
+    <div class="stat"><div class="stat-label">Ganancia neta</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
+  `;
+
+  if (!cargas.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const sorted = [...cargas].sort((a,b) => b.createdAt - a.createdAt);
+  tbody.innerHTML = sorted.map(c => {
+    const cobrado = c.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+    return `
+      <tr>
+        <td><strong>${esc(c.reference)}</strong></td>
+        <td>${fDate(c.date)}</td>
+        <td>${fLbs(c.totalWeightLbs)} / ${fKg(c.totalWeightLbs)}</td>
+        <td style="color:var(--red);font-weight:700">${fCRC(c.totalCostCRC)}</td>
+        <td style="font-weight:700">${fCRC(cobrado)}</td>
+        <td style="text-align:center">${c.clients.length}</td>
+        <td><span class="badge badge-${c.status}">${c.status === 'open' ? 'Abierta' : 'Cerrada'}</span></td>
+        <td>
+          <div style="display:flex;gap:.35rem">
+            <button class="btn btn-sm btn-secondary" onclick="showDetail('${c.id}')">Ver</button>
+            <button class="btn btn-sm btn-secondary" onclick="showCierre('${c.id}')">Cierre</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteCarga('${c.id}')">✕</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function renderDetail(cargaId) {
+  const cargas  = DB.getCargas();
+  const carga   = cargas.find(c => c.id === cargaId);
+  if (!carga) { showView('cargas'); return; }
+
+  document.getElementById('detail-title').textContent = carga.reference;
+  document.getElementById('detail-sub').textContent   = fDate(carga.date) + ' · ' + (carga.status === 'open' ? 'Carga abierta' : 'Carga cerrada');
+
+  const cobrado     = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+  const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
+  const pendingLbs  = carga.totalWeightLbs - assignedLbs;
+  const ganancia    = cobrado - carga.totalCostCRC;
+
+  const actionsEl = document.getElementById('detail-actions');
+  if (carga.status === 'open') {
+    actionsEl.innerHTML = `
+      <button class="btn btn-warn" onclick="openEditCarga('${carga.id}')">✎ Editar carga</button>
+      <button class="btn btn-success" onclick="closeCarga('${carga.id}')">✔ Cerrar carga</button>
+      <button class="btn btn-secondary" onclick="showCierre('${carga.id}')">Ver cierre</button>
+    `;
+  } else {
+    actionsEl.innerHTML = `
+      <button class="btn btn-secondary" onclick="reopenCarga('${carga.id}')">↩ Reabrir</button>
+      <button class="btn btn-primary"   onclick="showCierre('${carga.id}')">Ver cierre</button>
+    `;
+  }
+
+  document.getElementById('btn-add-client').disabled = carga.status === 'closed';
+
+  document.getElementById('detail-stats').innerHTML = `
+    <div class="stat"><div class="stat-label">Peso total</div><div class="stat-val purple">${fLbs(carga.totalWeightLbs)}</div></div>
+    <div class="stat"><div class="stat-label">Peso asignado</div><div class="stat-val">${fLbs(assignedLbs)}</div></div>
+    <div class="stat"><div class="stat-label">Peso pendiente</div><div class="stat-val ${pendingLbs < 0 ? 'red' : ''}">${fLbs(pendingLbs)}</div></div>
+    <div class="stat"><div class="stat-label">Costo pagado</div><div class="stat-val red">${fCRC(carga.totalCostCRC)}</div></div>
+    <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(cobrado)}</div></div>
+    <div class="stat"><div class="stat-label">Ganancia</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
+  `;
+
+  const tbody = document.getElementById('detail-tbody');
+  const empty = document.getElementById('detail-empty');
+
+  if (!carga.clients.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = carga.clients.map((cl, i) => {
+      const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+      const editBtns = carga.status === 'open'
+        ? `<button class="btn btn-sm btn-secondary" onclick="openEditClient('${cargaId}','${cl.id}')">✎</button>
+           <button class="btn btn-sm btn-danger"    onclick="deleteClient('${cargaId}','${cl.id}')">✕</button>`
+        : '';
+      return `
+        <tr>
+          <td style="text-align:center;color:var(--gray);font-size:.78rem">${i+1}</td>
+          <td><strong>${esc(cl.clientName)}</strong></td>
+          <td>${fLbs(cl.weightLbs)}</td>
+          <td style="color:var(--gray)">${fKg(cl.weightLbs)}</td>
+          <td>${fPct(pct)}</td>
+          <td style="font-weight:700;color:var(--purple)">${fCRC(cl.chargedCRC)}</td>
+          <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes || '')}</td>
+          <td class="no-print"><div style="display:flex;gap:.3rem">${editBtns}</div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  const alertEl = document.getElementById('detail-weight-alert');
+  if (pendingLbs < -0.01) {
+    alertEl.style.display = '';
+    alertEl.innerHTML = `<div class="alert alert-danger">⚠ El peso asignado (${fLbs(assignedLbs)}) supera el peso total de la carga (${fLbs(carga.totalWeightLbs)}).</div>`;
+  } else if (pendingLbs > 0.01 && carga.clients.length > 0) {
+    alertEl.style.display = '';
+    alertEl.innerHTML = `<div class="alert alert-warn">Quedan ${fLbs(pendingLbs)} sin asignar a ningún cliente.</div>`;
+  } else {
+    alertEl.style.display = 'none';
+  }
+}
+
+function renderCierre(cargaId) {
+  const cargas = DB.getCargas();
+  const carga  = cargas.find(c => c.id === cargaId);
+  if (!carga) return;
+
+  const cobrado     = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+  const ganancia    = cobrado - carga.totalCostCRC;
+  const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
+
+  const rows = carga.clients.map((cl, i) => {
+    const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+    return `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${esc(cl.clientName)}</strong></td>
+        <td>${fLbs(cl.weightLbs)}</td>
+        <td>${fKg(cl.weightLbs)}</td>
+        <td>${fPct(pct)}</td>
+        <td style="font-weight:700">${fCRC(cl.chargedCRC)}</td>
+        <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes || '')}</td>
+      </tr>`;
+  }).join('');
+
+  const totalsRow = carga.clients.length ? `
+    <tr style="background:var(--light);font-weight:800">
+      <td colspan="2">TOTAL</td>
+      <td>${fLbs(assignedLbs)}</td>
+      <td>${fKg(assignedLbs)}</td>
+      <td>—</td>
+      <td>${fCRC(cobrado)}</td>
+      <td></td>
+    </tr>` : '';
+
+  document.getElementById('cierre-content').innerHTML = `
+    <div class="cierre-header">
+      <div class="logo-wrap" style="margin-bottom:.5rem">
+        <span class="logo-l">LINK</span><span class="logo-r">DOOR</span>
+      </div>
+      <h2>Cierre Contable</h2>
+      <p>${esc(carga.reference)} · ${fDate(carga.date)}</p>
+      <p style="margin-top:.3rem"><span class="badge badge-${carga.status}">${carga.status === 'open' ? 'Carga abierta (preliminar)' : 'Carga cerrada'}</span></p>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="kv"><div class="k">Referencia</div><div class="v">${esc(carga.reference)}</div></div>
+        <div class="kv"><div class="k">Fecha</div><div class="v">${fDate(carga.date)}</div></div>
+        <div class="kv"><div class="k">Estado</div><div class="v">${carga.status === 'open' ? 'Abierta' : 'Cerrada'}</div></div>
+      </div>
+      <div>
+        <div class="kv"><div class="k">Peso total recibido</div><div class="v">${fLbs(carga.totalWeightLbs)} / ${fKg(carga.totalWeightLbs)}</div></div>
+        <div class="kv"><div class="k">Peso asignado</div><div class="v">${fLbs(assignedLbs)}</div></div>
+        <div class="kv"><div class="k">Clientes</div><div class="v">${carga.clients.length}</div></div>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="stats" style="margin-bottom:0">
+      <div class="stat"><div class="stat-label">Costo pagado</div><div class="stat-val red">${fCRC(carga.totalCostCRC)}</div></div>
+      <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(cobrado)}</div></div>
+    </div>
+    <div class="profit-box ${ganancia >= 0 ? 'pos' : 'neg'}">
+      <div class="lbl">GANANCIA NETA</div>
+      <div class="amt">${fCRC(ganancia)}</div>
+    </div>
+    <hr class="div">
+    <div style="margin-bottom:.75rem"><strong>Detalle por cliente</strong></div>
+    ${carga.clients.length ? `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th></tr>
+        </thead>
+        <tbody>${rows}${totalsRow}</tbody>
+      </table>
+    </div>` : `<div class="empty"><div class="ico">📋</div><p>No hay clientes en esta carga.</p></div>`}
+    <div style="margin-top:1.5rem;color:var(--gray);font-size:.75rem;text-align:right">
+      Generado el ${new Date().toLocaleString('es-CR')} · Linktodoor
+    </div>
+  `;
+
+  document.getElementById('btn-exportcsv').onclick = () => exportCSV(cargaId);
+}
+
+function renderClientes() {
+  const clients = DB.getClients();
+  const tbody   = document.getElementById('clientes-tbody');
+  const empty   = document.getElementById('clientes-empty');
+
+  if (!clients.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const sorted = [...clients].sort((a,b) => a.name.localeCompare(b.name));
+  tbody.innerHTML = sorted.map(c => `
+    <tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td>${esc(c.phone || '—')}</td>
+      <td style="color:var(--gray);font-size:.82rem">${esc(c.notes || '—')}</td>
+      <td>
+        <div style="display:flex;gap:.35rem">
+          <button class="btn btn-sm btn-secondary" onclick="openEditCliente('${c.id}')">✎</button>
+          <button class="btn btn-sm btn-danger"    onclick="deleteCliente('${c.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openModal(html) {
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+function onModalBgClick(e) {
+  if (e.target === document.getElementById('modal-bg')) closeModal();
+}
+
+function openNuevaCarga() {
+  const today = new Date().toISOString().slice(0,10);
+  openModal(`
+    <div class="modal-head">
+      <span class="modal-title">Nueva Carga</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg"><label>Referencia / nombre de la carga</label><input type="text" id="m-ref" placeholder="Ej: Carga mayo #1" /></div>
+    <div class="fg"><label>Fecha de recepción</label><input type="date" id="m-date" value="${today}" /></div>
+    <div class="fg">
+      <label>Peso total recibido</label>
+      <div class="inline-row">
+        <input type="number" id="m-weight" placeholder="0.00" min="0" step="0.01" />
+        <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Costo total pagado (₡ colones)</label><input type="number" id="m-cost" placeholder="0" min="0" step="1" /></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveCarga(null)">Guardar</button>
+    </div>
+  `);
+  document.getElementById('m-ref').focus();
+}
+
+function openEditCarga(cargaId) {
+  const carga = DB.getCargas().find(c => c.id === cargaId);
+  if (!carga) return;
+  openModal(`
+    <div class="modal-head">
+      <span class="modal-title">Editar Carga</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg"><label>Referencia</label><input type="text" id="m-ref" value="${esc(carga.reference)}" /></div>
+    <div class="fg"><label>Fecha</label><input type="date" id="m-date" value="${carga.date}" /></div>
+    <div class="fg">
+      <label>Peso total (lbs)</label>
+      <div class="inline-row">
+        <input type="number" id="m-weight" value="${carga.totalWeightLbs.toFixed(3)}" min="0" step="0.01" />
+        <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Costo pagado (₡)</label><input type="number" id="m-cost" value="${carga.totalCostCRC}" min="0" step="1" /></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveCarga('${cargaId}')">Guardar</button>
+    </div>
+  `);
+}
+
+function saveCarga(editId) {
+  const ref    = document.getElementById('m-ref').value.trim();
+  const date   = document.getElementById('m-date').value;
+  const wRaw   = parseFloat(document.getElementById('m-weight').value) || 0;
+  const unit   = document.getElementById('m-unit').value;
+  const cost   = parseFloat(document.getElementById('m-cost').value) || 0;
+  if (!ref)  { alert('Ingresá una referencia.'); return; }
+  if (!date) { alert('Seleccioná la fecha.'); return; }
+  const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+  const cargas = DB.getCargas();
+  if (editId) {
+    const idx = cargas.findIndex(c => c.id === editId);
+    if (idx === -1) return;
+    cargas[idx].reference = ref; cargas[idx].date = date;
+    cargas[idx].totalWeightLbs = weightLbs; cargas[idx].totalCostCRC = cost;
+  } else {
+    cargas.push({ id: uid(), reference: ref, date, totalWeightLbs: weightLbs, totalCostCRC: cost, status: 'open', clients: [], createdAt: Date.now() });
+  }
+  DB.saveCargas(cargas);
+  closeModal();
+  if (editId) renderDetail(editId); else renderCargas();
+}
+
+function deleteCarga(cargaId) {
+  if (!confirm('¿Eliminar esta carga y todos sus clientes?')) return;
+  DB.saveCargas(DB.getCargas().filter(c => c.id !== cargaId));
+  renderCargas();
+}
+
+function closeCarga(cargaId) {
+  if (!confirm('¿Cerrar esta carga?')) return;
+  const cargas = DB.getCargas();
+  const idx = cargas.findIndex(c => c.id === cargaId);
+  if (idx !== -1) { cargas[idx].status = 'closed'; DB.saveCargas(cargas); renderDetail(cargaId); }
+}
+
+function reopenCarga(cargaId) {
+  const cargas = DB.getCargas();
+  const idx = cargas.findIndex(c => c.id === cargaId);
+  if (idx !== -1) { cargas[idx].status = 'open'; DB.saveCargas(cargas); renderDetail(cargaId); }
+}
+
+function openAddClient() {
+  const carga = DB.getCargas().find(c => c.id === currentCargaId);
+  if (!carga || carga.status === 'closed') return;
+  const savedClients = DB.getClients();
+  const assignedLbs  = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
+  const pendingLbs   = Math.max(0, carga.totalWeightLbs - assignedLbs);
+  const clientOptions = savedClients.length
+    ? savedClients.sort((a,b) => a.name.localeCompare(b.name)).map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')
+    : '';
+  const pendingInfo = pendingLbs > 0.001
+    ? `<div class="alert alert-info" style="margin-top:.5rem;margin-bottom:0">Peso pendiente: ${fLbs(pendingLbs)} / ${fKg(pendingLbs)}</div>`
+    : '';
+  openModal(`
+    <div class="modal-head">
+      <span class="modal-title">Agregar Cliente</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg">
+      <label>Nombre del cliente</label>
+      <input type="text" id="m-cname" placeholder="Nombre del cliente" list="clients-datalist" />
+      <datalist id="clients-datalist">${clientOptions}</datalist>
+    </div>
+    <div class="fg">
+      <label>Peso del cliente</label>
+      <div class="inline-row">
+        <input type="number" id="m-cweight" placeholder="0.00" min="0" step="0.01" oninput="autoCalcCharge()" />
+        <select id="m-cunit" onchange="autoCalcCharge()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+      ${pendingInfo}
+    </div>
+    <div class="fg">
+      <label>Monto cobrado (₡)</label>
+      <input type="number" id="m-ccharge" placeholder="Se calcula automáticamente" min="0" step="1" />
+      <p style="font-size:.75rem;color:var(--gray);margin-top:.25rem">Tarifa base: ${fCRC(RATE_PER_LB)}/lb</p>
+    </div>
+    <div class="fg"><label>Notas (opcional)</label><textarea id="m-cnotes" placeholder="Rastreo, descripción, etc."></textarea></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveClient(null)">Agregar</button>
+    </div>
+  `);
+  document.getElementById('m-cname').focus();
+}
+
+function openEditClient(cargaId, clientId) {
+  const carga  = DB.getCargas().find(c => c.id === cargaId);
+  const client = carga?.clients.find(cl => cl.id === clientId);
+  if (!client) return;
+  openModal(`
+    <div class="modal-head">
+      <span class="modal-title">Editar Cliente</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fg"><label>Nombre</label><input type="text" id="m-cname" value="${esc(client.clientName)}" /></div>
+    <div class="fg">
+      <label>Peso (lbs)</label>
+      <div class="inline-row">
+        <input type="number" id="m-cweight" value="${client.weightLbs.toFixed(3)}" min="0" step="0.01" oninput="autoCalcCharge()" />
+        <select id="m-cunit" onchange="autoCalcCharge()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Monto cobrado (₡)</label><input type="number" id="m-ccharge" value="${client.chargedCRC}" min="0" step="1" /></div>
+    <div class="fg"><label>Notas</label><textarea id="m-cnotes">${esc(client.notes || '')}</textarea></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveClient('${clientId}')">Guardar</button>
+    </div>
+  `);
+}
+
+function autoCalcCharge() {
+  const wRaw = parseFloat(document.getElementById('m-cweight')?.value) || 0;
+  const unit = document.getElementById('m-cunit')?.value || 'lbs';
+  const wLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+  const chargeEl = document.getElementById('m-ccharge');
+  if (chargeEl && !chargeEl._userEdited) chargeEl.value = Math.round(wLbs * RATE_PER_LB);
+}
+
+function saveClient(editId) {
+  const name   = document.getElementById('m-cname').value.trim();
+  const wRaw   = parseFloat(document.getElementById('m-cweight').value) || 0;
+  const unit   = document.getElementById('m-cunit').value;
+  const charge = parseFloat(document.getElementById('m-ccharge').value) || 0;
+  const notes  = document.getElementById('m-cnotes').value.trim();
+  if (!name)    { alert('Ingresá el nombre.'); return; }
+  if (wRaw <= 0){ alert('Ingresá un peso válido.'); return; }
+  const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+  const cargas = DB.getCargas();
+  const idx    = cargas.findIndex(c => c.id === currentCargaId);
+  if (idx === -1) return;
+  if (editId) {
+    const ci = cargas[idx].clients.findIndex(cl => cl.id === editId);
+    if (ci !== -1) cargas[idx].clients[ci] = { ...cargas[idx].clients[ci], clientName: name, weightLbs, chargedCRC: charge, notes };
+  } else {
+    cargas[idx].clients.push({ id: uid(), clientName: name, weightLbs, chargedCRC: charge, notes, createdAt: Date.now() });
+    const clients = DB.getClients();
+    if (!clients.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+      clients.push({ id: uid(), name, phone: '', notes: '' });
+      DB.saveClients(clients);
+    }
+  }
+  DB.saveCargas(cargas);
+  closeModal();
+  renderDetail(currentCargaId);
+}
+
+function deleteClient(cargaId, clientId) {
+  if (!confirm('¿Eliminar este cliente de la carga?')) return;
+  const cargas = DB.getCargas();
+  const idx    = cargas.findIndex(c => c.id === cargaId);
+  if (idx !== -1) { cargas[idx].clients = cargas[idx].clients.filter(cl => cl.id !== clientId); DB.saveCargas(cargas); renderDetail(cargaId); }
+}
+
+function openNuevoCliente() {
+  openModal(`
+    <div class="modal-head"><span class="modal-title">Nuevo Cliente</span><button class="modal-x" onclick="closeModal()">✕</button></div>
+    <div class="fg"><label>Nombre</label><input type="text" id="m-clname" placeholder="Nombre completo" /></div>
+    <div class="fg"><label>Teléfono (opcional)</label><input type="tel" id="m-clphone" placeholder="+506 ..." /></div>
+    <div class="fg"><label>Notas (opcional)</label><textarea id="m-clnotes" placeholder="Dirección, indicaciones..."></textarea></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveCliente(null)">Guardar</button>
+    </div>
+  `);
+  document.getElementById('m-clname').focus();
+}
+
+function openEditCliente(clientId) {
+  const client = DB.getClients().find(c => c.id === clientId);
+  if (!client) return;
+  openModal(`
+    <div class="modal-head"><span class="modal-title">Editar Cliente</span><button class="modal-x" onclick="closeModal()">✕</button></div>
+    <div class="fg"><label>Nombre</label><input type="text" id="m-clname" value="${esc(client.name)}" /></div>
+    <div class="fg"><label>Teléfono</label><input type="tel" id="m-clphone" value="${esc(client.phone || '')}" /></div>
+    <div class="fg"><label>Notas</label><textarea id="m-clnotes">${esc(client.notes || '')}</textarea></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="saveCliente('${clientId}')">Guardar</button>
+    </div>
+  `);
+}
+
+function saveCliente(editId) {
+  const name  = document.getElementById('m-clname').value.trim();
+  const phone = document.getElementById('m-clphone').value.trim();
+  const notes = document.getElementById('m-clnotes').value.trim();
+  if (!name) { alert('Ingresá el nombre.'); return; }
+  const clients = DB.getClients();
+  if (editId) {
+    const idx = clients.findIndex(c => c.id === editId);
+    if (idx !== -1) clients[idx] = { ...clients[idx], name, phone, notes };
+  } else {
+    clients.push({ id: uid(), name, phone, notes });
+  }
+  DB.saveClients(clients);
+  closeModal();
+  renderClientes();
+}
+
+function deleteCliente(clientId) {
+  if (!confirm('¿Eliminar este cliente?')) return;
+  DB.saveClients(DB.getClients().filter(c => c.id !== clientId));
+  renderClientes();
+}
+
+function openChangePw() {
+  openModal(`
+    <div class="modal-head"><span class="modal-title">Cambiar Contraseña</span><button class="modal-x" onclick="closeModal()">✕</button></div>
+    <div class="fg"><label>Contraseña actual</label><input type="password" id="m-pw-old" /></div>
+    <div class="fg"><label>Nueva contraseña</label><input type="password" id="m-pw-new" /></div>
+    <div class="fg"><label>Confirmar nueva</label><input type="password" id="m-pw-confirm" /></div>
+    <p id="m-pw-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary"   onclick="doChangePw()">Guardar</button>
+    </div>
+  `);
+}
+
+function doChangePw() {
+  const old  = document.getElementById('m-pw-old').value;
+  const nw   = document.getElementById('m-pw-new').value;
+  const conf = document.getElementById('m-pw-confirm').value;
+  const err  = document.getElementById('m-pw-err');
+  if (old !== DB.getPassword()) { err.textContent = 'Contraseña actual incorrecta.'; err.style.display = ''; return; }
+  if (!nw)                      { err.textContent = 'Ingresá una nueva contraseña.'; err.style.display = ''; return; }
+  if (nw !== conf)              { err.textContent = 'Las contraseñas no coinciden.'; err.style.display = ''; return; }
+  DB.setPassword(nw);
+  closeModal();
+  alert('Contraseña cambiada.');
+}
+
+function exportCSV(cargaId) {
+  const carga = DB.getCargas().find(c => c.id === cargaId);
+  if (!carga) return;
+  const cobrado  = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
+  const ganancia = cobrado - carga.totalCostCRC;
+  const header = ['#','Cliente','Peso (lbs)','Peso (kg)','% del total','Cobrado','Notas'].join(',');
+  const rows   = carga.clients.map((cl, i) => {
+    const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100).toFixed(1) : '0';
+    return [i+1, `"${cl.clientName}"`, cl.weightLbs.toFixed(2), (cl.weightLbs/KG_TO_LBS).toFixed(2), pct, Math.round(cl.chargedCRC), `"${cl.notes || ''}"`].join(',');
+  });
+  const summary = ['','Resumen',`Referencia,"${carga.reference}"`,`Fecha,${carga.date}`,`Peso total (lbs),${carga.totalWeightLbs.toFixed(2)}`,`Costo pagado,${carga.totalCostCRC}`,`Total cobrado,${cobrado}`,`Ganancia,${ganancia}`];
+  const csv  = [header, ...rows, ...summary].join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `cierre-${carga.reference.replace(/\s+/g,'-')}-${carga.date}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('focusin', e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
+document.addEventListener('input',   e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
+
+if (DB.isLoggedIn()) {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').hidden = false;
+  showView('cargas');
+}
+
+if (!localStorage.getItem('ltd_pw')) {
+  window.addEventListener('load', () => {
+    const info = document.createElement('div');
+    info.className = 'alert alert-warn';
+    info.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:300;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.15)';
+    info.innerHTML = '🔑 Contraseña inicial: <strong>linktodoor</strong> — Cambiala desde ⚙';
+    document.body.appendChild(info);
+    setTimeout(() => info.remove(), 7000);
+  });
+}
+</script>
+</body>
+</html>
