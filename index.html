@@ -1004,7 +1004,12 @@ async function buscarPaquete() {
       return;
     }
 
-    (json.data.paquetes).forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
+    const paquetes = json.data.paquetes;
+    /* DEBUG temporal — borrar después */
+    resultsEl.innerHTML = `<pre style="color:var(--cream);font-size:.65rem;overflow:auto;
+      background:rgba(255,255,255,.05);padding:1rem;border-radius:8px;white-space:pre-wrap;
+      word-break:break-all;max-height:400px">${JSON.stringify(paquetes[0], null, 2)}</pre>`;
+    paquetes.forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
 
   } catch {
     loading.classList.remove('show');
