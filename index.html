@@ -1058,7 +1058,8 @@ function renderPaquete(pkg) {
         const nom = s.nombre || s.name || s.titulo || s.label || s.descripcion
                  || s.etapa || s.text || s.paso || s.title || s.step
                  || Object.values(s).find(v => typeof v === 'string'
-                      && v.length > 1
+                      && v.length > 2
+                      && /[a-zA-ZáéíóúñÁÉÍÓÚÑ]/.test(v)
                       && !['completado','actual','pendiente','true','false'].includes(v.toLowerCase()))
                  || '';
         const fec = s.fecha || s.date || s.hora || s.timestamp || s.fechaHora || '';
