@@ -1004,12 +1004,7 @@ async function buscarPaquete() {
       return;
     }
 
-    const paquetes = json.data.paquetes;
-    /* DEBUG temporal — borrar después */
-    resultsEl.innerHTML = `<pre style="color:var(--cream);font-size:.65rem;overflow:auto;
-      background:rgba(255,255,255,.05);padding:1rem;border-radius:8px;white-space:pre-wrap;
-      word-break:break-all;max-height:400px">${JSON.stringify(paquetes[0], null, 2)}</pre>`;
-    paquetes.forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
+    (json.data.paquetes).forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
 
   } catch {
     loading.classList.remove('show');
@@ -1041,11 +1036,14 @@ function renderPaquete(pkg) {
       </div>`;
   }
 
-  const pasos = pkg.pasos || pkg.steps || pkg.timeline || pkg.etapas || pkg.estados || [];
-  const pkgId = pkg.codigo || pkg.id || pkg.tracking || pkg.warehouse || pkg.codigoBodega || pkg.numero || pkg.trackingNumber || '';
-  const pkgPeso = pkg.peso ?? pkg.weight ?? pkg.kg ?? null;
-  const pesoUnit = (pkg.lbs != null) ? 'lbs' : 'kg';
-  const estadoActual = pkg.estadoActual || pkg.statusActual || pkg.estado || '';
+  const pasos = pkg.timeline || pkg.pasos || pkg.steps || pkg.etapas || pkg.estados || [];
+  const pkgId = pkg.trackingNumber || pkg.codigo || pkg.id || pkg.tracking || pkg.warehouse || pkg.numero || '';
+  const pkgPeso = pkg.pesoKg ?? pkg.peso ?? pkg.weight ?? pkg.kg ?? null;
+  const pesoUnit = 'kg';
+  const estadoActualRaw = pkg.estadoActual;
+  const estadoActual = (estadoActualRaw && typeof estadoActualRaw === 'object')
+    ? (estadoActualRaw.label || '')
+    : (estadoActualRaw || pkg.statusActual || '');
 
   const card = document.createElement('div');
   card.className = 'pkg-card';
@@ -1067,7 +1065,7 @@ function renderPaquete(pkg) {
                       && /[a-zA-ZáéíóúñÁÉÍÓÚÑ]/.test(v)
                       && !['completado','actual','pendiente','true','false'].includes(v.toLowerCase()))
                  || '';
-        const fec = s.fecha || s.date || s.hora || s.timestamp || s.fechaHora || '';
+        const fec = s.fechaIso || s.fecha || s.date || s.hora || s.timestamp || '';
         return `
           <div class="tl-step ${est}">
             <div class="tl-dot">${est === 'completado' ? '✓' : ''}</div>
