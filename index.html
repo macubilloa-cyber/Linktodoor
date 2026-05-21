@@ -737,16 +737,16 @@
   <div class="sec-head reveal">
     <span class="sec-tag">📦 Rastreo en tiempo real</span>
     <h2>¿Dónde está tu paquete?</h2>
-    <p>Ingresá tu número de rastreo, código B2B o tu número de teléfono para ver el estado de tu envío.</p>
+    <p>Ingresá tu número de rastreo o tu número de teléfono para ver el estado de tu envío.</p>
   </div>
 
   <div class="track-box reveal">
     <div class="track-input-wrap">
       <input type="text" class="track-input" id="trackInput"
-        placeholder="Número de rastreo, B2B-XXXXX o teléfono (8 dígitos)" />
+        placeholder="Número de rastreo o teléfono (8 dígitos)" />
       <button class="btn-track" id="btnTrack" onclick="buscarPaquete()">🔍 Rastrear</button>
     </div>
-    <div class="track-hint">Podés buscar por número de rastreo, código B2B-XXXXX o tu número de teléfono</div>
+    <div class="track-hint">Podés buscar por número de rastreo o tu número de teléfono (8 dígitos)</div>
   </div>
 
   <div class="track-result-area reveal" id="trackResultArea">
@@ -905,15 +905,13 @@ async function buscarPaquete() {
     btn.disabled = false;
 
     if (!json.ok || json.data?.vacio) {
-      errorEl.innerHTML = '🔍 No encontramos paquetes con ese dato. Verificá el número de rastreo, tu teléfono (8 dígitos) o tu código B2B.';
-      errorEl.classList.add('show');
+      mostrarFallbackCargotrack(q, errorEl);
       return;
     }
 
     const paquetes = json.data?.paquetes || [];
     if (paquetes.length === 0) {
-      errorEl.innerHTML = '🔍 No encontramos paquetes asociados a ese número.';
-      errorEl.classList.add('show');
+      mostrarFallbackCargotrack(q, errorEl);
       return;
     }
 
@@ -925,6 +923,26 @@ async function buscarPaquete() {
     errorEl.innerHTML = '⚠️ No se pudo conectar con el sistema de rastreo. Intentá de nuevo en unos minutos.';
     errorEl.classList.add('show');
   }
+}
+
+function mostrarFallbackCargotrack(q, errorEl) {
+  errorEl.innerHTML = `
+    <div style="margin-bottom:.8rem">🔍 No encontramos ese número en nuestro sistema.</div>
+    <div style="font-size:.84rem;color:rgba(252,165,165,.7);margin-bottom:1.2rem">
+      Si enviaste tu paquete a la dirección <strong style="color:#fca5a5">5414</strong>, rastrealo en el siguiente botón.
+    </div>
+    <a href="https://noblex.cargotrack.net/m/track.asp" target="_blank"
+      style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);
+      color:#fff;padding:.65rem 1.3rem;border-radius:50px;text-decoration:none;
+      font-weight:700;font-size:.88rem;border:1px solid rgba(255,255,255,.2);transition:all .2s"
+      onmouseover="this.style.background='rgba(255,255,255,.2)'"
+      onmouseout="this.style.background='rgba(255,255,255,.1)'">
+      📦 Rastrear en sistema alternativo
+    </a>
+    <div style="font-size:.75rem;color:rgba(252,165,165,.5);margin-top:.7rem">
+      Tu número: <strong style="color:rgba(252,165,165,.7);font-family:monospace">${q}</strong> — copialo y pegalo ahí
+    </div>`;
+  errorEl.classList.add('show');
 }
 
 function renderPaquete(pkg) {
