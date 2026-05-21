@@ -306,7 +306,26 @@
     #rastrear .sec-head p{color:rgba(245,240,228,.5)}
     #rastrear .sec-tag{background:rgba(91,91,214,.3);color:var(--lblue)}
 
+    .track-addr-grid{max-width:660px;margin:0 auto 2rem;
+      display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .track-addr-card{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);
+      border-radius:var(--r);padding:1.8rem;cursor:pointer;transition:var(--t);text-align:center}
+    .track-addr-card:hover,.track-addr-card:focus{border-color:var(--pri-lite);
+      background:rgba(91,91,214,.12);transform:translateY(-4px);outline:none}
+    .track-addr-card.flash:hover,.track-addr-card.flash:focus{border-color:#FFD700;
+      background:rgba(255,215,0,.06);transform:translateY(-4px)}
+    .tac-badge{display:inline-block;background:rgba(255,215,0,.15);color:#FFD700;
+      padding:.2rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;
+      letter-spacing:.3px;margin-bottom:.5rem}
+    .tac-icon{font-size:2rem;margin-bottom:.5rem}
+    .tac-label{font-size:.98rem;font-weight:800;color:var(--cream);margin-bottom:.5rem}
+    .tac-addr{font-size:.8rem;color:rgba(245,240,228,.45);margin-bottom:.1rem;font-family:monospace}
+    .tac-city{font-size:.74rem;color:rgba(245,240,228,.25)}
+
     .track-box{max-width:660px;margin:0 auto 2rem}
+    .track-back{font-size:.82rem;color:var(--pri-lite);cursor:pointer;
+      margin-bottom:1rem;display:inline-flex;align-items:center;gap:.3rem;transition:var(--t)}
+    .track-back:hover{color:var(--cream)}
     .track-input-wrap{display:flex;gap:.7rem;background:rgba(255,255,255,.06);
       border:2px solid rgba(255,255,255,.12);border-radius:60px;
       padding:.45rem .45rem .45rem 1.4rem;transition:var(--t)}
@@ -321,7 +340,8 @@
     .btn-track:disabled{opacity:.5;cursor:not-allowed}
     .track-hint{font-size:.76rem;color:rgba(245,240,228,.3);text-align:center;margin-top:.65rem}
 
-    .track-result-area{max-width:660px;margin:0 auto}
+    .track-result-area{max-width:660px;margin:0 auto;display:none}
+    .track-result-area.show{display:block}
     .track-loading{text-align:center;padding:3rem;display:none}
     .track-loading.show{display:block}
     .track-spinner{width:44px;height:44px;border:3px solid rgba(91,91,214,.2);
@@ -329,6 +349,13 @@
       animation:spin .8s linear infinite;margin:0 auto 1rem}
     @keyframes spin{to{transform:rotate(360deg)}}
     .track-loading p{color:rgba(245,240,228,.45);font-size:.9rem}
+
+    .track-copy-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--r);padding:1.5rem;text-align:center;animation:slideUp .4s ease}
+    .track-copy-num{font-family:monospace;font-size:1.2rem;color:var(--cream);
+      background:rgba(255,255,255,.1);padding:.6rem 1.2rem;border-radius:8px;
+      display:inline-block;letter-spacing:1px;margin:.5rem 0 .8rem;cursor:pointer}
+    .track-copy-num:active{background:rgba(255,255,255,.2)}
 
     .track-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
       border-radius:var(--r);padding:1.5rem;text-align:center;
@@ -372,6 +399,7 @@
     .tl-date{font-size:.76rem;color:rgba(245,240,228,.25)}
     .tl-step.completado .tl-date{color:rgba(245,240,228,.4)}
     .tl-step.actual .tl-date{color:rgba(196,217,245,.45)}
+    @media(max-width:600px){.track-addr-grid{grid-template-columns:1fr}}
 
     /* ── RESPONSIVE ── */
     @media(max-width:1024px){
@@ -737,19 +765,39 @@
   <div class="sec-head reveal">
     <span class="sec-tag">📦 Rastreo en tiempo real</span>
     <h2>¿Dónde está tu paquete?</h2>
-    <p>Ingresá tu número de rastreo o tu número de teléfono para ver el estado de tu envío.</p>
+    <p>Seleccioná la bodega a la que enviaste tu paquete para rastrearlo.</p>
   </div>
 
-  <div class="track-box reveal">
+  <!-- Paso 1: selección de bodega -->
+  <div class="track-addr-grid reveal" id="trackAddrGrid">
+    <div class="track-addr-card" onclick="seleccionarBodega('b2b')" tabindex="0">
+      <div class="tac-icon">📦</div>
+      <div class="tac-label">Bodega Consolidado</div>
+      <div class="tac-addr">2071 NW 112th Ave</div>
+      <div class="tac-addr">8800 NW 102nd ST</div>
+      <div class="tac-city">Miami, FL</div>
+    </div>
+    <div class="track-addr-card flash" onclick="seleccionarBodega('cargotrack')" tabindex="0">
+      <div class="tac-badge">⚡ Flash · 3 días</div>
+      <div class="tac-icon">🏃</div>
+      <div class="tac-label">Bodega Flash</div>
+      <div class="tac-addr">5414 NW 79 Ave</div>
+      <div class="tac-city">Doral, FL 33166</div>
+    </div>
+  </div>
+
+  <!-- Paso 2: buscar (aparece al seleccionar) -->
+  <div class="track-box" id="trackSearchBox" style="display:none">
+    <div class="track-back" onclick="resetTrack()">← Cambiar bodega</div>
     <div class="track-input-wrap">
       <input type="text" class="track-input" id="trackInput"
         placeholder="Número de rastreo o teléfono (8 dígitos)" />
       <button class="btn-track" id="btnTrack" onclick="buscarPaquete()">🔍 Rastrear</button>
     </div>
-    <div class="track-hint">Podés buscar por número de rastreo o tu número de teléfono (8 dígitos)</div>
+    <div class="track-hint" id="trackHint"></div>
   </div>
 
-  <div class="track-result-area reveal" id="trackResultArea">
+  <div class="track-result-area" id="trackResultArea">
     <div class="track-loading" id="trackLoading">
       <div class="track-spinner"></div>
       <p>Buscando tu paquete...</p>
@@ -881,6 +929,34 @@ document.getElementById('calcLbs').addEventListener('keydown', e => { if (e.key 
 /* ── TRACKING ── */
 document.getElementById('trackInput').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPaquete(); });
 
+let trackMode = null;
+
+function seleccionarBodega(mode) {
+  trackMode = mode;
+  document.getElementById('trackAddrGrid').style.display = 'none';
+  document.getElementById('trackSearchBox').style.display = 'block';
+  document.getElementById('trackResultArea').classList.remove('show');
+  document.getElementById('trackLoading').classList.remove('show');
+  document.getElementById('trackError').classList.remove('show');
+  document.getElementById('trackResults').innerHTML = '';
+  const hint = document.getElementById('trackHint');
+  hint.textContent = mode === 'cargotrack'
+    ? 'Ingresá tu número de rastreo — se abrirá el sistema en una nueva pestaña'
+    : 'Podés buscar por número de rastreo o tu número de teléfono (8 dígitos)';
+  document.getElementById('trackInput').focus();
+}
+
+function resetTrack() {
+  trackMode = null;
+  document.getElementById('trackAddrGrid').style.display = 'grid';
+  document.getElementById('trackSearchBox').style.display = 'none';
+  document.getElementById('trackResultArea').classList.remove('show');
+  document.getElementById('trackLoading').classList.remove('show');
+  document.getElementById('trackError').classList.remove('show');
+  document.getElementById('trackResults').innerHTML = '';
+  document.getElementById('trackInput').value = '';
+}
+
 async function buscarPaquete() {
   const q = document.getElementById('trackInput').value.trim();
   if (!q) return;
@@ -892,30 +968,43 @@ async function buscarPaquete() {
   const btn        = document.getElementById('btnTrack');
 
   resultArea.classList.add('show');
-  loading.classList.add('show');
   errorEl.classList.remove('show');
   resultsEl.innerHTML = '';
+
+  /* ── Cargotrack flow ── */
+  if (trackMode === 'cargotrack') {
+    window.open('https://noblex.cargotrack.net/m/track.asp', '_blank');
+    resultsEl.innerHTML = `
+      <div class="track-copy-box">
+        <div style="font-size:.88rem;color:rgba(245,240,228,.55);margin-bottom:.3rem">
+          ✅ Se abrió el sistema de rastreo en una nueva pestaña
+        </div>
+        <div style="font-size:.8rem;color:rgba(245,240,228,.35);margin-bottom:.4rem">
+          Copiá tu número y pegalo ahí:
+        </div>
+        <div class="track-copy-num" onclick="copiarNumero('${q}')" title="Tocar para copiar">${q}</div>
+        <div style="font-size:.72rem;color:rgba(245,240,228,.25)">Tocá el número para copiarlo</div>
+      </div>`;
+    return;
+  }
+
+  /* ── Box2Box flow ── */
+  loading.classList.add('show');
   btn.disabled = true;
 
   try {
     const res  = await fetch(`/api/tracking?q=${encodeURIComponent(q)}`);
     const json = await res.json();
-
     loading.classList.remove('show');
     btn.disabled = false;
 
-    if (!json.ok || json.data?.vacio) {
-      mostrarFallbackCargotrack(q, errorEl);
+    if (!json.ok || json.data?.vacio || (json.data?.paquetes || []).length === 0) {
+      errorEl.innerHTML = '🔍 No encontramos paquetes con ese dato. Verificá el número de rastreo o tu teléfono (8 dígitos).';
+      errorEl.classList.add('show');
       return;
     }
 
-    const paquetes = json.data?.paquetes || [];
-    if (paquetes.length === 0) {
-      mostrarFallbackCargotrack(q, errorEl);
-      return;
-    }
-
-    paquetes.forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
+    (json.data.paquetes).forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
 
   } catch {
     loading.classList.remove('show');
@@ -925,24 +1014,11 @@ async function buscarPaquete() {
   }
 }
 
-function mostrarFallbackCargotrack(q, errorEl) {
-  errorEl.innerHTML = `
-    <div style="margin-bottom:.8rem">🔍 No encontramos ese número en nuestro sistema.</div>
-    <div style="font-size:.84rem;color:rgba(252,165,165,.7);margin-bottom:1.2rem">
-      Si enviaste tu paquete a la dirección <strong style="color:#fca5a5">5414</strong>, rastrealo en el siguiente botón.
-    </div>
-    <a href="https://noblex.cargotrack.net/m/track.asp" target="_blank"
-      style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.1);
-      color:#fff;padding:.65rem 1.3rem;border-radius:50px;text-decoration:none;
-      font-weight:700;font-size:.88rem;border:1px solid rgba(255,255,255,.2);transition:all .2s"
-      onmouseover="this.style.background='rgba(255,255,255,.2)'"
-      onmouseout="this.style.background='rgba(255,255,255,.1)'">
-      📦 Rastrear en sistema alternativo
-    </a>
-    <div style="font-size:.75rem;color:rgba(252,165,165,.5);margin-top:.7rem">
-      Tu número: <strong style="color:rgba(252,165,165,.7);font-family:monospace">${q}</strong> — copialo y pegalo ahí
-    </div>`;
-  errorEl.classList.add('show');
+function copiarNumero(num) {
+  navigator.clipboard?.writeText(num).then(() => {
+    const el = document.querySelector('.track-copy-num');
+    if (el) { el.textContent = '¡Copiado!'; setTimeout(() => el.textContent = num, 1500); }
+  });
 }
 
 function renderPaquete(pkg) {
