@@ -1036,28 +1036,35 @@ function renderPaquete(pkg) {
       </div>`;
   }
 
-  const pasos  = pkg.pasos || pkg.steps || pkg.timeline || [];
-  const actual = pasos.find(s => (s.estado || s.state) === 'actual');
+  const pasos = pkg.pasos || pkg.steps || pkg.timeline || pkg.etapas || pkg.estados || [];
+  const pkgId = pkg.codigo || pkg.id || pkg.tracking || pkg.warehouse || pkg.codigoBodega || pkg.numero || pkg.trackingNumber || '';
+  const pkgPeso = pkg.peso ?? pkg.weight ?? pkg.kg ?? null;
+  const pesoUnit = (pkg.lbs != null) ? 'lbs' : 'kg';
+  const estadoActual = pkg.estadoActual || pkg.statusActual || pkg.estado || '';
 
   const card = document.createElement('div');
   card.className = 'pkg-card';
   card.innerHTML = `
     <div class="pkg-header">
       <div>
-        <div class="pkg-id">${pkg.codigo || pkg.id || pkg.tracking || ''}</div>
-        ${actual ? `<div class="pkg-status-name">📍 ${actual.nombre || actual.name || ''}</div>` : ''}
+        ${pkgId ? `<div class="pkg-id">${pkgId}</div>` : ''}
+        ${estadoActual ? `<div class="pkg-status-name">📍 ${estadoActual}</div>` : ''}
       </div>
-      ${pkg.peso ? `<div class="pkg-weight">⚖️ ${pkg.peso} lbs</div>` : ''}
+      ${pkgPeso != null ? `<div class="pkg-weight">⚖️ ${pkgPeso} ${pesoUnit}</div>` : ''}
     </div>
     <div class="timeline">
       ${pasos.map(s => {
-        const est  = s.estado || s.state || 'pendiente';
-        const nom  = s.nombre || s.name || '';
-        const fec  = s.fecha  || s.date  || '';
-        const icon = est === 'completado' ? '✓' : '';
+        const est = s.estado || s.state || s.status || s.estatus || 'pendiente';
+        const nom = s.nombre || s.name || s.titulo || s.label || s.descripcion
+                 || s.etapa || s.text || s.paso || s.title || s.step
+                 || Object.values(s).find(v => typeof v === 'string'
+                      && v.length > 1
+                      && !['completado','actual','pendiente','true','false'].includes(v.toLowerCase()))
+                 || '';
+        const fec = s.fecha || s.date || s.hora || s.timestamp || s.fechaHora || '';
         return `
           <div class="tl-step ${est}">
-            <div class="tl-dot">${icon}</div>
+            <div class="tl-dot">${est === 'completado' ? '✓' : ''}</div>
             <div class="tl-body">
               <div class="tl-name">${nom}</div>
               ${fec ? `<div class="tl-date">${fec}</div>` : ''}
