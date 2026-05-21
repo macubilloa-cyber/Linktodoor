@@ -300,6 +300,79 @@
     .reveal.visible{opacity:1;transform:translateY(0)}
     .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
 
+    /* ── RASTREAR ── */
+    #rastrear{background:var(--dark2);padding:5rem 2rem}
+    #rastrear .sec-head h2{color:var(--cream)}
+    #rastrear .sec-head p{color:rgba(245,240,228,.5)}
+    #rastrear .sec-tag{background:rgba(91,91,214,.3);color:var(--lblue)}
+
+    .track-box{max-width:660px;margin:0 auto 2rem}
+    .track-input-wrap{display:flex;gap:.7rem;background:rgba(255,255,255,.06);
+      border:2px solid rgba(255,255,255,.12);border-radius:60px;
+      padding:.45rem .45rem .45rem 1.4rem;transition:var(--t)}
+    .track-input-wrap:focus-within{border-color:var(--pri-lite);background:rgba(255,255,255,.1)}
+    .track-input{flex:1;background:none;border:none;outline:none;
+      color:var(--cream);font-size:1rem;font-family:inherit}
+    .track-input::placeholder{color:rgba(245,240,228,.3)}
+    .btn-track{background:var(--pri);color:var(--white);border:none;
+      padding:.75rem 1.5rem;border-radius:50px;font-weight:700;font-size:.95rem;
+      cursor:pointer;transition:var(--t);font-family:inherit;white-space:nowrap}
+    .btn-track:hover{background:var(--pri-dark)}
+    .btn-track:disabled{opacity:.5;cursor:not-allowed}
+    .track-hint{font-size:.76rem;color:rgba(245,240,228,.3);text-align:center;margin-top:.65rem}
+
+    .track-result-area{max-width:660px;margin:0 auto}
+    .track-loading{text-align:center;padding:3rem;display:none}
+    .track-loading.show{display:block}
+    .track-spinner{width:44px;height:44px;border:3px solid rgba(91,91,214,.2);
+      border-top-color:var(--pri-lite);border-radius:50%;
+      animation:spin .8s linear infinite;margin:0 auto 1rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .track-loading p{color:rgba(245,240,228,.45);font-size:.9rem}
+
+    .track-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
+      border-radius:var(--r);padding:1.5rem;text-align:center;
+      display:none;color:#fca5a5;font-size:.92rem;line-height:1.6}
+    .track-error.show{display:block}
+
+    .delay-warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);
+      border-radius:12px;padding:1rem 1.2rem;display:flex;align-items:flex-start;
+      gap:.8rem;margin-bottom:1rem;animation:slideUp .4s ease}
+    .delay-warn-icon{font-size:1.3rem;flex-shrink:0;margin-top:.05rem}
+    .delay-warn-text{font-size:.86rem;color:#fde68a;line-height:1.5}
+    .delay-warn-text a{color:#fbbf24}
+
+    .pkg-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      border-radius:var(--r);padding:1.8rem;margin-bottom:1rem;animation:slideUp .4s ease}
+    .pkg-header{display:flex;align-items:flex-start;justify-content:space-between;
+      flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem}
+    .pkg-id{font-size:.78rem;color:rgba(245,240,228,.35);font-family:monospace;letter-spacing:.3px}
+    .pkg-status-name{font-size:.88rem;color:var(--lblue);margin-top:.2rem;font-weight:600}
+    .pkg-weight{background:rgba(91,91,214,.2);color:var(--lblue);
+      padding:.3rem .8rem;border-radius:20px;font-size:.8rem;font-weight:700;white-space:nowrap}
+
+    .timeline{display:flex;flex-direction:column}
+    .tl-step{display:flex;align-items:flex-start;gap:1rem;position:relative}
+    .tl-step:not(:last-child)::after{content:'';position:absolute;left:17px;top:36px;
+      width:2px;bottom:0;background:rgba(255,255,255,.08)}
+    .tl-step.completado:not(:last-child)::after{background:var(--pri)}
+    .tl-dot{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:.9rem;
+      border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+      position:relative;z-index:1;color:rgba(245,240,228,.2)}
+    .tl-step.completado .tl-dot{background:var(--pri);border-color:var(--pri);color:var(--white)}
+    .tl-step.actual .tl-dot{border-color:var(--pri-lite);background:rgba(91,91,214,.15);color:var(--pri-lite)}
+    .tl-step.actual .tl-dot::after{content:'';position:absolute;inset:-5px;border-radius:50%;
+      border:2px solid var(--pri-lite);animation:pulse-ring 1.6s ease-out infinite;opacity:.5}
+    @keyframes pulse-ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.5);opacity:0}}
+    .tl-body{padding:.2rem 0 1.4rem;flex:1}
+    .tl-name{font-size:.9rem;font-weight:700;color:rgba(245,240,228,.3);margin-bottom:.15rem}
+    .tl-step.completado .tl-name{color:var(--cream)}
+    .tl-step.actual .tl-name{color:var(--lblue)}
+    .tl-date{font-size:.76rem;color:rgba(245,240,228,.25)}
+    .tl-step.completado .tl-date{color:rgba(245,240,228,.4)}
+    .tl-step.actual .tl-date{color:rgba(196,217,245,.45)}
+
     /* ── RESPONSIVE ── */
     @media(max-width:1024px){
       .serv-grid{grid-template-columns:1fr}
@@ -341,7 +414,8 @@
     <li><a href="#como">Cómo funciona</a></li>
     <li><a href="#precios">Tarifas</a></li>
     <li><a href="#entregas">Entregas</a></li>
-    <li><a href="#cta" class="nav-cta">📦 Cotizar ahora</a></li>
+    <li><a href="#rastrear">📦 Rastrear</a></li>
+    <li><a href="#cta" class="nav-cta">Cotizar ahora</a></li>
   </ul>
   <div class="hamburger" id="hbg" onclick="toggleMenu()">
     <span></span><span></span><span></span>
@@ -658,6 +732,33 @@
   </div>
 </section>
 
+<!-- RASTREAR -->
+<section id="rastrear">
+  <div class="sec-head reveal">
+    <span class="sec-tag">📦 Rastreo en tiempo real</span>
+    <h2>¿Dónde está tu paquete?</h2>
+    <p>Ingresá tu número de rastreo, código B2B o tu número de teléfono para ver el estado de tu envío.</p>
+  </div>
+
+  <div class="track-box reveal">
+    <div class="track-input-wrap">
+      <input type="text" class="track-input" id="trackInput"
+        placeholder="Número de rastreo, B2B-XXXXX o teléfono (8 dígitos)" />
+      <button class="btn-track" id="btnTrack" onclick="buscarPaquete()">🔍 Rastrear</button>
+    </div>
+    <div class="track-hint">Podés buscar por número de rastreo, código B2B-XXXXX o tu número de teléfono</div>
+  </div>
+
+  <div class="track-result-area reveal" id="trackResultArea">
+    <div class="track-loading" id="trackLoading">
+      <div class="track-spinner"></div>
+      <p>Buscando tu paquete...</p>
+    </div>
+    <div class="track-error" id="trackError"></div>
+    <div id="trackResults"></div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section id="cta">
   <h2>¿Listo para<br><em>comprar en EE.UU.?</em></h2>
@@ -703,12 +804,13 @@
           <li><a href="#como">Cómo funciona</a></li>
           <li><a href="#entregas">Zonas de entrega</a></li>
           <li><a href="#precios">Calculadora</a></li>
+          <li><a href="#rastrear">Rastrear paquete</a></li>
           <li><a href="#cta">Contacto</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2024 Linktodoor · linktodoor.com</span>
+      <span>© 2025 Linktodoor · linktodoor.co</span>
       <span>📍 Miami → San José 🇺🇸→🇨🇷</span>
     </div>
   </div>
@@ -775,6 +877,104 @@ function calcCosto() {
   result.classList.add('show');
 }
 document.getElementById('calcLbs').addEventListener('keydown', e => { if (e.key === 'Enter') calcCosto(); });
+
+/* ── TRACKING ── */
+document.getElementById('trackInput').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPaquete(); });
+
+async function buscarPaquete() {
+  const q = document.getElementById('trackInput').value.trim();
+  if (!q) return;
+
+  const resultArea = document.getElementById('trackResultArea');
+  const loading    = document.getElementById('trackLoading');
+  const errorEl    = document.getElementById('trackError');
+  const resultsEl  = document.getElementById('trackResults');
+  const btn        = document.getElementById('btnTrack');
+
+  resultArea.classList.add('show');
+  loading.classList.add('show');
+  errorEl.classList.remove('show');
+  resultsEl.innerHTML = '';
+  btn.disabled = true;
+
+  try {
+    const res  = await fetch(`/api/tracking?q=${encodeURIComponent(q)}`);
+    const json = await res.json();
+
+    loading.classList.remove('show');
+    btn.disabled = false;
+
+    if (!json.ok || json.data?.vacio) {
+      errorEl.innerHTML = '🔍 No encontramos paquetes con ese dato. Verificá el número de rastreo, tu teléfono (8 dígitos) o tu código B2B.';
+      errorEl.classList.add('show');
+      return;
+    }
+
+    const paquetes = json.data?.paquetes || [];
+    if (paquetes.length === 0) {
+      errorEl.innerHTML = '🔍 No encontramos paquetes asociados a ese número.';
+      errorEl.classList.add('show');
+      return;
+    }
+
+    paquetes.forEach(pkg => resultsEl.appendChild(renderPaquete(pkg)));
+
+  } catch {
+    loading.classList.remove('show');
+    btn.disabled = false;
+    errorEl.innerHTML = '⚠️ No se pudo conectar con el sistema de rastreo. Intentá de nuevo en unos minutos.';
+    errorEl.classList.add('show');
+  }
+}
+
+function renderPaquete(pkg) {
+  const wrap = document.createElement('div');
+
+  if (pkg.posibleRetrasoEnBodega) {
+    wrap.innerHTML += `
+      <div class="delay-warn">
+        <div class="delay-warn-icon">⚠️</div>
+        <div class="delay-warn-text">
+          <strong>Posible retraso en bodega</strong><br>
+          Tu paquete lleva más tiempo del normal. Escribinos para más información.
+          <a href="https://wa.me/50685173813" target="_blank">→ Contactar por WhatsApp</a>
+        </div>
+      </div>`;
+  }
+
+  const pasos  = pkg.pasos || pkg.steps || pkg.timeline || [];
+  const actual = pasos.find(s => (s.estado || s.state) === 'actual');
+
+  const card = document.createElement('div');
+  card.className = 'pkg-card';
+  card.innerHTML = `
+    <div class="pkg-header">
+      <div>
+        <div class="pkg-id">${pkg.codigo || pkg.id || pkg.tracking || ''}</div>
+        ${actual ? `<div class="pkg-status-name">📍 ${actual.nombre || actual.name || ''}</div>` : ''}
+      </div>
+      ${pkg.peso ? `<div class="pkg-weight">⚖️ ${pkg.peso} lbs</div>` : ''}
+    </div>
+    <div class="timeline">
+      ${pasos.map(s => {
+        const est  = s.estado || s.state || 'pendiente';
+        const nom  = s.nombre || s.name || '';
+        const fec  = s.fecha  || s.date  || '';
+        const icon = est === 'completado' ? '✓' : '';
+        return `
+          <div class="tl-step ${est}">
+            <div class="tl-dot">${icon}</div>
+            <div class="tl-body">
+              <div class="tl-name">${nom}</div>
+              ${fec ? `<div class="tl-date">${fec}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  wrap.appendChild(card);
+  return wrap;
+}
 </script>
 </body>
 </html>
