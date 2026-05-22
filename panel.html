@@ -720,10 +720,12 @@ function renderCargas() {
   const totalPagado   = cargas.reduce((s,c) => s + c.totalCostCRC, 0);
   const totalCobrado  = cargas.reduce((s,c) => s + c.clients.reduce((ss,cl) => ss + cl.chargedCRC, 0), 0);
   const ganancia      = totalCobrado - totalPagado;
+  const totalPesoLbs  = cargas.reduce((s,c) => s + c.totalWeightLbs, 0);
 
   stats.innerHTML = `
     <div class="stat"><div class="stat-label">Total cargas</div><div class="stat-val purple">${totalCargas}</div></div>
     <div class="stat"><div class="stat-label">Cargas abiertas</div><div class="stat-val" style="color:var(--yellow)">${openCargas}</div></div>
+    <div class="stat"><div class="stat-label">Peso total traído</div><div class="stat-val purple">${fLbs(totalPesoLbs)}<span style="display:block;font-size:.8rem;font-weight:600;color:var(--gray)">${fKg(totalPesoLbs)}</span></div></div>
     <div class="stat"><div class="stat-label">Total pagado</div><div class="stat-val red">${fCRC(totalPagado)}</div></div>
     <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(totalCobrado)}</div></div>
     <div class="stat"><div class="stat-label">Ganancia neta</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
@@ -977,18 +979,20 @@ function renderClientes() {
 
   const cargas = DB.getCargas();
 
-  const sorted = [...clients].sort((a,b) => a.name.localeCompare(b.name));
+  // Pre-calculate totals for sorting
+  const clientTotals = {};
+  clients.forEach(c => {
+    let lbs = 0, count = 0;
+    cargas.forEach(cg => cg.clients.forEach(cl => {
+      if (cl.clientName.toLowerCase() === c.name.toLowerCase()) { lbs += cl.weightLbs; count++; }
+    }));
+    clientTotals[c.id] = { lbs, count };
+  });
+
+  const sorted = [...clients].sort((a,b) => (clientTotals[b.id].lbs) - (clientTotals[a.id].lbs));
   tbody.innerHTML = sorted.map(c => {
     // Sum all lbs and count cargas for this client (match by name, case-insensitive)
-    let totalLbs = 0, cargaCount = 0;
-    cargas.forEach(cg => {
-      cg.clients.forEach(cl => {
-        if (cl.clientName.toLowerCase() === c.name.toLowerCase()) {
-          totalLbs += cl.weightLbs;
-          cargaCount++;
-        }
-      });
-    });
+    const totalLbs = clientTotals[c.id].lbs, cargaCount = clientTotals[c.id].count;
     const lbsStr   = totalLbs > 0 ? `<strong>${fLbs(totalLbs)}</strong>` : '<span style="color:var(--gray)">—</span>';
     const kgStr    = totalLbs > 0 ? fKg(totalLbs) : '—';
     const cargaStr = cargaCount > 0 ? cargaCount : '—';
