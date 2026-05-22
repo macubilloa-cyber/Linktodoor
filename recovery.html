@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recuperación de datos — Linktodoor</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #F5F0E4; color: #12121F; padding: 2rem 1rem; max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; font-weight: 900; margin-bottom: .5rem; }
+    p { color: #6B7280; font-size: .9rem; margin-bottom: 1.5rem; }
+    .card { background: white; border-radius: 12px; border: 1px solid #E5E7EB; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .key { font-size: .75rem; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: .4px; margin-bottom: .4rem; }
+    pre { font-size: .78rem; background: #F9FAFB; border-radius: 8px; padding: .75rem; overflow-x: auto; white-space: pre-wrap; word-break: break-all; border: 1px solid #E5E7EB; max-height: 200px; overflow-y: auto; }
+    .btn { display: inline-flex; align-items: center; gap: .35rem; padding: .58rem 1.1rem; border-radius: 8px; border: none; font-size: .88rem; font-weight: 700; cursor: pointer; font-family: inherit; margin-right: .5rem; margin-top: .5rem; }
+    .btn-primary { background: #5B5BD6; color: white; }
+    .btn-secondary { background: white; color: #12121F; border: 1.5px solid #E5E7EB; }
+    .empty { text-align: center; padding: 3rem; color: #6B7280; }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .72rem; font-weight: 800; }
+    .badge-found { background: #D1FAE5; color: #065f46; }
+    .badge-empty { background: #FEE2E2; color: #991b1b; }
+    .logo-wrap { display: inline-flex; gap: 2px; margin-bottom: 1.5rem; }
+    .logo-l { background: #5B5BD6; color: white; padding: 7px 9px; border-radius: 6px 0 0 6px; font-weight: 900; font-size: 1rem; }
+    .logo-r { background: #12121F; color: white; padding: 7px 9px; border-radius: 0 6px 6px 0; font-weight: 900; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="logo-wrap"><span class="logo-l">LINK</span><span class="logo-r">DOOR</span></div>
+  <h1>Recuperación de datos</h1>
+  <p>Esta herramienta busca todos los datos guardados en este navegador para linktodoor.co.</p>
+  <div id="content"></div>
+
+  <script>
+    const KEYS = ['ltd_cargas', 'ltd_clients', 'ltd_pw'];
+    const content = document.getElementById('content');
+    let found = false;
+    let exportData = {};
+
+    // Check all localStorage keys
+    const allKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      allKeys.push(localStorage.key(i));
+    }
+
+    if (allKeys.length === 0) {
+      content.innerHTML = `
+        <div class="card">
+          <div class="empty">
+            <div style="font-size:2rem;margin-bottom:.75rem">😔</div>
+            <p style="font-weight:700;margin-bottom:.25rem">No se encontraron datos en este navegador para este dominio.</p>
+            <p>Los datos pueden estar en <strong>www.linktodoor.co</strong> — intentá abrir esta misma página con www.</p>
+          </div>
+        </div>`;
+    } else {
+      found = true;
+      let html = `<div class="card" style="border-color:#10B981"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><strong>Datos encontrados</strong><span class="badge badge-found">${allKeys.length} registro(s)</span></div>`;
+      
+      allKeys.forEach(k => {
+        const val = localStorage.getItem(k);
+        exportData[k] = val;
+        let preview = val;
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed)) {
+            preview = `[${parsed.length} elemento(s)] ` + JSON.stringify(parsed, null, 2);
+          } else {
+            preview = JSON.stringify(parsed, null, 2);
+          }
+        } catch(e) {}
+        
+        html += `<div style="margin-bottom:1rem"><div class="key">${k}</div><pre>${preview}</pre></div>`;
+      });
+
+      // Summary of cargas if found
+      const cargasRaw = localStorage.getItem('ltd_cargas');
+      if (cargasRaw) {
+        try {
+          const cargas = JSON.parse(cargasRaw);
+          html += `<div style="background:#D1FAE5;border-radius:8px;padding:.75rem;margin-bottom:1rem;font-size:.85rem;font-weight:700;color:#065f46">
+            ✓ Se encontraron <strong>${cargas.length} carga(s)</strong> con un total de <strong>${cargas.reduce((s,c)=>s+c.clients.length,0)} cliente(s)</strong>
+          </div>`;
+        } catch(e) {}
+      }
+
+      html += `</div>`;
+      content.innerHTML = html;
+
+      // Add export and transfer buttons
+      const btnDiv = document.createElement('div');
+      btnDiv.innerHTML = `
+        <button class="btn btn-primary" onclick="exportJSON()">⬇ Descargar backup (JSON)</button>
+        <button class="btn btn-secondary" onclick="transferToWWW()">↗ Transferir a www.linktodoor.co</button>
+        <a href="/panel.html" class="btn btn-secondary" style="text-decoration:none">Ir al panel</a>
+      `;
+      content.appendChild(btnDiv);
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'linktodoor-backup-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function transferToWWW() {
+      const data = JSON.stringify(exportData);
+      const url = 'https://www.linktodoor.co/panel.html?import=' + encodeURIComponent(data);
+      if (confirm('¿Transferir los datos al panel en www.linktodoor.co?')) {
+        window.location.href = url;
+      }
+    }
+  </script>
+</body>
+</html>
