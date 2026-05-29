@@ -448,6 +448,43 @@
     .tl-step.actual .tl-date{color:rgba(196,217,245,.45)}
     @media(max-width:600px){.track-addr-grid{grid-template-columns:1fr}}
 
+    /* ── REGISTRO ── */
+    #registro{background:var(--cream);padding:5rem 2rem}
+    #registro .sec-tag{background:rgba(91,91,214,.1);color:var(--pri)}
+    .reg-wrap{max-width:680px;margin:0 auto}
+    .reg-form{background:var(--white);border-radius:24px;padding:2.5rem;
+      box-shadow:var(--shadow-lg)}
+    .reg-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+    .reg-field{display:flex;flex-direction:column;gap:.45rem}
+    .reg-field label{font-size:.8rem;font-weight:700;color:var(--dark);
+      letter-spacing:.2px;text-transform:uppercase}
+    .reg-input{padding:.85rem 1.15rem;border:2px solid var(--cream2);border-radius:12px;
+      font-size:.97rem;color:var(--dark);background:var(--cream);
+      outline:none;transition:var(--t);font-family:inherit}
+    .reg-input:focus{border-color:var(--pri);background:var(--white)}
+    .reg-input::placeholder{color:#b0a99a}
+    select.reg-input{cursor:pointer;appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 1.1rem center;
+      padding-right:2.5rem}
+    .btn-reg{width:100%;padding:1rem;background:var(--pri);color:var(--white);
+      border:none;border-radius:50px;font-weight:800;font-size:1.05rem;
+      cursor:pointer;transition:var(--t);font-family:inherit;
+      display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.4rem}
+    .btn-reg:hover{background:var(--pri-dark);transform:translateY(-2px);
+      box-shadow:0 10px 28px rgba(91,91,214,.35)}
+    .btn-reg:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .reg-success{display:none;text-align:center;padding:2rem}
+    .reg-success.show{display:block}
+    .reg-success-icon{font-size:3.5rem;margin-bottom:1rem}
+    .reg-success h3{font-size:1.5rem;font-weight:900;color:var(--dark);margin-bottom:.5rem}
+    .reg-success p{color:var(--gray);font-size:.97rem;line-height:1.7}
+    .reg-note{font-size:.78rem;color:var(--gray);text-align:center;
+      margin-top:1.2rem;line-height:1.6}
+    .reg-note a{color:var(--pri)}
+    @media(max-width:600px){.reg-row{grid-template-columns:1fr}
+      .reg-form{padding:1.6rem}}
+
     /* ── RESPONSIVE ── */
     @media(max-width:1024px){
       .serv-grid{grid-template-columns:1fr}
@@ -489,6 +526,7 @@
     <li><a href="#precios">Tarifas</a></li>
     <li><a href="#entregas">Entregas</a></li>
     <li><a href="#rastrear">📦 Rastrear</a></li>
+    <li><a href="#registro">Registrarse</a></li>
     <li><a href="#cta" class="nav-cta">Cotizar ahora</a></li>
   </ul>
   <div class="hamburger" id="hbg" onclick="toggleMenu()">
@@ -803,6 +841,58 @@
   </div>
 </section>
 
+<!-- REGISTRO -->
+<section id="registro">
+  <div class="sec-head reveal">
+    <span class="sec-tag">🚀 Es gratis</span>
+    <h2>Registrate y empezá a comprar</h2>
+    <p>Completá el formulario y te contactamos para asignarte tu dirección en Miami y explicarte cómo funciona todo.</p>
+  </div>
+  <div class="reg-wrap">
+    <div class="reg-form reveal">
+      <form id="regForm" novalidate>
+        <div class="reg-row">
+          <div class="reg-field">
+            <label for="regNombre">Nombre completo</label>
+            <input class="reg-input" id="regNombre" name="nombre" type="text"
+              placeholder="Tu nombre" required autocomplete="name" />
+          </div>
+          <div class="reg-field">
+            <label for="regTel">WhatsApp</label>
+            <input class="reg-input" id="regTel" name="telefono" type="tel"
+              placeholder="8888-8888" required autocomplete="tel" />
+          </div>
+        </div>
+        <div class="reg-row">
+          <div class="reg-field">
+            <label for="regEmail">Correo electrónico</label>
+            <input class="reg-input" id="regEmail" name="email" type="email"
+              placeholder="tu@email.com" required autocomplete="email" />
+          </div>
+          <div class="reg-field">
+            <label for="regModal">¿Cómo querés comprar?</label>
+            <select class="reg-input" id="regModal" name="modalidad" required>
+              <option value="">Seleccioná...</option>
+              <option value="Ustedes me ayudan a comprar">🛍️ Ustedes me ayudan a comprar</option>
+              <option value="Yo compro, ustedes traen">📮 Yo compro, ustedes traen</option>
+              <option value="Las dos opciones">✅ Las dos opciones</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-reg" type="submit" id="btnReg">
+          <span id="btnRegText">Registrarme →</span>
+        </button>
+      </form>
+      <div class="reg-success" id="regSuccess">
+        <div class="reg-success-icon">🎉</div>
+        <h3>¡Ya estás registrado!</h3>
+        <p>Te vamos a contactar pronto por WhatsApp para asignarte tu dirección en Miami y resolver todas tus dudas.</p>
+      </div>
+      <p class="reg-note">Al registrarte aceptás que Linktodoor te contacte para coordinar tu servicio. Sin spam, sin costos ocultos.</p>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section id="cta">
   <h2>¿Listo para<br><em>comprar en EE.UU.?</em></h2>
@@ -849,6 +939,7 @@
           <li><a href="#entregas">Zonas de entrega</a></li>
           <li><a href="#precios">Calculadora</a></li>
           <li><a href="#rastrear">Rastrear paquete</a></li>
+          <li><a href="#registro">Registrarse</a></li>
           <li><a href="#cta">Contacto</a></li>
         </ul>
       </div>
@@ -1117,6 +1208,41 @@ ScrollTrigger.create({
       ease: 'power2.out', delay: 0.8
     });
   }
+});
+
+/* ── REGISTRO ── */
+document.getElementById('regForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const nombre   = document.getElementById('regNombre').value.trim();
+  const telefono = document.getElementById('regTel').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const modalidad= document.getElementById('regModal').value;
+
+  if (!nombre || !telefono || !email || !modalidad) return;
+
+  const btn = document.getElementById('btnReg');
+  const txt = document.getElementById('btnRegText');
+  btn.disabled = true;
+  txt.textContent = 'Enviando...';
+
+  /* WhatsApp */
+  const msg = `¡Hola! Me quiero registrar en Linktodoor 📦\n\n` +
+    `👤 Nombre: ${nombre}\n📱 Teléfono: ${telefono}\n` +
+    `📧 Email: ${email}\n🛍️ Modalidad: ${modalidad}`;
+  window.open(`https://wa.me/50685173813?text=${encodeURIComponent(msg)}`, '_blank');
+
+  /* Email vía Formspree */
+  try {
+    await fetch('https://formspree.io/f/REEMPLAZA_ESTE_ID', {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: new FormData(this)
+    });
+  } catch {}
+
+  /* Mostrar éxito */
+  this.style.display = 'none';
+  document.getElementById('regSuccess').classList.add('show');
 });
 
 function renderPaquete(pkg) {
