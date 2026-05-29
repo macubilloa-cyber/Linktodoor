@@ -952,6 +952,7 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script>
@@ -1212,6 +1213,12 @@ ScrollTrigger.create({
 });
 
 /* ── REGISTRO ── */
+/* ── Supabase (solo para registro) ── */
+const _sb = window.supabase.createClient(
+  'https://opqyskmpdnijhvcbewkf.supabase.co',
+  'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL'
+);
+
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const nombre   = document.getElementById('regNombre').value.trim();
@@ -1225,6 +1232,20 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const txt = document.getElementById('btnRegText');
   btn.disabled = true;
   txt.textContent = 'Enviando...';
+
+  /* Supabase — guardar en saved_clients (upsert por email) */
+  try {
+    const { data: existing } = await _sb.from('saved_clients')
+      .select('id').eq('email', email).maybeSingle();
+    if (existing) {
+      await _sb.from('saved_clients')
+        .update({ name: nombre, phone: telefono, notes: modalidad })
+        .eq('email', email);
+    } else {
+      await _sb.from('saved_clients')
+        .insert({ name: nombre, phone: telefono, email, notes: modalidad });
+    }
+  } catch {}
 
   /* WhatsApp */
   const msg = `¡Hola! Me quiero registrar en Linktodoor 📦\n\n` +
