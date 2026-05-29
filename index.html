@@ -936,21 +936,35 @@ function countUp(sel, end) {
 countUp('.hero-stat:nth-child(1) .num', 3950);
 countUp('.hero-stat:nth-child(2) .num', 3);
 
-/* Scroll reveals */
+/* Scroll reveals — set initial state first, then animate TO visible */
+gsap.set('.reveal', { opacity: 0, y: 28 });
+
 document.querySelectorAll('.reveal').forEach(el => {
   const delay = el.classList.contains('d4') ? 0.28
               : el.classList.contains('d3') ? 0.21
               : el.classList.contains('d2') ? 0.14
               : el.classList.contains('d1') ? 0.07 : 0;
-  gsap.from(el, {
-    scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
-    y: 28, opacity: 0, duration: 0.65, delay, ease: 'power2.out'
+  gsap.to(el, {
+    scrollTrigger: {
+      trigger: el,
+      start: 'top 92%',
+      toggleActions: 'play none none none',
+      once: true
+    },
+    opacity: 1, y: 0, duration: 0.65, delay, ease: 'power2.out',
+    clearProps: 'transform'
   });
 });
 
-/* Fallback safety net */
+/* IntersectionObserver fallback (runs in parallel — harmless if GSAP works) */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { gsap.to(e.target, { opacity:1, y:0, duration:.6, ease:'power2.out', clearProps:'transform' }); obs.unobserve(e.target); } });
+}, { threshold: 0, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+/* Hard fallback at 2s */
 setTimeout(() => document.querySelectorAll('.reveal').forEach(el =>
-  gsap.set(el, { opacity: 1, y: 0 })), 1600);
+  gsap.set(el, { opacity: 1, y: 0, clearProps: 'transform' })), 2000);
 
 /* Tabs cómo funciona */
 function showTab(id, btn) {
