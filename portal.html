@@ -184,33 +184,24 @@
       </div>
       <button class="btn-login" id="btnLogin" onclick="doLogin()">Iniciar sesión</button>
       <div class="login-forgot">
-        <a onclick="showForgot()">¿Olvidaste tu contraseña?</a>
+        <a onclick="showMagic()">Acceder sin contraseña →</a>
       </div>
     </div>
 
-    <!-- Formulario olvidé contraseña -->
-    <div id="formForgot" style="display:none">
+    <!-- Formulario magic link -->
+    <div id="formMagic" style="display:none">
+      <p style="font-size:.88rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">
+        Ingresá tu email y te mandamos un enlace para entrar directo, sin contraseña.
+      </p>
       <div class="login-field">
         <label>Tu correo electrónico</label>
-        <input class="login-input" type="email" id="forgotEmail" placeholder="tu@email.com" />
+        <input class="login-input" type="email" id="magicEmail" placeholder="tu@email.com"
+          onkeydown="if(event.key==='Enter')doMagicLink()" />
       </div>
-      <button class="btn-login" id="btnForgot" onclick="doForgot()">Enviar enlace de acceso</button>
+      <button class="btn-login" id="btnMagic" onclick="doMagicLink()">Enviarme el enlace ✉️</button>
       <div class="login-forgot">
-        <a onclick="showLogin()">← Volver</a>
+        <a onclick="showLogin()">← Volver al inicio de sesión</a>
       </div>
-    </div>
-
-    <!-- Formulario nueva contraseña (recovery) -->
-    <div id="formReset" style="display:none">
-      <div class="login-field">
-        <label>Nueva contraseña</label>
-        <input class="login-input" type="password" id="resetPw1" placeholder="Mínimo 6 caracteres" />
-      </div>
-      <div class="login-field">
-        <label>Confirmar contraseña</label>
-        <input class="login-input" type="password" id="resetPw2" placeholder="••••••••" />
-      </div>
-      <button class="btn-login" onclick="saveNewPw()">Guardar contraseña</button>
     </div>
   </div>
 </div>
@@ -297,25 +288,16 @@ function clearMsgs() {
 }
 
 function showLogin() {
-  document.getElementById('formLogin').style.display  = 'block';
-  document.getElementById('formForgot').style.display = 'none';
-  document.getElementById('formReset').style.display  = 'none';
+  document.getElementById('formLogin').style.display = 'block';
+  document.getElementById('formMagic').style.display = 'none';
   clearMsgs();
   setTimeout(() => document.getElementById('loginEmail').focus(), 50);
 }
-function showForgot() {
-  document.getElementById('formLogin').style.display  = 'none';
-  document.getElementById('formForgot').style.display = 'block';
-  document.getElementById('formReset').style.display  = 'none';
+function showMagic() {
+  document.getElementById('formLogin').style.display = 'none';
+  document.getElementById('formMagic').style.display = 'block';
   clearMsgs();
-  document.getElementById('forgotEmail').focus();
-}
-function showReset() {
-  document.getElementById('formLogin').style.display  = 'none';
-  document.getElementById('formForgot').style.display = 'none';
-  document.getElementById('formReset').style.display  = 'block';
-  showOk('🔑 Creá tu nueva contraseña para acceder.');
-  setTimeout(() => document.getElementById('resetPw1').focus(), 50);
+  setTimeout(() => document.getElementById('magicEmail').focus(), 50);
 }
 
 /* ── AUTH ── */
@@ -331,29 +313,30 @@ async function doLogin() {
   if (error) showErr(error.message.includes('Invalid') ? 'Email o contraseña incorrectos.' : error.message);
 }
 
-async function doForgot() {
-  const email = document.getElementById('forgotEmail').value.trim();
-  const btn   = document.getElementById('btnForgot');
+async function doMagicLink() {
+  const email = document.getElementById('magicEmail').value.trim();
+  const btn   = document.getElementById('btnMagic');
   if (!email) { showErr('Ingresá tu correo electrónico.'); return; }
   clearMsgs();
-  btn.disabled = true; btn.textContent = 'Enviando...';
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/mi-cuenta'
-  });
-  btn.disabled = false; btn.textContent = 'Enviar enlace de acceso';
-  if (error) showErr(error.message);
-  else showOk('✅ Revisá tu correo — te enviamos el enlace para acceder.');
-}
 
-async function saveNewPw() {
-  const p1 = document.getElementById('resetPw1').value;
-  const p2 = document.getElementById('resetPw2').value;
-  if (!p1 || p1.length < 6) { showErr('La contraseña debe tener al menos 6 caracteres.'); return; }
-  if (p1 !== p2) { showErr('Las contraseñas no coinciden.'); return; }
-  const { error } = await sb.auth.updateUser({ password: p1 });
-  if (error) { showErr(error.message); return; }
-  showOk('✅ Contraseña guardada. ¡Ya podés ingresar!');
-  setTimeout(showLogin, 2000);
+  /* Verificar que el email esté registrado como cliente */
+  const { data: clientRow } = await sb.from('saved_clients')
+    .select('id').eq('email', email).limit(1).maybeSingle();
+
+  if (!clientRow) {
+    showErr('No encontramos ese email en nuestro sistema. Verificá que sea el correo con el que te registraste, o escribinos por WhatsApp.');
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin + '/mi-cuenta' }
+  });
+  btn.disabled = false; btn.textContent = 'Enviarme el enlace ✉️';
+
+  if (error) showErr(error.message);
+  else showOk('✅ Revisá tu correo — te mandamos el enlace para entrar. Puede tardar un minuto.');
 }
 
 async function doLogout() {
@@ -362,12 +345,6 @@ async function doLogout() {
 
 /* ── SESSION ── */
 sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'PASSWORD_RECOVERY') {
-    document.getElementById('screen-login').style.display = 'flex';
-    document.getElementById('screen-app').style.display   = 'none';
-    showReset();
-    return;
-  }
   if (session) {
     document.getElementById('screen-login').style.display = 'none';
     document.getElementById('screen-app').style.display   = 'block';
