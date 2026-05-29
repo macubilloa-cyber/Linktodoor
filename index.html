@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Linktodoor — Tu casillero en Miami</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --pri:      #5B5BD6;
@@ -23,7 +26,7 @@
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif;
       color:var(--dark);background:var(--white);overflow-x:hidden}
 
     /* ── NAV ── */
@@ -53,8 +56,11 @@
     .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
     /* ── HERO ── */
-    #hero{min-height:100vh;background:var(--pri);position:relative;
-      display:flex;align-items:center;overflow:hidden}
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    #hero{min-height:100vh;
+      background:linear-gradient(-45deg,#3737a8,#5B5BD6,#7373e0,#4444bf,#6060d8,#3a3ab0);
+      background-size:320% 320%;animation:gradientShift 14s ease infinite;
+      position:relative;display:flex;align-items:center;overflow:hidden}
     .hero-bg{position:absolute;inset:0}
     .hero-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
     .hc1{width:700px;height:700px;top:-250px;right:-150px;animation:floatY 10s ease-in-out infinite}
@@ -296,9 +302,8 @@
     .tab-btn:not(.active):hover{background:rgba(91,91,214,.15)}
 
     /* ── SCROLL REVEAL ── */
-    .reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
-    .reveal.visible{opacity:1;transform:translateY(0)}
-    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+    .reveal{opacity:0;transform:translateY(26px)}
+    .reveal.visible{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease}
 
     /* ── RASTREAR ── */
     #rastrear{background:var(--dark2);padding:5rem 2rem}
@@ -864,6 +869,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script>
 /* NAV */
 const nav = document.getElementById('nav');
@@ -896,14 +903,54 @@ function selectShip(el, name, days) {
   document.getElementById('routeDays').textContent = days;
 }
 
-/* Scroll reveal */
-const revealEls = document.querySelectorAll('.reveal');
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-}, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
-revealEls.forEach(el => obs.observe(el));
-/* Fallback: reveal everything after 800ms in case observer doesn't fire */
-setTimeout(() => revealEls.forEach(el => el.classList.add('visible')), 800);
+/* ── GSAP ── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* Hero entrance */
+const htl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.1 });
+htl
+  .from('.hero-tag',     { y: 20, opacity: 0, duration: 0.5 })
+  .from('.hero-text h1', { y: 44, opacity: 0, duration: 0.75 }, '-=0.2')
+  .from('.hero-text p',  { y: 28, opacity: 0, duration: 0.6  }, '-=0.45')
+  .from('.hero-btns',    { y: 20, opacity: 0, duration: 0.5  }, '-=0.35')
+  .from('.hero-stats',   { y: 20, opacity: 0, duration: 0.5  }, '-=0.3')
+  .from('.hero-card',    { y: 64, opacity: 0, duration: 0.95 }, '-=0.5')
+  .from('.fc-1', { x:  32, opacity: 0, duration: 0.65, ease: 'back.out(1.6)' }, '-=0.35')
+  .from('.fc-2', { x: -32, opacity: 0, duration: 0.65, ease: 'back.out(1.6)' }, '-=0.45');
+
+/* Stat counter */
+function countUp(sel, end) {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  const obj = { n: 0 };
+  gsap.to(obj, {
+    n: end, duration: 1.5, ease: 'power2.out', delay: 0.85,
+    onUpdate() {
+      const v = Math.round(obj.n);
+      el.textContent = v >= 1000
+        ? Math.floor(v / 1000) + ',' + String(v % 1000).padStart(3, '0')
+        : String(v);
+    }
+  });
+}
+countUp('.hero-stat:nth-child(1) .num', 3950);
+countUp('.hero-stat:nth-child(2) .num', 3);
+
+/* Scroll reveals */
+document.querySelectorAll('.reveal').forEach(el => {
+  const delay = el.classList.contains('d4') ? 0.28
+              : el.classList.contains('d3') ? 0.21
+              : el.classList.contains('d2') ? 0.14
+              : el.classList.contains('d1') ? 0.07 : 0;
+  gsap.from(el, {
+    scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+    y: 28, opacity: 0, duration: 0.65, delay, ease: 'power2.out'
+  });
+});
+
+/* Fallback safety net */
+setTimeout(() => document.querySelectorAll('.reveal').forEach(el =>
+  gsap.set(el, { opacity: 1, y: 0 })), 1600);
 
 /* Tabs cómo funciona */
 function showTab(id, btn) {
