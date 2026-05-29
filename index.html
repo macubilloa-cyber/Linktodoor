@@ -152,32 +152,30 @@
     .sec-head h2{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800;line-height:1.2;margin-bottom:.9rem}
     .sec-head p{color:var(--gray);font-size:1.05rem;line-height:1.7}
 
-    /* ── SERVICIOS ── */
-    #servicios{background:var(--cream);padding:5rem 2rem}
-    .serv-grid{max-width:1100px;margin:0 auto;
-      display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
-    .serv-card{background:var(--white);border-radius:var(--r);padding:2rem;
-      border:2px solid transparent;transition:var(--t);display:flex;gap:1.2rem;align-items:flex-start}
-    .serv-card:hover{border-color:var(--pri);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
-    .serv-ico{width:56px;height:56px;border-radius:14px;background:rgba(91,91,214,.1);
-      display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;transition:var(--t)}
-    .serv-card:hover .serv-ico{background:var(--pri)}
-    .serv-card h3{font-size:1.05rem;font-weight:800;letter-spacing:.3px;margin-bottom:.4rem;color:var(--dark)}
-    .serv-card p{font-size:.9rem;color:var(--gray);line-height:1.6}
-
     /* ── CÓMO FUNCIONA ── */
-    #como{padding:5rem 2rem;background:var(--white)}
-    .steps{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:0}
-    .step-row{display:flex;align-items:flex-start;gap:2rem;padding:2rem 0;
-      border-bottom:1px solid var(--cream2);transition:var(--t)}
-    .step-row:last-child{border-bottom:none}
-    .step-row:hover .step-num-big{background:var(--pri);color:var(--white)}
-    .step-num-big{width:60px;height:60px;border-radius:16px;background:rgba(91,91,214,.1);
-      color:var(--pri);font-size:1.6rem;font-weight:900;display:flex;align-items:center;
-      justify-content:center;flex-shrink:0;transition:var(--t)}
-    .step-body h3{font-size:1.05rem;font-weight:800;letter-spacing:.3px;
-      text-transform:uppercase;margin-bottom:.4rem;color:var(--dark)}
-    .step-body p{font-size:.92rem;color:var(--gray);line-height:1.65;max-width:600px}
+    #como{padding:5rem 2rem;background:var(--cream)}
+    .como-tabs{max-width:960px;margin:0 auto 2rem;display:flex;gap:.8rem;flex-wrap:wrap}
+    .como-intro{max-width:960px;margin:0 auto 2.5rem;background:var(--white);
+      border-radius:14px;padding:1.1rem 1.6rem;font-size:.97rem;color:var(--gray);line-height:1.7}
+    .como-intro strong{color:var(--pri)}
+    .steps-grid{max-width:960px;margin:0 auto;
+      display:grid;grid-template-columns:1fr 44px 1fr 44px 1fr;align-items:start}
+    .step-arrow{display:flex;align-items:center;justify-content:center;
+      color:var(--pri);font-size:1.3rem;padding-top:2.4rem;opacity:.5}
+    .step-card{background:var(--white);border:2px solid transparent;
+      border-radius:var(--r);padding:1.6rem;text-align:center;transition:var(--t)}
+    .step-card:hover{border-color:var(--pri);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .sc-num{width:28px;height:28px;background:var(--pri);color:var(--white);border-radius:50%;
+      font-size:.78rem;font-weight:900;display:flex;align-items:center;justify-content:center;
+      margin:0 auto .7rem}
+    .sc-icon{font-size:1.8rem;margin-bottom:.55rem}
+    .step-card h3{font-size:.9rem;font-weight:800;color:var(--dark);
+      margin-bottom:.35rem;letter-spacing:.3px}
+    .step-card p{font-size:.83rem;color:var(--gray);line-height:1.6}
+    @media(max-width:700px){
+      .steps-grid{grid-template-columns:1fr}
+      .step-arrow{transform:rotate(90deg);padding-top:0;margin:.3rem auto}
+    }
 
     /* ── PRECIOS ── */
     #precios{background:var(--dark2);padding:5rem 2rem}
@@ -443,7 +441,6 @@
     <span class="logo-text">Linktodoor</span>
   </a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#servicios">Servicios</a></li>
     <li><a href="#como">Cómo funciona</a></li>
     <li><a href="#precios">Tarifas</a></li>
     <li><a href="#entregas">Entregas</a></li>
@@ -539,147 +536,73 @@
   </div>
 </section>
 
-<!-- SERVICIOS -->
-<section id="servicios">
-  <div class="sec-head reveal">
-    <span class="sec-tag">🌟 Nuestros servicios</span>
-    <h2>Dos formas de comprar en EE.UU.</h2>
-    <p>Vos elegís cómo querés hacerlo — nosotros nos encargamos del resto.</p>
-  </div>
-
-  <!-- Opciones de compra destacadas -->
-  <div style="max-width:1100px;margin:0 auto 2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="reveal">
-    <div style="background:var(--pri);border-radius:var(--r);padding:2rem;color:var(--cream)">
-      <div style="font-size:2rem;margin-bottom:.8rem">🛍️</div>
-      <div style="font-size:.75rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;opacity:.65;margin-bottom:.4rem">Opción 1</div>
-      <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:.7rem;color:var(--cream)">Nosotros compramos por vos</h3>
-      <p style="font-size:.9rem;line-height:1.65;opacity:.8">Encontraste algo que querés en Amazon, Shein, Nike o cualquier tienda. <strong style="color:var(--lblue)">Mandanos el link</strong> y nosotros hacemos la compra completa. Sin tarjeta internacional, sin cuenta en EE.UU., sin complicaciones.</p>
-    </div>
-    <div style="background:var(--cream2);border-radius:var(--r);padding:2rem;border:2px solid var(--pri)">
-      <div style="font-size:2rem;margin-bottom:.8rem">📮</div>
-      <div style="font-size:.75rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--pri);opacity:.7;margin-bottom:.4rem">Opción 2</div>
-      <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:.7rem;color:var(--dark)">Vos comprás, nosotros traemos</h3>
-      <p style="font-size:.9rem;line-height:1.65;color:var(--gray)">¿Preferís hacer vos mismo la compra? Te damos tu <strong style="color:var(--pri)">dirección personal en Miami</strong>. Enviás tus compras ahí y nosotros las recibimos y las traemos a San José.</p>
-    </div>
-  </div>
-
-  <div class="serv-grid">
-    <div class="serv-card reveal d1">
-      <div class="serv-ico">🔗</div>
-      <div>
-        <h3>Consolidación</h3>
-        <p>Juntamos todos tus paquetes en un solo envío para que ahorrés en flete. Ideal si comprás en varias tiendas a la vez.</p>
-      </div>
-    </div>
-    <div class="serv-card reveal d2">
-      <div class="serv-ico">⚖️</div>
-      <div>
-        <h3>Cobro por libra</h3>
-        <p>Precio justo y transparente: ₡3,950 por libra. Sin tarifas ocultas, sin sorpresas al momento de pagar.</p>
-      </div>
-    </div>
-    <div class="serv-card reveal d3">
-      <div class="serv-ico">⚡</div>
-      <div>
-        <h3>Envío Flash</h3>
-        <p>Tu paquete vuela en cuanto llega a Miami. En solo 3 días hábiles está en San José, ideal cuando lo necesitás urgente.</p>
-      </div>
-    </div>
-    <div class="serv-card reveal d4">
-      <div class="serv-ico">📦</div>
-      <div>
-        <h3>Envío Consolidado</h3>
-        <p>Juntamos tu envío con otros para mayor eficiencia. Misma tarifa por libra, ~5 días hábiles de tiempo de entrega.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- CÓMO FUNCIONA -->
 <section id="como">
   <div class="sec-head reveal">
     <span class="sec-tag">🚀 Simple y rápido</span>
     <h2>¿Cómo funciona?</h2>
-    <p>En pocos pasos tus productos de EE.UU. llegan a la puerta de tu casa en San José.</p>
+    <p>Elegís cómo querés comprar — nosotros nos encargamos del resto.</p>
   </div>
-  <!-- tabs -->
-  <div style="max-width:1000px;margin:0 auto 2rem;display:flex;gap:.8rem;flex-wrap:wrap" class="reveal">
+
+  <div class="como-tabs reveal">
     <button class="tab-btn active" onclick="showTab('tab-nosotros',this)">🛍️ Nosotros compramos por vos</button>
     <button class="tab-btn" onclick="showTab('tab-vos',this)">📮 Vos comprás, nosotros traemos</button>
   </div>
 
-  <div class="steps" id="tab-nosotros">
-    <div class="step-row reveal d1">
-      <div class="step-num-big">1</div>
-      <div class="step-body">
+  <!-- Tab: nosotros compramos -->
+  <div id="tab-nosotros">
+    <div class="como-intro reveal">
+      Encontraste algo en Amazon, Shein, Nike o cualquier tienda de EE.UU. <strong>Mandanos el link</strong> y nosotros hacemos la compra completa — sin tarjeta internacional ni cuenta en EE.UU.
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal d1">
+        <div class="sc-num">1</div>
+        <div class="sc-icon">💬</div>
         <h3>Mandanos el link</h3>
-        <p>Encontraste lo que querés en Amazon, Shein, Nike o cualquier tienda de EE.UU. Nos mandás el link por WhatsApp o Instagram y listo.</p>
+        <p>Por WhatsApp o Instagram. Te confirmamos precio, talla y disponibilidad.</p>
       </div>
-    </div>
-    <div class="step-row reveal d2">
-      <div class="step-num-big">2</div>
-      <div class="step-body">
-        <h3>Compramos por vos</h3>
-        <p>Nos encargamos de hacer la compra completa. Sin tarjeta internacional, sin cuenta en EE.UU., sin costo extra de gestión.</p>
+      <div class="step-arrow reveal">→</div>
+      <div class="step-card reveal d2">
+        <div class="sc-num">2</div>
+        <div class="sc-icon">✈️</div>
+        <h3>Compramos y enviamos</h3>
+        <p>Hacemos la compra, lo recibimos en Miami y te avisamos el peso: ₡3,950/libra.</p>
       </div>
-    </div>
-    <div class="step-row reveal d3">
-      <div class="step-num-big">3</div>
-      <div class="step-body">
-        <h3>Llega a nuestra bodega en Miami</h3>
-        <p>El paquete llega a nuestro casillero. Lo revisamos, pesamos y te notificamos el costo del flete: ₡3,950 por libra.</p>
-      </div>
-    </div>
-    <div class="step-row reveal d4">
-      <div class="step-num-big">4</div>
-      <div class="step-body">
-        <h3>Elegís la modalidad</h3>
-        <p><strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
-      </div>
-    </div>
-    <div class="step-row reveal">
-      <div class="step-num-big">5</div>
-      <div class="step-body">
+      <div class="step-arrow reveal">→</div>
+      <div class="step-card reveal d3">
+        <div class="sc-num">3</div>
+        <div class="sc-icon">🏠</div>
         <h3>Entrega en tu puerta</h3>
-        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa.</p>
+        <p>Los martes y viernes entregamos en San José. Directo a tu casa.</p>
       </div>
     </div>
   </div>
 
-  <div class="steps" id="tab-vos" style="display:none">
-    <div class="step-row reveal d1">
-      <div class="step-num-big">1</div>
-      <div class="step-body">
-        <h3>Te damos tu dirección en Miami</h3>
-        <p>Escribinos por WhatsApp y te asignamos tu dirección personal en Miami. La usás como dirección de envío en cualquier tienda de EE.UU.</p>
-      </div>
+  <!-- Tab: vos comprás -->
+  <div id="tab-vos" style="display:none">
+    <div class="como-intro reveal">
+      ¿Tenés tarjeta o cuenta en EE.UU.? Te asignamos tu <strong>dirección personal en Miami</strong>. Comprás donde quieras y tus paquetes llegan a nuestra bodega.
     </div>
-    <div class="step-row reveal d2">
-      <div class="step-num-big">2</div>
-      <div class="step-body">
-        <h3>Hacés la compra vos mismo</h3>
-        <p>Comprás en Amazon, Shein, Nike o donde quieras usando tu dirección de Miami como destino. Vos manejás tu tarjeta y tu cuenta.</p>
+    <div class="steps-grid">
+      <div class="step-card reveal d1">
+        <div class="sc-num">1</div>
+        <div class="sc-icon">📍</div>
+        <h3>Tu dirección en Miami</h3>
+        <p>Te damos una dirección personal para usar como envío en cualquier tienda de EE.UU.</p>
       </div>
-    </div>
-    <div class="step-row reveal d3">
-      <div class="step-num-big">3</div>
-      <div class="step-body">
-        <h3>Lo recibimos en Miami</h3>
-        <p>El paquete llega a nuestra bodega. Lo revisamos, pesamos y te avisamos el costo del flete: ₡3,950 por libra.</p>
+      <div class="step-arrow reveal">→</div>
+      <div class="step-card reveal d2">
+        <div class="sc-num">2</div>
+        <div class="sc-icon">📦</div>
+        <h3>Llega a nuestra bodega</h3>
+        <p>Recibimos tu paquete en Miami, lo pesamos y te avisamos el costo: ₡3,950/libra.</p>
       </div>
-    </div>
-    <div class="step-row reveal d4">
-      <div class="step-num-big">4</div>
-      <div class="step-body">
-        <h3>Elegís la modalidad</h3>
-        <p><strong>Flash</strong> (3 días hábiles) o <strong>Consolidado</strong> (~5 días hábiles). Enviamos tu paquete a San José.</p>
-      </div>
-    </div>
-    <div class="step-row reveal">
-      <div class="step-num-big">5</div>
-      <div class="step-body">
+      <div class="step-arrow reveal">→</div>
+      <div class="step-card reveal d3">
+        <div class="sc-num">3</div>
+        <div class="sc-icon">🏠</div>
         <h3>Entrega en tu puerta</h3>
-        <p>Los martes y viernes hacemos rutas de entrega en San José. Tu paquete llega directo a la puerta de tu casa.</p>
+        <p>Los martes y viernes entregamos en San José. Directo a tu casa.</p>
       </div>
     </div>
   </div>
@@ -845,9 +768,9 @@
       <div class="foot-links-group">
         <h4>Servicios</h4>
         <ul>
-          <li><a href="#servicios">Casillero en Miami</a></li>
-          <li><a href="#servicios">Compramos por vos</a></li>
-          <li><a href="#servicios">Consolidación</a></li>
+          <li><a href="#como">Cómo funciona</a></li>
+          <li><a href="#como">Nosotros compramos</a></li>
+          <li><a href="#como">Casillero en Miami</a></li>
           <li><a href="#precios">Tarifas</a></li>
         </ul>
       </div>
@@ -970,9 +893,12 @@ setTimeout(() => document.querySelectorAll('.reveal').forEach(el =>
 function showTab(id, btn) {
   document.getElementById('tab-nosotros').style.display = 'none';
   document.getElementById('tab-vos').style.display = 'none';
-  document.getElementById(id).style.display = 'flex';
+  document.getElementById(id).style.display = 'block';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  /* Re-trigger reveals inside the newly shown tab */
+  document.querySelectorAll('#' + id + ' .reveal').forEach(el =>
+    gsap.to(el, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.07 }));
 }
 
 /* Calculadora */
