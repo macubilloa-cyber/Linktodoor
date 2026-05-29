@@ -218,7 +218,7 @@
 <!-- APP -->
 <div id="screen-app">
   <header class="portal-header">
-    <a href="/" class="portal-logo">
+    <a href="https://linktodoor.co" class="portal-logo">
       <div class="logo-mark">
         <span class="l1">LINK</span>
         <span class="l2">DOOR</span>
@@ -338,7 +338,7 @@ async function doForgot() {
   clearMsgs();
   btn.disabled = true; btn.textContent = 'Enviando...';
   const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/portal.html'
+    redirectTo: window.location.origin + '/mi-cuenta'
   });
   btn.disabled = false; btn.textContent = 'Enviar enlace de acceso';
   if (error) showErr(error.message);
