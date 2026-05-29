@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Cuenta — Linktodoor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --pri:      #5B5BD6;
+      --pri-dark: #4848b8;
+      --pri-lite: #7B7BE6;
+      --cream:    #F5F0E4;
+      --cream2:   #EDE8DC;
+      --lblue:    #C4D9F5;
+      --dark:     #12121F;
+      --dark2:    #1E1E35;
+      --gray:     #6B7280;
+      --white:    #FFFFFF;
+      --border:   #E5E7EB;
+      --light:    #F9FAFB;
+      --green:    #10B981;
+      --shadow:   0 4px 20px rgba(0,0,0,.08);
+      --shadow-lg:0 20px 56px rgba(0,0,0,.16);
+      --r:        16px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+    body { font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif;
+      background:var(--cream);color:var(--dark);min-height:100vh }
+
+    /* ── LOGIN ── */
+    #screen-login {
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(-45deg,#3737a8,#5B5BD6,#7373e0,#4444bf,#6060d8,#3a3ab0);
+      background-size:320% 320%;animation:gradientShift 14s ease infinite;padding:1rem }
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .login-card {
+      background:white;border-radius:24px;padding:2.5rem;
+      width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.28) }
+
+    .login-logo { text-align:center;margin-bottom:2rem }
+    .login-logo .logo-mark {
+      display:inline-flex;flex-direction:column;background:var(--pri);border-radius:12px;
+      padding:.5rem .75rem;line-height:1;gap:2px;margin-bottom:.6rem }
+    .login-logo .l1 { font-size:.85rem;font-weight:900;color:var(--cream);letter-spacing:.5px }
+    .login-logo .l2 { font-size:.85rem;font-weight:900;color:var(--lblue);letter-spacing:.5px }
+    .login-logo h2 { font-size:1.3rem;font-weight:900;color:var(--dark) }
+    .login-logo p  { font-size:.85rem;color:var(--gray);margin-top:.25rem }
+
+    .login-field { margin-bottom:1.1rem }
+    .login-field label {
+      display:block;font-size:.78rem;font-weight:700;color:var(--dark);
+      letter-spacing:.2px;text-transform:uppercase;margin-bottom:.4rem }
+    .login-input {
+      width:100%;padding:.85rem 1.1rem;border:2px solid var(--border);border-radius:12px;
+      font-size:.97rem;color:var(--dark);font-family:inherit;outline:none;transition:border-color .2s }
+    .login-input:focus { border-color:var(--pri) }
+
+    .btn-login {
+      width:100%;padding:1rem;background:var(--pri);color:white;border:none;
+      border-radius:50px;font-weight:800;font-size:1rem;cursor:pointer;
+      font-family:inherit;transition:all .2s;margin-top:.4rem }
+    .btn-login:hover { background:var(--pri-dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,91,214,.35) }
+    .btn-login:disabled { opacity:.55;cursor:not-allowed;transform:none }
+
+    .login-forgot { text-align:center;margin-top:1.1rem;font-size:.82rem;color:var(--gray) }
+    .login-forgot a { color:var(--pri);cursor:pointer;font-weight:700 }
+    .login-forgot a:hover { text-decoration:underline }
+
+    .msg-err { background:#FEE2E2;color:#991b1b;border-radius:10px;padding:.65rem .9rem;
+      font-size:.83rem;font-weight:600;margin-bottom:1rem;display:none }
+    .msg-ok  { background:#D1FAE5;color:#065f46;border-radius:10px;padding:.65rem .9rem;
+      font-size:.83rem;font-weight:600;margin-bottom:1rem;display:none }
+
+    /* ── APP ── */
+    #screen-app { display:none;min-height:100vh }
+
+    .portal-header {
+      background:var(--dark);padding:1rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem }
+    .portal-logo { display:flex;align-items:center;gap:.6rem;text-decoration:none }
+    .portal-logo .logo-mark {
+      background:var(--pri);border-radius:8px;padding:.3rem .55rem;
+      display:flex;flex-direction:column;line-height:1;gap:1px }
+    .portal-logo .l1 { font-size:.65rem;font-weight:900;color:var(--cream);letter-spacing:.5px }
+    .portal-logo .l2 { font-size:.65rem;font-weight:900;color:var(--lblue);letter-spacing:.5px }
+    .portal-logo-name { font-size:1.05rem;font-weight:800;color:white }
+    .portal-user { display:flex;align-items:center;gap:.8rem }
+    .portal-user-email { font-size:.82rem;color:rgba(255,255,255,.5);font-weight:500 }
+    .btn-logout {
+      background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);
+      border:1px solid rgba(255,255,255,.15);border-radius:8px;
+      padding:.4rem .9rem;font-size:.82rem;font-weight:600;
+      cursor:pointer;font-family:inherit;transition:all .2s }
+    .btn-logout:hover { background:rgba(255,255,255,.2);color:white }
+
+    .portal-main { max-width:880px;margin:0 auto;padding:2.5rem 1.5rem }
+
+    .welcome { margin-bottom:2rem }
+    .welcome h1 { font-size:1.8rem;font-weight:900;color:var(--dark) }
+    .welcome p  { color:var(--gray);margin-top:.3rem;font-size:.97rem }
+
+    .portal-stats {
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:1rem;margin-bottom:2rem }
+    .pstat { background:white;border-radius:var(--r);padding:1.2rem 1.4rem;box-shadow:var(--shadow) }
+    .pstat-label { font-size:.72rem;font-weight:700;color:var(--gray);
+      text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem }
+    .pstat-val { font-size:1.5rem;font-weight:900;color:var(--pri) }
+    .pstat-sub { font-size:.75rem;color:var(--gray);margin-top:.2rem }
+
+    .section-title { font-size:1rem;font-weight:800;color:var(--dark);margin-bottom:1rem }
+
+    .portal-card { background:white;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden }
+    .table-wrap { overflow-x:auto }
+    table { width:100%;border-collapse:collapse;font-size:.88rem }
+    thead th {
+      text-align:left;padding:.7rem 1rem;font-size:.72rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.4px;color:var(--gray);
+      border-bottom:2px solid #F3F4F6;background:#FAFAFA }
+    td { padding:.85rem 1rem;border-bottom:1px solid #F3F4F6;vertical-align:middle }
+    tr:last-child td { border-bottom:none }
+    tbody tr:hover { background:#FAFAFA }
+
+    .badge-closed { display:inline-block;padding:3px 10px;border-radius:20px;
+      font-size:.72rem;font-weight:800;background:#D1FAE5;color:#065f46 }
+    .badge-open   { display:inline-block;padding:3px 10px;border-radius:20px;
+      font-size:.72rem;font-weight:800;background:#DBEAFE;color:#1d4ed8 }
+
+    .empty-state { text-align:center;padding:3.5rem 1rem;color:var(--gray) }
+    .empty-state .ico { font-size:2.5rem;margin-bottom:.75rem }
+    .empty-state p { font-size:.95rem;line-height:1.7 }
+
+    .loading-state { text-align:center;padding:3rem;color:var(--gray) }
+    .spinner { width:36px;height:36px;border:3px solid rgba(91,91,214,.2);
+      border-top-color:var(--pri);border-radius:50%;
+      animation:spin .8s linear infinite;margin:0 auto 1rem }
+    @keyframes spin { to { transform:rotate(360deg) } }
+
+    .total-row td { font-weight:800;background:#FAFAFA;border-top:2px solid var(--border) }
+
+    @media(max-width:600px) {
+      .portal-header { padding:.9rem 1.1rem }
+      .portal-logo-name { display:none }
+      .portal-user-email { display:none }
+      .portal-main { padding:1.5rem 1rem }
+      .welcome h1 { font-size:1.4rem }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">
+        <span class="l1">LINK</span>
+        <span class="l2">DOOR</span>
+      </div>
+      <h2>Mi Cuenta</h2>
+      <p>Ingresá para ver tus pedidos y cobros</p>
+    </div>
+
+    <div class="msg-err" id="msgErr"></div>
+    <div class="msg-ok"  id="msgOk"></div>
+
+    <!-- Formulario login -->
+    <div id="formLogin">
+      <div class="login-field">
+        <label>Correo electrónico</label>
+        <input class="login-input" type="email" id="loginEmail"
+          placeholder="tu@email.com" autocomplete="email" />
+      </div>
+      <div class="login-field">
+        <label>Contraseña</label>
+        <input class="login-input" type="password" id="loginPw"
+          placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">Iniciar sesión</button>
+      <div class="login-forgot">
+        <a onclick="showForgot()">¿Olvidaste tu contraseña?</a>
+      </div>
+    </div>
+
+    <!-- Formulario olvidé contraseña -->
+    <div id="formForgot" style="display:none">
+      <div class="login-field">
+        <label>Tu correo electrónico</label>
+        <input class="login-input" type="email" id="forgotEmail" placeholder="tu@email.com" />
+      </div>
+      <button class="btn-login" id="btnForgot" onclick="doForgot()">Enviar enlace de acceso</button>
+      <div class="login-forgot">
+        <a onclick="showLogin()">← Volver</a>
+      </div>
+    </div>
+
+    <!-- Formulario nueva contraseña (recovery) -->
+    <div id="formReset" style="display:none">
+      <div class="login-field">
+        <label>Nueva contraseña</label>
+        <input class="login-input" type="password" id="resetPw1" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div class="login-field">
+        <label>Confirmar contraseña</label>
+        <input class="login-input" type="password" id="resetPw2" placeholder="••••••••" />
+      </div>
+      <button class="btn-login" onclick="saveNewPw()">Guardar contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <header class="portal-header">
+    <a href="/" class="portal-logo">
+      <div class="logo-mark">
+        <span class="l1">LINK</span>
+        <span class="l2">DOOR</span>
+      </div>
+      <span class="portal-logo-name">Linktodoor</span>
+    </a>
+    <div class="portal-user">
+      <span class="portal-user-email" id="portalEmail"></span>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <div class="welcome">
+      <h1 id="welcomeMsg">¡Hola! 👋</h1>
+      <p>Aquí podés ver el historial de tus pedidos y cobros.</p>
+    </div>
+
+    <div class="portal-stats">
+      <div class="pstat">
+        <div class="pstat-label">Pedidos</div>
+        <div class="pstat-val" id="statPedidos">—</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-label">Total libras</div>
+        <div class="pstat-val" id="statLbs">—</div>
+        <div class="pstat-sub" id="statKg"></div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-label">Total cobrado</div>
+        <div class="pstat-val" id="statCobrado">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">📦 Mis pedidos</div>
+    <div class="portal-card">
+      <div id="ordersContent">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando tus pedidos...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const KG_TO_LBS = 2.20462;
+const fCRC  = n => '₡ ' + Math.round(n).toLocaleString('es-CR');
+const fLbs  = n => (+n).toFixed(2) + ' lbs';
+const fKg   = n => (+n / KG_TO_LBS).toFixed(2) + ' kg';
+const fDate = d => {
+  const [y,m,day] = d.split('-');
+  return new Date(+y,+m-1,+day).toLocaleDateString('es-CR',{day:'numeric',month:'long',year:'numeric'});
+};
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ── UI helpers ── */
+function showErr(msg) {
+  const el = document.getElementById('msgErr');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('msgOk').style.display = 'none';
+}
+function showOk(msg) {
+  const el = document.getElementById('msgOk');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('msgErr').style.display = 'none';
+}
+function clearMsgs() {
+  document.getElementById('msgErr').style.display = 'none';
+  document.getElementById('msgOk').style.display  = 'none';
+}
+
+function showLogin() {
+  document.getElementById('formLogin').style.display  = 'block';
+  document.getElementById('formForgot').style.display = 'none';
+  document.getElementById('formReset').style.display  = 'none';
+  clearMsgs();
+  setTimeout(() => document.getElementById('loginEmail').focus(), 50);
+}
+function showForgot() {
+  document.getElementById('formLogin').style.display  = 'none';
+  document.getElementById('formForgot').style.display = 'block';
+  document.getElementById('formReset').style.display  = 'none';
+  clearMsgs();
+  document.getElementById('forgotEmail').focus();
+}
+function showReset() {
+  document.getElementById('formLogin').style.display  = 'none';
+  document.getElementById('formForgot').style.display = 'none';
+  document.getElementById('formReset').style.display  = 'block';
+  showOk('🔑 Creá tu nueva contraseña para acceder.');
+  setTimeout(() => document.getElementById('resetPw1').focus(), 50);
+}
+
+/* ── AUTH ── */
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const btn   = document.getElementById('btnLogin');
+  if (!email || !pw) { showErr('Completá el email y la contraseña.'); return; }
+  clearMsgs();
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  if (error) showErr(error.message.includes('Invalid') ? 'Email o contraseña incorrectos.' : error.message);
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const btn   = document.getElementById('btnForgot');
+  if (!email) { showErr('Ingresá tu correo electrónico.'); return; }
+  clearMsgs();
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/portal.html'
+  });
+  btn.disabled = false; btn.textContent = 'Enviar enlace de acceso';
+  if (error) showErr(error.message);
+  else showOk('✅ Revisá tu correo — te enviamos el enlace para acceder.');
+}
+
+async function saveNewPw() {
+  const p1 = document.getElementById('resetPw1').value;
+  const p2 = document.getElementById('resetPw2').value;
+  if (!p1 || p1.length < 6) { showErr('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if (p1 !== p2) { showErr('Las contraseñas no coinciden.'); return; }
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  if (error) { showErr(error.message); return; }
+  showOk('✅ Contraseña guardada. ¡Ya podés ingresar!');
+  setTimeout(showLogin, 2000);
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+/* ── SESSION ── */
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    document.getElementById('screen-login').style.display = 'flex';
+    document.getElementById('screen-app').style.display   = 'none';
+    showReset();
+    return;
+  }
+  if (session) {
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-app').style.display   = 'block';
+    document.getElementById('portalEmail').textContent    = session.user.email;
+    loadDashboard(session.user.email);
+  } else {
+    document.getElementById('screen-app').style.display   = 'none';
+    document.getElementById('screen-login').style.display = 'flex';
+    showLogin();
+  }
+});
+
+/* ── DASHBOARD ── */
+async function loadDashboard(userEmail) {
+  /* 1. Buscar cliente por email */
+  const { data: clientRow } = await sb.from('saved_clients')
+    .select('id, name')
+    .eq('email', userEmail)
+    .limit(1)
+    .maybeSingle();
+
+  if (!clientRow) {
+    document.getElementById('welcomeMsg').textContent = '¡Hola! 👋';
+    document.getElementById('statPedidos').textContent = '0';
+    document.getElementById('statLbs').textContent     = '0.00 lbs';
+    document.getElementById('statCobrado').textContent = '₡ 0';
+    document.getElementById('ordersContent').innerHTML = `
+      <div class="empty-state">
+        <div class="ico">⏳</div>
+        <p>Tu cuenta está siendo configurada.<br>
+        Pronto podrás ver tus pedidos aquí.<br><br>
+        <a href="https://wa.me/50685173813" target="_blank"
+          style="color:var(--pri);font-weight:700">
+          ¿Dudas? Escribinos por WhatsApp →
+        </a></p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('welcomeMsg').textContent = `¡Hola, ${clientRow.name}! 👋`;
+
+  /* 2. Cargar sus líneas de carga_clients + datos de la carga */
+  const { data: lines } = await sb.from('carga_clients')
+    .select('*, cargas(reference, date, status, total_weight_lbs)')
+    .eq('client_name', clientRow.name)
+    .order('created_at', { ascending: false });
+
+  const myLines = lines || [];
+
+  /* Stats */
+  const totalLbs     = myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
+  const totalCobrado = myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
+  document.getElementById('statPedidos').textContent  = myLines.length;
+  document.getElementById('statLbs').textContent      = fLbs(totalLbs);
+  document.getElementById('statKg').textContent       = fKg(totalLbs);
+  document.getElementById('statCobrado').textContent  = fCRC(totalCobrado);
+
+  /* Table */
+  if (!myLines.length) {
+    document.getElementById('ordersContent').innerHTML = `
+      <div class="empty-state">
+        <div class="ico">📦</div>
+        <p>Todavía no tenés pedidos registrados.<br>¡Pronto aparecerán aquí!</p>
+      </div>`;
+    return;
+  }
+
+  const rows = myLines.map(l => {
+    const c = l.cargas || {};
+    return `
+      <tr>
+        <td><strong>${esc(c.reference || '—')}</strong></td>
+        <td style="white-space:nowrap">${c.date ? fDate(c.date) : '—'}</td>
+        <td>
+          <strong>${fLbs(l.weight_lbs)}</strong><br>
+          <span style="font-size:.76rem;color:var(--gray)">${fKg(l.weight_lbs)}</span>
+        </td>
+        <td style="font-weight:800;color:var(--pri)">${fCRC(l.charged_crc)}</td>
+        <td>${c.status === 'closed'
+          ? '<span class="badge-closed">✅ Entregado</span>'
+          : '<span class="badge-open">🚚 En camino</span>'}</td>
+        <td style="color:var(--gray);font-size:.82rem">${esc(l.notes || '—')}</td>
+      </tr>`;
+  }).join('');
+
+  const totalRow = `
+    <tr class="total-row">
+      <td colspan="2" style="font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">Total</td>
+      <td><strong>${fLbs(totalLbs)}</strong><br><span style="font-size:.76rem;color:var(--gray)">${fKg(totalLbs)}</span></td>
+      <td style="color:var(--pri);font-size:1.05rem">${fCRC(totalCobrado)}</td>
+      <td colspan="2"></td>
+    </tr>`;
+
+  document.getElementById('ordersContent').innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Carga</th><th>Fecha</th><th>Mis libras</th>
+            <th>Cobrado</th><th>Estado</th><th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>${rows}${totalRow}</tbody>
+      </table>
+    </div>`;
+}
+</script>
+</body>
+</html>

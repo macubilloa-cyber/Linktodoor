@@ -582,6 +582,7 @@
               <tr>
                 <th>Nombre</th>
                 <th>Teléfono</th>
+                <th>Email (portal)</th>
                 <th>Total lbs</th>
                 <th>Total kg</th>
                 <th>Cargas</th>
@@ -654,7 +655,7 @@ function mapClient(row) {
 }
 
 function mapSavedClient(row) {
-  return { id: row.id, name: row.name, phone: row.phone || '', notes: row.notes || '' };
+  return { id: row.id, name: row.name, phone: row.phone || '', email: row.email || '', notes: row.notes || '' };
 }
 
 /* ─── DB ─── */
@@ -745,16 +746,16 @@ const DB = {
     await sb.from('saved_clients').insert({ name, phone: '', notes: '' });
   },
 
-  async createSavedClient(name, phone, notes) {
+  async createSavedClient(name, phone, email, notes) {
     const { error } = await sb.from('saved_clients')
-      .insert({ name, phone: phone || '', notes: notes || '' });
+      .insert({ name, phone: phone || '', email: email || '', notes: notes || '' });
     if (error) console.error(error);
     return !error;
   },
 
-  async updateSavedClient(id, name, phone, notes) {
+  async updateSavedClient(id, name, phone, email, notes) {
     const { error } = await sb.from('saved_clients')
-      .update({ name, phone: phone || '', notes: notes || '' }).eq('id', id);
+      .update({ name, phone: phone || '', email: email || '', notes: notes || '' }).eq('id', id);
     if (error) console.error(error);
     return !error;
   },
@@ -1105,10 +1106,14 @@ async function renderClientes() {
     const lbsStr   = lbs > 0 ? `<strong>${fLbs(lbs)}</strong>` : '<span style="color:var(--gray)">—</span>';
     const kgStr    = lbs > 0 ? fKg(lbs) : '—';
     const countStr = count > 0 ? count : '—';
+    const emailBadge = c.email
+      ? `<span style="font-size:.78rem;color:var(--green);font-weight:700">✔ ${esc(c.email)}</span>`
+      : `<span style="font-size:.78rem;color:var(--gray)">Sin acceso</span>`;
     return `
       <tr>
         <td><strong>${esc(c.name)}</strong></td>
         <td>${esc(c.phone || '—')}</td>
+        <td>${emailBadge}</td>
         <td>${lbsStr}</td>
         <td style="color:var(--gray)">${kgStr}</td>
         <td style="text-align:center;color:var(--purple);font-weight:700">${countStr}</td>
@@ -1390,6 +1395,11 @@ function openNuevoCliente() {
       <input type="tel" id="m-clphone" placeholder="+506 ..." />
     </div>
     <div class="fg">
+      <label>Email (acceso al portal)</label>
+      <input type="email" id="m-clemail" placeholder="cliente@email.com" />
+      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">El cliente usará este email para ingresar a su cuenta en linktodoor.co/portal.html</p>
+    </div>
+    <div class="fg">
       <label>Notas (opcional)</label>
       <textarea id="m-clnotes" placeholder="Dirección, indicaciones, etc."></textarea>
     </div>
@@ -1419,6 +1429,11 @@ async function openEditCliente(clientId) {
       <input type="tel" id="m-clphone" value="${esc(client.phone || '')}" />
     </div>
     <div class="fg">
+      <label>Email (acceso al portal)</label>
+      <input type="email" id="m-clemail" value="${esc(client.email || '')}" placeholder="cliente@email.com" />
+      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">El cliente usará este email para ingresar a su cuenta en linktodoor.co/portal.html</p>
+    </div>
+    <div class="fg">
       <label>Notas</label>
       <textarea id="m-clnotes">${esc(client.notes || '')}</textarea>
     </div>
@@ -1432,6 +1447,7 @@ async function openEditCliente(clientId) {
 async function saveCliente(editId) {
   const name  = document.getElementById('m-clname').value.trim();
   const phone = document.getElementById('m-clphone').value.trim();
+  const email = document.getElementById('m-clemail').value.trim();
   const notes = document.getElementById('m-clnotes').value.trim();
 
   if (!name) { alert('Ingresá el nombre del cliente.'); return; }
@@ -1440,9 +1456,9 @@ async function saveCliente(editId) {
   if (btn) btn.disabled = true;
 
   if (editId) {
-    await DB.updateSavedClient(editId, name, phone, notes);
+    await DB.updateSavedClient(editId, name, phone, email, notes);
   } else {
-    await DB.createSavedClient(name, phone, notes);
+    await DB.createSavedClient(name, phone, email, notes);
   }
   closeModal();
   renderClientes();
