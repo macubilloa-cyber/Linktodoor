@@ -80,7 +80,9 @@
 
     .hero-text h1{font-size:clamp(2.6rem,5.5vw,4.2rem);font-weight:900;
       color:var(--cream);line-height:1.05;margin-bottom:.5rem;letter-spacing:-1px}
-    .hero-text h1 em{color:var(--lblue);font-style:normal;display:block}
+    .hero-text h1 em{font-style:normal;display:block;
+      background:linear-gradient(135deg,#C4D9F5 0%,#fff 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero-text p{font-size:1.1rem;color:rgba(245,240,228,.72);line-height:1.75;
       margin-bottom:2rem;max-width:480px}
     .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
@@ -144,6 +146,42 @@
     .fc-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
     .fc-t{font-size:.75rem;font-weight:700;color:var(--dark)}
     .fc-st{font-size:.68rem;color:var(--gray)}
+
+    /* ── MANIFESTO ── */
+    #manifesto{background:#080812;height:100vh;position:relative;overflow:hidden;
+      display:flex;align-items:center;justify-content:center}
+    .mf-phrase{position:absolute;inset:0;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;padding:2rem;
+      opacity:0;transform:translateY(28px);pointer-events:none}
+    .mf-eyebrow{font-size:clamp(.8rem,1.8vw,1rem);font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);
+      margin-bottom:1rem}
+    .mf-big{font-size:clamp(3.2rem,11vw,9.5rem);font-weight:900;line-height:1;
+      letter-spacing:-2px;
+      background:linear-gradient(135deg,#C4D9F5 0%,#ffffff 50%,#7B7BE6 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* ── STAT GIANT ── */
+    #stat-giant{background:var(--dark);padding:7rem 2rem;text-align:center;
+      position:relative;overflow:hidden}
+    #stat-giant::before{content:'';position:absolute;width:900px;height:900px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(91,91,214,.13) 0%,transparent 70%);
+      top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+    .sg-inner{position:relative;max-width:960px;margin:0 auto}
+    .sg-eyebrow{font-size:.85rem;font-weight:700;letter-spacing:.2em;
+      text-transform:uppercase;color:var(--pri-lite);margin-bottom:1rem}
+    .sg-num{font-size:clamp(4.5rem,17vw,12rem);font-weight:900;line-height:1;
+      letter-spacing:-4px;
+      background:linear-gradient(135deg,#C4D9F5 0%,#ffffff 40%,#7B7BE6 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:.8rem}
+    .sg-sub{font-size:clamp(.95rem,2.5vw,1.5rem);color:rgba(245,240,228,.4);
+      font-weight:500;margin-bottom:2.5rem}
+    .sg-pills{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+    .sg-pill{background:rgba(91,91,214,.14);border:1px solid rgba(91,91,214,.3);
+      color:var(--lblue);padding:.55rem 1.3rem;border-radius:50px;
+      font-size:.85rem;font-weight:600}
 
     /* ── SEC COMMON ── */
     .sec-head{text-align:center;max-width:620px;margin:0 auto 3rem}
@@ -536,6 +574,22 @@
   </div>
 </section>
 
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="mf-phrase" id="mfp1">
+    <div class="mf-eyebrow">tu tienda favorita</div>
+    <div class="mf-big">en EE.UU.</div>
+  </div>
+  <div class="mf-phrase" id="mfp2">
+    <div class="mf-eyebrow">una sola tarifa</div>
+    <div class="mf-big">₡3,950/lb.</div>
+  </div>
+  <div class="mf-phrase" id="mfp3">
+    <div class="mf-eyebrow">directo</div>
+    <div class="mf-big">en tu puerta.</div>
+  </div>
+</section>
+
 <!-- CÓMO FUNCIONA -->
 <section id="como">
   <div class="sec-head reveal">
@@ -608,6 +662,20 @@
   </div>
 </section>
 
+<!-- STAT GIANT -->
+<section id="stat-giant">
+  <div class="sg-inner">
+    <div class="sg-eyebrow">una sola tarifa</div>
+    <div class="sg-num" id="sgNum">₡ 0</div>
+    <div class="sg-sub">por libra · sin sorpresas · sin letras chicas</div>
+    <div class="sg-pills">
+      <div class="sg-pill">⚡ Flash · 3 días</div>
+      <div class="sg-pill">📦 Consolidado · ~5 días</div>
+      <div class="sg-pill">🏠 Hasta tu puerta</div>
+    </div>
+  </div>
+</section>
+
 <!-- PRECIOS -->
 <section id="precios">
   <div class="sec-head reveal">
@@ -616,12 +684,6 @@
     <p>Un solo precio por libra. Elegís la velocidad que más te conviene.</p>
   </div>
   <div class="precio-main">
-    <div class="precio-rate reveal">
-      <div class="rate-label">Tarifa única</div>
-      <div class="rate-num">₡ 3,950</div>
-      <div class="rate-sub">por libra · aplica a ambas modalidades</div>
-    </div>
-
     <div class="modalidades">
       <div class="modal-card flash reveal d1">
         <div class="mc-icon">⚡</div>
@@ -1007,6 +1069,49 @@ function copiarNumero(num) {
     if (el) { el.textContent = '¡Copiado!'; setTimeout(() => el.textContent = num, 1500); }
   });
 }
+
+/* ── Manifesto pinned scroll ── */
+gsap.set('#mfp1,#mfp2,#mfp3', { opacity: 0, y: 28 });
+const mfTl = gsap.timeline({
+  scrollTrigger: {
+    trigger: '#manifesto',
+    pin: true,
+    scrub: 0.9,
+    start: 'top top',
+    end: '+=280%'
+  }
+});
+mfTl
+  .to('#mfp1', { opacity: 1, y: 0, duration: 1 })
+  .to('#mfp1', { opacity: 0, y: -20, duration: 0.6 }, '+=0.7')
+  .to('#mfp2', { opacity: 1, y: 0, duration: 1 }, '-=0.2')
+  .to('#mfp2', { opacity: 0, y: -20, duration: 0.6 }, '+=0.7')
+  .to('#mfp3', { opacity: 1, y: 0, duration: 1 }, '-=0.2');
+
+/* ── Stat giant counter ── */
+ScrollTrigger.create({
+  trigger: '#stat-giant',
+  start: 'top 72%',
+  once: true,
+  onEnter() {
+    gsap.from('.sg-inner', { y: 44, opacity: 0, duration: 0.9, ease: 'power2.out' });
+    const el = document.getElementById('sgNum');
+    const obj = { n: 0 };
+    gsap.to(obj, {
+      n: 3950, duration: 2, ease: 'power2.out', delay: 0.35,
+      onUpdate() {
+        const v = Math.round(obj.n);
+        el.textContent = '₡ ' + (v >= 1000
+          ? Math.floor(v / 1000) + ',' + String(v % 1000).padStart(3, '0')
+          : v);
+      }
+    });
+    gsap.from('.sg-pills .sg-pill', {
+      y: 20, opacity: 0, stagger: 0.12, duration: 0.6,
+      ease: 'power2.out', delay: 0.8
+    });
+  }
+});
 
 function renderPaquete(pkg) {
   const wrap = document.createElement('div');
