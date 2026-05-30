@@ -174,33 +174,29 @@
       <div class="login-field">
         <label>Correo electrónico</label>
         <input class="login-input" type="email" id="loginEmail"
-          placeholder="tu@email.com" autocomplete="email" />
+          placeholder="tu@email.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter')doSendOtp()" />
       </div>
-      <div class="login-field">
-        <label>Contraseña</label>
-        <input class="login-input" type="password" id="loginPw"
-          placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doLogin()" />
-      </div>
-      <button class="btn-login" id="btnLogin" onclick="doLogin()">Iniciar sesión</button>
-      <div class="login-forgot">
-        <a onclick="showMagic()">Acceder sin contraseña →</a>
-      </div>
+      <button class="btn-login" id="btnSendOtp" onclick="doSendOtp()">Enviarme el código →</button>
     </div>
 
-    <!-- Formulario magic link -->
-    <div id="formMagic" style="display:none">
+    <!-- Formulario código OTP -->
+    <div id="formOtp" style="display:none">
       <p style="font-size:.88rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">
-        Ingresá tu email y te mandamos un enlace para entrar directo, sin contraseña.
+        Te enviamos un código de 6 dígitos a <strong id="otpEmailLabel"></strong>
       </p>
       <div class="login-field">
-        <label>Tu correo electrónico</label>
-        <input class="login-input" type="email" id="magicEmail" placeholder="tu@email.com"
-          onkeydown="if(event.key==='Enter')doMagicLink()" />
+        <label>Código de acceso</label>
+        <input class="login-input" type="text" id="otpCode"
+          placeholder="000000" maxlength="6" inputmode="numeric"
+          style="font-size:1.6rem;letter-spacing:.4rem;text-align:center"
+          onkeydown="if(event.key==='Enter')doVerifyOtp()" />
       </div>
-      <button class="btn-login" id="btnMagic" onclick="doMagicLink()">Enviarme el enlace ✉️</button>
+      <button class="btn-login" id="btnVerifyOtp" onclick="doVerifyOtp()">Entrar</button>
       <div class="login-forgot">
-        <a onclick="showLogin()">← Volver al inicio de sesión</a>
+        <a onclick="showLogin()">← Usar otro email</a>
+        &nbsp;·&nbsp;
+        <a onclick="doSendOtp(true)">Reenviar código</a>
       </div>
     </div>
   </div>
@@ -287,45 +283,59 @@ function clearMsgs() {
   document.getElementById('msgOk').style.display  = 'none';
 }
 
+let _otpEmail = '';
+
 function showLogin() {
   document.getElementById('formLogin').style.display = 'block';
-  document.getElementById('formMagic').style.display = 'none';
+  document.getElementById('formOtp').style.display   = 'none';
   clearMsgs();
   setTimeout(() => document.getElementById('loginEmail').focus(), 50);
 }
-function showMagic() {
+function showOtp(email) {
+  _otpEmail = email;
+  document.getElementById('otpEmailLabel').textContent = email;
   document.getElementById('formLogin').style.display = 'none';
-  document.getElementById('formMagic').style.display = 'block';
+  document.getElementById('formOtp').style.display   = 'block';
   clearMsgs();
-  setTimeout(() => document.getElementById('magicEmail').focus(), 50);
+  setTimeout(() => document.getElementById('otpCode').focus(), 50);
 }
 
 /* ── AUTH ── */
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pw    = document.getElementById('loginPw').value;
-  const btn   = document.getElementById('btnLogin');
-  if (!email || !pw) { showErr('Completá el email y la contraseña.'); return; }
-  clearMsgs();
-  btn.disabled = true; btn.textContent = 'Ingresando...';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  btn.disabled = false; btn.textContent = 'Iniciar sesión';
-  if (error) showErr(error.message.includes('Invalid') ? 'Email o contraseña incorrectos.' : error.message);
-}
-
-async function doMagicLink() {
-  const email = document.getElementById('magicEmail').value.trim();
-  const btn   = document.getElementById('btnMagic');
+async function doSendOtp(resend = false) {
+  const email = resend ? _otpEmail : document.getElementById('loginEmail').value.trim();
+  const btn   = document.getElementById('btnSendOtp');
   if (!email) { showErr('Ingresá tu correo electrónico.'); return; }
   clearMsgs();
-  btn.disabled = true; btn.textContent = 'Enviando...';
+  if (!resend) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
   const { error } = await sb.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.origin + '/mi-cuenta' }
+    options: { shouldCreateUser: true }
   });
-  btn.disabled = false; btn.textContent = 'Enviarme el enlace ✉️';
-  if (error) showErr(error.message);
-  else showOk('✅ Revisá tu correo — te mandamos el enlace para entrar. Puede tardar un minuto.');
+
+  if (!resend) { btn.disabled = false; btn.textContent = 'Enviarme el código →'; }
+
+  if (error) { showErr(error.message); return; }
+
+  if (resend) showOk('✅ Código reenviado. Revisá tu correo.');
+  else        showOtp(email);
+}
+
+async function doVerifyOtp() {
+  const code = document.getElementById('otpCode').value.trim();
+  const btn  = document.getElementById('btnVerifyOtp');
+  if (!code || code.length < 6) { showErr('Ingresá el código de 6 dígitos.'); return; }
+  clearMsgs();
+  btn.disabled = true; btn.textContent = 'Verificando...';
+
+  const { error } = await sb.auth.verifyOtp({
+    email: _otpEmail,
+    token: code,
+    type: 'email'
+  });
+
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) showErr('Código incorrecto o expirado. Pedí uno nuevo.');
 }
 
 async function doLogout() {
