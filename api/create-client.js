@@ -1,5 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -15,35 +13,42 @@ export default async function handler(req, res) {
 
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
   if (!serviceKey) {
-    return res.status(500).json({ ok: false, error: 'Configuración incompleta en el servidor.' });
+    return res.status(500).json({ ok: false, error: 'SUPABASE_SERVICE_KEY no configurado en Vercel.' });
   }
 
-  const sb = createClient(
-    'https://opqyskmpdnijhvcbewkf.supabase.co',
-    serviceKey,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const BASE = 'https://opqyskmpdnijhvcbewkf.supabase.co/auth/v1/admin';
+  const headers = {
+    'Authorization': `Bearer ${serviceKey}`,
+    'apikey': serviceKey,
+    'Content-Type': 'application/json'
+  };
 
-  /* Si ya existe, actualizar contraseña y confirmar */
-  const { data: list } = await sb.auth.admin.listUsers({ perPage: 1000 });
-  const existing = (list?.users || []).find(u => u.email === email);
+  /* Buscar si el usuario ya existe */
+  const listRes = await fetch(`${BASE}/users?email=${encodeURIComponent(email)}&per_page=1`, { headers });
+  const listData = await listRes.json();
+  const existing = listData?.users?.[0];
 
   if (existing) {
-    const { error } = await sb.auth.admin.updateUserById(existing.id, {
-      password,
-      email_confirm: true
+    /* Actualizar contraseña y confirmar email */
+    const upRes = await fetch(`${BASE}/users/${existing.id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ password, email_confirm: true })
     });
-    if (error) return res.status(400).json({ ok: false, error: error.message });
+    const upData = await upRes.json();
+    if (upData.error) return res.status(400).json({ ok: false, error: upData.error.message || upData.error });
     return res.status(200).json({ ok: true, action: 'updated' });
   }
 
   /* Crear usuario nuevo ya confirmado */
-  const { error } = await sb.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true
+  const createRes = await fetch(`${BASE}/users`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email, password, email_confirm: true })
   });
-
-  if (error) return res.status(400).json({ ok: false, error: error.message });
+  const createData = await createRes.json();
+  if (createData.error || createData.msg) {
+    return res.status(400).json({ ok: false, error: createData.error?.message || createData.msg || 'Error al crear usuario.' });
+  }
   return res.status(200).json({ ok: true, action: 'created' });
 }
