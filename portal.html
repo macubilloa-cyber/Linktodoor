@@ -175,28 +175,21 @@
         <label>Correo electrónico</label>
         <input class="login-input" type="email" id="loginEmail"
           placeholder="tu@email.com" autocomplete="email"
-          onkeydown="if(event.key==='Enter')doSendOtp()" />
+          onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()" />
       </div>
-      <button class="btn-login" id="btnSendOtp" onclick="doSendOtp()">Enviarme el código →</button>
-    </div>
-
-    <!-- Formulario código OTP -->
-    <div id="formOtp" style="display:none">
-      <p style="font-size:.88rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">
-        Te enviamos un código de 6 dígitos a <strong id="otpEmailLabel"></strong>
-      </p>
       <div class="login-field">
-        <label>Código de acceso</label>
-        <input class="login-input" type="text" id="otpCode"
-          placeholder="000000" maxlength="6" inputmode="numeric"
-          style="font-size:1.6rem;letter-spacing:.4rem;text-align:center"
-          onkeydown="if(event.key==='Enter')doVerifyOtp()" />
+        <label>Contraseña</label>
+        <input class="login-input" type="password" id="loginPw"
+          placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
-      <button class="btn-login" id="btnVerifyOtp" onclick="doVerifyOtp()">Entrar</button>
-      <div class="login-forgot">
-        <a onclick="showLogin()">← Usar otro email</a>
-        &nbsp;·&nbsp;
-        <a onclick="doSendOtp(true)">Reenviar código</a>
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">Entrar →</button>
+      <div class="login-forgot" style="margin-top:1rem;font-size:.8rem;color:var(--gray);text-align:center;line-height:1.6">
+        ¿No tenés acceso aún?
+        <a href="https://wa.me/50685173813" target="_blank"
+          style="color:var(--pri);font-weight:700;text-decoration:none">
+          Escribinos por WhatsApp
+        </a>
       </div>
     </div>
   </div>
@@ -283,59 +276,22 @@ function clearMsgs() {
   document.getElementById('msgOk').style.display  = 'none';
 }
 
-let _otpEmail = '';
-
 function showLogin() {
-  document.getElementById('formLogin').style.display = 'block';
-  document.getElementById('formOtp').style.display   = 'none';
   clearMsgs();
   setTimeout(() => document.getElementById('loginEmail').focus(), 50);
 }
-function showOtp(email) {
-  _otpEmail = email;
-  document.getElementById('otpEmailLabel').textContent = email;
-  document.getElementById('formLogin').style.display = 'none';
-  document.getElementById('formOtp').style.display   = 'block';
-  clearMsgs();
-  setTimeout(() => document.getElementById('otpCode').focus(), 50);
-}
 
 /* ── AUTH ── */
-async function doSendOtp(resend = false) {
-  const email = resend ? _otpEmail : document.getElementById('loginEmail').value.trim();
-  const btn   = document.getElementById('btnSendOtp');
-  if (!email) { showErr('Ingresá tu correo electrónico.'); return; }
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const btn   = document.getElementById('btnLogin');
+  if (!email || !pw) { showErr('Ingresá tu email y contraseña.'); return; }
   clearMsgs();
-  if (!resend) { btn.disabled = true; btn.textContent = 'Enviando...'; }
-
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true }
-  });
-
-  if (!resend) { btn.disabled = false; btn.textContent = 'Enviarme el código →'; }
-
-  if (error) { showErr(error.message); return; }
-
-  if (resend) showOk('✅ Código reenviado. Revisá tu correo.');
-  else        showOtp(email);
-}
-
-async function doVerifyOtp() {
-  const code = document.getElementById('otpCode').value.trim();
-  const btn  = document.getElementById('btnVerifyOtp');
-  if (!code || code.length < 6) { showErr('Ingresá el código de 6 dígitos.'); return; }
-  clearMsgs();
-  btn.disabled = true; btn.textContent = 'Verificando...';
-
-  const { error } = await sb.auth.verifyOtp({
-    email: _otpEmail,
-    token: code,
-    type: 'email'
-  });
-
-  btn.disabled = false; btn.textContent = 'Entrar';
-  if (error) showErr('Código incorrecto o expirado. Pedí uno nuevo.');
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Entrar →';
+  if (error) showErr('Email o contraseña incorrectos. Si no tenés acceso escribinos por WhatsApp.');
 }
 
 async function doLogout() {
