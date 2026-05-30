@@ -11,157 +11,570 @@
   <style>
     :root {
       --pri:      #5B5BD6;
-      --pri-dark: #4848b8;
-      --pri-lite: #7B7BE6;
+      --pri-dk:   #4848b8;
+      --pri-lt:   #EEF2FF;
+      --bg:       #F2F1EE;
+      --surface:  #FFFFFF;
+      --dark:     #0D0D1A;
+      --body:     #1E293B;
+      --muted:    #64748B;
+      --faint:    #94A3B8;
+      --border:   #E2E8F0;
+      --light:    #F8FAFC;
+      --green:    #059669;
+      --green-lt: #ECFDF5;
+      --blue:     #2563EB;
+      --blue-lt:  #EFF6FF;
+      --amber:    #D97706;
+      --amber-lt: #FFFBEB;
+      --red:      #DC2626;
+      --red-lt:   #FEF2F2;
+      --r:        14px;
+      --r-lg:     20px;
       --cream:    #F5F0E4;
-      --cream2:   #EDE8DC;
       --lblue:    #C4D9F5;
-      --dark:     #12121F;
-      --dark2:    #1E1E35;
-      --gray:     #6B7280;
-      --white:    #FFFFFF;
-      --border:   #E5E7EB;
-      --light:    #F9FAFB;
-      --green:    #10B981;
-      --shadow:   0 4px 20px rgba(0,0,0,.08);
-      --shadow-lg:0 20px 56px rgba(0,0,0,.16);
-      --r:        16px;
     }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
-    body { font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif;
-      background:var(--cream);color:var(--dark);min-height:100vh }
 
-    /* ── LOGIN ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ═══════════════════════════════════
+       LOGIN
+    ═══════════════════════════════════ */
     #screen-login {
-      min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(-45deg,#3737a8,#5B5BD6,#7373e0,#4444bf,#6060d8,#3a3ab0);
-      background-size:320% 320%;animation:gradientShift 14s ease infinite;padding:1rem }
-    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(-45deg, #12122a, #2525a0, #5B5BD6, #3a3abf, #5252cc, #1a1a40);
+      background-size: 400% 400%;
+      animation: bgShift 18s ease infinite;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    #screen-login::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 75% 25%, rgba(255,255,255,.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(255,255,255,.04) 0%, transparent 45%);
+      pointer-events: none;
+    }
+    @keyframes bgShift {
+      0%, 100% { background-position: 0% 50% }
+      50%       { background-position: 100% 50% }
+    }
 
     .login-card {
-      background:white;border-radius:24px;padding:2.5rem;
-      width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.28) }
+      background: white;
+      border-radius: 24px;
+      padding: 2.75rem 2.5rem 2.25rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 40px 100px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.08);
+      position: relative;
+      z-index: 1;
+    }
 
-    .login-logo { text-align:center;margin-bottom:2rem }
-    .login-logo .logo-mark {
-      display:inline-flex;flex-direction:column;background:var(--pri);border-radius:12px;
-      padding:.5rem .75rem;line-height:1;gap:2px;margin-bottom:.6rem }
-    .login-logo .l1 { font-size:.85rem;font-weight:900;color:var(--cream);letter-spacing:.5px }
-    .login-logo .l2 { font-size:.85rem;font-weight:900;color:var(--lblue);letter-spacing:.5px }
-    .login-logo h2 { font-size:1.3rem;font-weight:900;color:var(--dark) }
-    .login-logo p  { font-size:.85rem;color:var(--gray);margin-top:.25rem }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.75rem;
+    }
+    .login-logo-mark {
+      background: var(--pri);
+      border-radius: 10px;
+      padding: .45rem .65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .login-logo-mark span { font-size: .75rem; font-weight: 900; letter-spacing: .5px; }
+    .login-logo-mark .l1 { color: var(--cream); }
+    .login-logo-mark .l2 { color: var(--lblue); }
+    .login-brand-text h1 { font-size: 1.15rem; font-weight: 900; color: var(--dark); line-height: 1.1; }
+    .login-brand-text p  { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
 
-    .login-field { margin-bottom:1.1rem }
-    .login-field label {
-      display:block;font-size:.78rem;font-weight:700;color:var(--dark);
-      letter-spacing:.2px;text-transform:uppercase;margin-bottom:.4rem }
-    .login-input {
-      width:100%;padding:.85rem 1.1rem;border:2px solid var(--border);border-radius:12px;
-      font-size:.97rem;color:var(--dark);font-family:inherit;outline:none;transition:border-color .2s }
-    .login-input:focus { border-color:var(--pri) }
+    .login-divider { height: 1px; background: var(--border); margin-bottom: 1.75rem; }
 
-    .btn-login {
-      width:100%;padding:1rem;background:var(--pri);color:white;border:none;
-      border-radius:50px;font-weight:800;font-size:1rem;cursor:pointer;
-      font-family:inherit;transition:all .2s;margin-top:.4rem }
-    .btn-login:hover { background:var(--pri-dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,91,214,.35) }
-    .btn-login:disabled { opacity:.55;cursor:not-allowed;transform:none }
+    .login-heading h2 { font-size: 1.3rem; font-weight: 800; color: var(--dark); }
+    .login-heading p  { font-size: .84rem; color: var(--muted); margin-top: .25rem; margin-bottom: 1.5rem; }
 
-    .login-forgot { text-align:center;margin-top:1.1rem;font-size:.82rem;color:var(--gray) }
-    .login-forgot a { color:var(--pri);cursor:pointer;font-weight:700 }
-    .login-forgot a:hover { text-decoration:underline }
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
+      font-size: .73rem;
+      font-weight: 700;
+      color: var(--body);
+      text-transform: uppercase;
+      letter-spacing: .35px;
+      margin-bottom: .4rem;
+    }
+    .field input {
+      width: 100%;
+      padding: .85rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .95rem;
+      color: var(--dark);
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      background: var(--light);
+    }
+    .field input:focus {
+      border-color: var(--pri);
+      box-shadow: 0 0 0 3px rgba(91,91,214,.12);
+      background: white;
+    }
 
-    .msg-err { background:#FEE2E2;color:#991b1b;border-radius:10px;padding:.65rem .9rem;
-      font-size:.83rem;font-weight:600;margin-bottom:1rem;display:none }
-    .msg-ok  { background:#D1FAE5;color:#065f46;border-radius:10px;padding:.65rem .9rem;
-      font-size:.83rem;font-weight:600;margin-bottom:1rem;display:none }
+    .msg-err {
+      border-left: 3px solid var(--red);
+      background: var(--red-lt);
+      color: var(--red);
+      border-radius: 0 8px 8px 0;
+      padding: .65rem .9rem;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .msg-ok {
+      border-left: 3px solid var(--green);
+      background: var(--green-lt);
+      color: var(--green);
+      border-radius: 0 8px 8px 0;
+      padding: .65rem .9rem;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: none;
+    }
 
-    /* ── APP ── */
-    #screen-app { display:none;min-height:100vh }
+    .btn-submit {
+      width: 100%;
+      padding: .95rem;
+      background: var(--pri);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+      margin-top: .5rem;
+      letter-spacing: .2px;
+    }
+    .btn-submit:hover {
+      background: var(--pri-dk);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(91,91,214,.35);
+    }
+    .btn-submit:active { transform: translateY(0); box-shadow: none; }
+    .btn-submit:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    .portal-header {
-      background:var(--dark);padding:1rem 2rem;
-      display:flex;align-items:center;justify-content:space-between;gap:1rem }
-    .portal-logo { display:flex;align-items:center;gap:.6rem;text-decoration:none }
-    .portal-logo .logo-mark {
-      background:var(--pri);border-radius:8px;padding:.3rem .55rem;
-      display:flex;flex-direction:column;line-height:1;gap:1px }
-    .portal-logo .l1 { font-size:.65rem;font-weight:900;color:var(--cream);letter-spacing:.5px }
-    .portal-logo .l2 { font-size:.65rem;font-weight:900;color:var(--lblue);letter-spacing:.5px }
-    .portal-logo-name { font-size:1.05rem;font-weight:800;color:white }
-    .portal-user { display:flex;align-items:center;gap:.8rem }
-    .portal-user-email { font-size:.82rem;color:rgba(255,255,255,.5);font-weight:500 }
-    .btn-logout {
-      background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);
-      border:1px solid rgba(255,255,255,.15);border-radius:8px;
-      padding:.4rem .9rem;font-size:.82rem;font-weight:600;
-      cursor:pointer;font-family:inherit;transition:all .2s }
-    .btn-logout:hover { background:rgba(255,255,255,.2);color:white }
+    .login-help {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: .79rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .login-help a { color: var(--pri); font-weight: 700; text-decoration: none; }
+    .login-help a:hover { text-decoration: underline; }
 
-    .portal-main { max-width:880px;margin:0 auto;padding:2.5rem 1.5rem }
+    /* ═══════════════════════════════════
+       APP SHELL
+    ═══════════════════════════════════ */
+    #screen-app { display: none; min-height: 100vh; }
 
-    .welcome { margin-bottom:2rem }
-    .welcome h1 { font-size:1.8rem;font-weight:900;color:var(--dark) }
-    .welcome p  { color:var(--gray);margin-top:.3rem;font-size:.97rem }
+    .app-header {
+      background: var(--dark);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 0 rgba(255,255,255,.05);
+    }
+    .app-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      text-decoration: none;
+    }
+    .app-logo-mark {
+      background: var(--pri);
+      border-radius: 7px;
+      padding: .28rem .5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      line-height: 1;
+    }
+    .app-logo-mark span { font-size: .62rem; font-weight: 900; letter-spacing: .5px; }
+    .app-logo-mark .l1 { color: var(--cream); }
+    .app-logo-mark .l2 { color: var(--lblue); }
+    .app-logo-name { font-size: .95rem; font-weight: 800; color: white; }
 
-    .portal-stats {
-      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:1rem;margin-bottom:2rem }
-    .pstat { background:white;border-radius:var(--r);padding:1.2rem 1.4rem;box-shadow:var(--shadow) }
-    .pstat-label { font-size:.72rem;font-weight:700;color:var(--gray);
-      text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem }
-    .pstat-val { font-size:1.5rem;font-weight:900;color:var(--pri) }
-    .pstat-sub { font-size:.75rem;color:var(--gray);margin-top:.2rem }
+    .app-header-right { display: flex; align-items: center; gap: .75rem; }
+    .user-email { font-size: .8rem; color: rgba(255,255,255,.4); font-weight: 500; }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--pri), var(--pri-dk));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .72rem;
+      font-weight: 900;
+      color: white;
+      letter-spacing: .5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.1);
+    }
+    .btn-signout {
+      background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      padding: .38rem .85rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .18s;
+    }
+    .btn-signout:hover { background: rgba(255,255,255,.14); color: white; }
 
-    .section-title { font-size:1rem;font-weight:800;color:var(--dark);margin-bottom:1rem }
+    /* ═══════════════════════════════════
+       MAIN LAYOUT
+    ═══════════════════════════════════ */
+    .app-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
 
-    .portal-card { background:white;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden }
-    .table-wrap { overflow-x:auto }
-    table { width:100%;border-collapse:collapse;font-size:.88rem }
+    /* Hero banner */
+    .portal-hero {
+      background: linear-gradient(135deg, #0d0d1e 0%, #2a2a8a 50%, var(--pri) 100%);
+      border-radius: var(--r-lg);
+      padding: 2rem 2.25rem 1.75rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .portal-hero::before {
+      content: '';
+      position: absolute;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 70%);
+      top: -80px; right: -60px;
+      border-radius: 50%;
+    }
+    .portal-hero::after {
+      content: '';
+      position: absolute;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 70%);
+      bottom: -50px; left: 10px;
+      border-radius: 50%;
+    }
+    .hero-greeting {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: white;
+      position: relative;
+      z-index: 1;
+      line-height: 1.2;
+    }
+    .hero-sub {
+      font-size: .84rem;
+      color: rgba(255,255,255,.5);
+      margin-top: .4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      padding: 1.3rem 1.4rem;
+      border: 1px solid rgba(0,0,0,.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.1); transform: translateY(-1px); }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      border-radius: 3px 0 0 3px;
+    }
+    .stat-card:nth-child(1)::before { background: var(--pri); }
+    .stat-card:nth-child(2)::before { background: var(--blue); }
+    .stat-card:nth-child(3)::before { background: var(--green); }
+    .stat-icon { font-size: 1.2rem; margin-bottom: .55rem; display: block; }
+    .stat-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .65px;
+      margin-bottom: .25rem;
+    }
+    .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--dark); line-height: 1.1; }
+    .stat-sub   { font-size: .72rem; color: var(--faint); margin-top: .2rem; }
+
+    /* Section headers */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .85rem;
+    }
+    .section-head-bar {
+      width: 3px; height: 1rem;
+      background: var(--pri);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .section-head-title {
+      font-size: .75rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .75px;
+    }
+
+    /* Data card */
+    .data-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      border: 1px solid rgba(0,0,0,.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
+
+    /* Table */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
     thead th {
-      text-align:left;padding:.7rem 1rem;font-size:.72rem;font-weight:800;
-      text-transform:uppercase;letter-spacing:.4px;color:var(--gray);
-      border-bottom:2px solid #F3F4F6;background:#FAFAFA }
-    td { padding:.85rem 1rem;border-bottom:1px solid #F3F4F6;vertical-align:middle }
-    tr:last-child td { border-bottom:none }
-    tbody tr:hover { background:#FAFAFA }
+      text-align: left;
+      padding: .7rem 1.1rem;
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .65px;
+      color: var(--muted);
+      background: #FAFBFC;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: .9rem 1.1rem;
+      border-bottom: 1px solid #F1F5F9;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .1s; }
+    tbody tr:hover { background: #FAFBFC; }
 
-    .badge-closed { display:inline-block;padding:3px 10px;border-radius:20px;
-      font-size:.72rem;font-weight:800;background:#D1FAE5;color:#065f46 }
-    .badge-open   { display:inline-block;padding:3px 10px;border-radius:20px;
-      font-size:.72rem;font-weight:800;background:#DBEAFE;color:#1d4ed8 }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .2rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-delivered { background: var(--green-lt); color: var(--green); }
+    .badge-transit   { background: var(--blue-lt);  color: var(--blue); }
 
-    .empty-state { text-align:center;padding:3.5rem 1rem;color:var(--gray) }
-    .empty-state .ico { font-size:2.5rem;margin-bottom:.75rem }
-    .empty-state p { font-size:.95rem;line-height:1.7 }
+    .total-row td {
+      font-weight: 800;
+      background: #F8FAFC;
+      border-top: 1.5px solid var(--border) !important;
+      color: var(--dark);
+    }
 
-    .loading-state { text-align:center;padding:3rem;color:var(--gray) }
-    .spinner { width:36px;height:36px;border:3px solid rgba(91,91,214,.2);
-      border-top-color:var(--pri);border-radius:50%;
-      animation:spin .8s linear infinite;margin:0 auto 1rem }
-    @keyframes spin { to { transform:rotate(360deg) } }
+    /* Empty / Loading */
+    .empty-box {
+      text-align: center;
+      padding: 3.5rem 1.5rem;
+      color: var(--muted);
+    }
+    .empty-box .ico { font-size: 2rem; margin-bottom: .75rem; }
+    .empty-box p { font-size: .9rem; line-height: 1.75; }
 
-    .total-row td { font-weight:800;background:#FAFAFA;border-top:2px solid var(--border) }
+    .loading-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem;
+      gap: .75rem;
+      color: var(--muted);
+      font-size: .87rem;
+    }
+    .spin {
+      width: 30px; height: 30px;
+      border: 2.5px solid rgba(91,91,214,.15);
+      border-top-color: var(--pri);
+      border-radius: 50%;
+      animation: doSpin .75s linear infinite;
+    }
+    @keyframes doSpin { to { transform: rotate(360deg) } }
 
-    @media(max-width:600px) {
-      .portal-header { padding:.9rem 1.1rem }
-      .portal-logo-name { display:none }
-      .portal-user-email { display:none }
-      .portal-main { padding:1.5rem 1rem }
-      .welcome h1 { font-size:1.4rem }
+    /* Section spacer */
+    .section-block { margin-top: 2.25rem; }
+
+    /* Tracking form */
+    .tracking-form-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      border: 1px solid rgba(0,0,0,.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .tracking-form-intro {
+      font-size: .84rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.1rem;
+      padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tracking-inputs {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .t-input {
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .87rem;
+      font-family: inherit;
+      color: var(--dark);
+      background: var(--light);
+      outline: none;
+      transition: border-color .18s, box-shadow .18s, background .18s;
+    }
+    .t-input:focus {
+      border-color: var(--pri);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(91,91,214,.1);
+    }
+    .t-input.t-narrow { flex: 1; min-width: 170px; }
+    .t-input.t-wide   { flex: 2; min-width: 190px; }
+
+    .btn-add-track {
+      padding: .75rem 1.3rem;
+      background: var(--pri);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: .87rem;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all .18s;
+    }
+    .btn-add-track:hover {
+      background: var(--pri-dk);
+      box-shadow: 0 4px 16px rgba(91,91,214,.3);
+      transform: translateY(-1px);
+    }
+    .btn-add-track:active { transform: none; box-shadow: none; }
+    .btn-add-track:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .track-msg {
+      margin-top: .75rem;
+      font-size: .82rem;
+      font-weight: 600;
+      padding: .6rem .9rem;
+      border-radius: 0 8px 8px 0;
+      display: none;
+    }
+    .track-msg.ok  { display: block; background: var(--green-lt); color: var(--green); border-left: 3px solid var(--green); }
+    .track-msg.err { display: block; background: var(--red-lt);   color: var(--red);   border-left: 3px solid var(--red); }
+
+    .btn-del-track {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--faint);
+      font-size: .88rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      line-height: 1;
+      transition: all .15s;
+    }
+    .btn-del-track:hover { background: var(--red-lt); color: var(--red); }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid .stat-card:nth-child(3) { grid-column: 1 / -1; }
+      .app-header { padding: 0 1rem; }
+      .app-main { padding: 1.25rem 1rem 3rem; }
+      .portal-hero { padding: 1.5rem 1.4rem; }
+      .hero-greeting { font-size: 1.35rem; }
+      .user-email, .app-logo-name { display: none; }
+      .login-card { padding: 2.25rem 1.75rem 2rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ═══ LOGIN ═══ -->
 <div id="screen-login">
   <div class="login-card">
-    <div class="login-logo">
-      <div class="logo-mark">
+    <div class="login-brand">
+      <div class="login-logo-mark">
         <span class="l1">LINK</span>
         <span class="l2">DOOR</span>
       </div>
+      <div class="login-brand-text">
+        <h1>Linktodoor</h1>
+        <p>Tu puerta a Miami</p>
+      </div>
+    </div>
+    <div class="login-divider"></div>
+    <div class="login-heading">
       <h2>Mi Cuenta</h2>
       <p>Ingresá para ver tus pedidos y cobros</p>
     </div>
@@ -169,127 +582,119 @@
     <div class="msg-err" id="msgErr"></div>
     <div class="msg-ok"  id="msgOk"></div>
 
-    <!-- Formulario login -->
     <div id="formLogin">
-      <div class="login-field">
+      <div class="field">
         <label>Correo electrónico</label>
-        <input class="login-input" type="email" id="loginEmail"
+        <input type="email" id="loginEmail"
           placeholder="tu@email.com" autocomplete="email"
           onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()" />
       </div>
-      <div class="login-field">
+      <div class="field">
         <label>Contraseña</label>
-        <input class="login-input" type="password" id="loginPw"
+        <input type="password" id="loginPw"
           placeholder="••••••••" autocomplete="current-password"
           onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
-      <button class="btn-login" id="btnLogin" onclick="doLogin()">Entrar →</button>
-      <div class="login-forgot" style="margin-top:1rem;font-size:.8rem;color:var(--gray);text-align:center;line-height:1.6">
+      <button class="btn-submit" id="btnLogin" onclick="doLogin()">Entrar →</button>
+      <div class="login-help">
         ¿No tenés acceso aún?
-        <a href="https://wa.me/50685173813" target="_blank"
-          style="color:var(--pri);font-weight:700;text-decoration:none">
-          Escribinos por WhatsApp
-        </a>
+        <a href="https://wa.me/50685173813" target="_blank">Escribinos por WhatsApp</a>
       </div>
     </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ═══ APP ═══ -->
 <div id="screen-app">
-  <header class="portal-header">
-    <a href="https://linktodoor.co" class="portal-logo">
-      <div class="logo-mark">
+  <header class="app-header">
+    <a href="https://linktodoor.co" class="app-logo">
+      <div class="app-logo-mark">
         <span class="l1">LINK</span>
         <span class="l2">DOOR</span>
       </div>
-      <span class="portal-logo-name">Linktodoor</span>
+      <span class="app-logo-name">Linktodoor</span>
     </a>
-    <div class="portal-user">
-      <span class="portal-user-email" id="portalEmail"></span>
-      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    <div class="app-header-right">
+      <span class="user-email" id="portalEmail"></span>
+      <div class="user-avatar" id="userAvatar"></div>
+      <button class="btn-signout" onclick="doLogout()">Salir</button>
     </div>
   </header>
 
-  <main class="portal-main">
-    <div class="welcome">
-      <h1 id="welcomeMsg">¡Hola! 👋</h1>
-      <p>Aquí podés ver el historial de tus pedidos y cobros.</p>
+  <main class="app-main">
+
+    <!-- Hero -->
+    <div class="portal-hero">
+      <div class="hero-greeting" id="welcomeMsg">¡Hola! 👋</div>
+      <div class="hero-sub">Aquí podés ver el historial de tus pedidos y cobros.</div>
     </div>
 
-    <div class="portal-stats">
-      <div class="pstat">
-        <div class="pstat-label">Pedidos</div>
-        <div class="pstat-val" id="statPedidos">—</div>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">📦</span>
+        <div class="stat-label">Pedidos</div>
+        <div class="stat-value" id="statPedidos">—</div>
       </div>
-      <div class="pstat">
-        <div class="pstat-label">Total libras</div>
-        <div class="pstat-val" id="statLbs">—</div>
-        <div class="pstat-sub" id="statKg"></div>
+      <div class="stat-card">
+        <span class="stat-icon">⚖️</span>
+        <div class="stat-label">Total libras</div>
+        <div class="stat-value" id="statLbs">—</div>
+        <div class="stat-sub" id="statKg"></div>
       </div>
-      <div class="pstat">
-        <div class="pstat-label">Total cobrado</div>
-        <div class="pstat-val" id="statCobrado">—</div>
+      <div class="stat-card">
+        <span class="stat-icon">💰</span>
+        <div class="stat-label">Total cobrado</div>
+        <div class="stat-value" id="statCobrado">—</div>
       </div>
     </div>
 
-    <div class="section-title">📦 Mis pedidos</div>
-    <div class="portal-card">
+    <!-- Orders -->
+    <div class="section-head">
+      <div class="section-head-bar"></div>
+      <div class="section-head-title">Mis pedidos</div>
+    </div>
+    <div class="data-card">
       <div id="ordersContent">
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Cargando tus pedidos...</p>
-        </div>
+        <div class="loading-box"><div class="spin"></div><span>Cargando tus pedidos...</span></div>
       </div>
     </div>
 
-    <!-- PRE-ALERTA SECTION -->
-    <div style="margin-top:2.5rem">
-      <div class="section-title" style="margin-bottom:.6rem">📡 Pre-alertar un paquete</div>
-      <div class="portal-card" style="padding:1.4rem;margin-bottom:2rem">
-        <p style="font-size:.87rem;color:var(--gray);margin-bottom:1rem;line-height:1.6">
-          Ingresá el número de rastreo y nosotros revisamos el estado una vez al día.
+    <!-- Pre-alerta -->
+    <div class="section-block">
+      <div class="section-head">
+        <div class="section-head-bar" style="background:var(--amber)"></div>
+        <div class="section-head-title">Pre-alertar paquete</div>
+      </div>
+      <div class="tracking-form-card">
+        <p class="tracking-form-intro">
+          Ingresá el número de rastreo de tu paquete y nosotros revisamos el estado una vez al día.
           Te avisamos por WhatsApp cuando cambie.
         </p>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <input id="alertTracking" type="text"
-            placeholder="Número de tracking (ej: 1Z9999W10123456784)"
-            style="flex:1;min-width:200px;padding:.8rem 1rem;border:2px solid var(--border);
-                   border-radius:10px;font-size:.88rem;font-family:inherit;outline:none;
-                   transition:border-color .2s;color:var(--dark);background:white"
-            onfocus="this.style.borderColor='var(--pri)'"
-            onblur="this.style.borderColor='var(--border)'" />
-          <input id="alertDesc" type="text"
+        <div class="tracking-inputs">
+          <input id="alertTracking" type="text" class="t-input t-narrow"
+            placeholder="Número de tracking" />
+          <input id="alertDesc" type="text" class="t-input t-wide"
             placeholder="Descripción (ej: Zapatillas Nike)"
-            style="flex:2;min-width:180px;padding:.8rem 1rem;border:2px solid var(--border);
-                   border-radius:10px;font-size:.88rem;font-family:inherit;outline:none;
-                   transition:border-color .2s;color:var(--dark);background:white"
-            onfocus="this.style.borderColor='var(--pri)'"
-            onblur="this.style.borderColor='var(--border)'"
             onkeydown="if(event.key==='Enter')addTracking()" />
-          <button onclick="addTracking()" id="btnAddTracking"
-            style="padding:.8rem 1.4rem;background:var(--pri);color:white;border:none;
-                   border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;
-                   font-family:inherit;white-space:nowrap;transition:background .2s"
-            onmouseover="this.style.background='var(--pri-dark)'"
-            onmouseout="this.style.background='var(--pri)'">
+          <button onclick="addTracking()" id="btnAddTracking" class="btn-add-track">
             + Agregar
           </button>
         </div>
-        <div id="alertMsg" style="margin-top:.75rem;font-size:.83rem;font-weight:600;
-          display:none;padding:.6rem .9rem;border-radius:8px"></div>
+        <div id="alertMsg" class="track-msg"></div>
       </div>
 
-      <div class="section-title">🗂️ Mis paquetes en seguimiento</div>
-      <div class="portal-card">
+      <div class="section-head">
+        <div class="section-head-bar" style="background:var(--amber)"></div>
+        <div class="section-head-title">Paquetes en seguimiento</div>
+      </div>
+      <div class="data-card">
         <div id="trackingsContent">
-          <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Cargando...</p>
-          </div>
+          <div class="loading-box"><div class="spin"></div><span>Cargando...</span></div>
         </div>
       </div>
     </div>
+
   </main>
 </div>
 
@@ -325,7 +730,6 @@ function clearMsgs() {
   document.getElementById('msgErr').style.display = 'none';
   document.getElementById('msgOk').style.display  = 'none';
 }
-
 function showLogin() {
   clearMsgs();
   setTimeout(() => document.getElementById('loginEmail').focus(), 50);
@@ -355,6 +759,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('screen-login').style.display = 'none';
     document.getElementById('screen-app').style.display   = 'block';
     document.getElementById('portalEmail').textContent    = session.user.email;
+    document.getElementById('userAvatar').textContent     = session.user.email.charAt(0).toUpperCase();
     loadDashboard(session.user.email);
     loadTrackings(session.user.email);
   } else {
@@ -367,7 +772,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
 
 /* ── DASHBOARD ── */
 async function loadDashboard(userEmail) {
-  /* 1. Buscar cliente por email */
   const { data: clientRow } = await sb.from('saved_clients')
     .select('id, name')
     .eq('email', userEmail)
@@ -375,17 +779,17 @@ async function loadDashboard(userEmail) {
     .maybeSingle();
 
   if (!clientRow) {
-    document.getElementById('welcomeMsg').textContent = '¡Hola! 👋';
-    document.getElementById('statPedidos').textContent = '0';
-    document.getElementById('statLbs').textContent     = '0.00 lbs';
-    document.getElementById('statCobrado').textContent = '₡ 0';
-    document.getElementById('ordersContent').innerHTML = `
-      <div class="empty-state">
+    document.getElementById('welcomeMsg').textContent    = '¡Hola! 👋';
+    document.getElementById('statPedidos').textContent   = '0';
+    document.getElementById('statLbs').textContent       = '0.00 lbs';
+    document.getElementById('statCobrado').textContent   = '₡ 0';
+    document.getElementById('ordersContent').innerHTML   = `
+      <div class="empty-box">
         <div class="ico">⏳</div>
         <p>Tu cuenta está siendo configurada.<br>
         Pronto podrás ver tus pedidos aquí.<br><br>
         <a href="https://wa.me/50685173813" target="_blank"
-          style="color:var(--pri);font-weight:700">
+          style="color:var(--pri);font-weight:700;text-decoration:none">
           ¿Dudas? Escribinos por WhatsApp →
         </a></p>
       </div>`;
@@ -394,7 +798,6 @@ async function loadDashboard(userEmail) {
 
   document.getElementById('welcomeMsg').textContent = `¡Hola, ${clientRow.name}! 👋`;
 
-  /* 2. Cargar sus líneas de carga_clients + datos de la carga */
   const { data: lines, error: linesErr } = await sb.from('carga_clients')
     .select('*, cargas(reference, date, status, total_weight_lbs)')
     .ilike('client_name', clientRow.name)
@@ -404,18 +807,16 @@ async function loadDashboard(userEmail) {
 
   const myLines = lines || [];
 
-  /* Stats */
   const totalLbs     = myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
   const totalCobrado = myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
-  document.getElementById('statPedidos').textContent  = myLines.length;
-  document.getElementById('statLbs').textContent      = fLbs(totalLbs);
-  document.getElementById('statKg').textContent       = fKg(totalLbs);
-  document.getElementById('statCobrado').textContent  = fCRC(totalCobrado);
+  document.getElementById('statPedidos').textContent = myLines.length;
+  document.getElementById('statLbs').textContent     = fLbs(totalLbs);
+  document.getElementById('statKg').textContent      = fKg(totalLbs);
+  document.getElementById('statCobrado').textContent = fCRC(totalCobrado);
 
-  /* Table */
   if (!myLines.length) {
     document.getElementById('ordersContent').innerHTML = `
-      <div class="empty-state">
+      <div class="empty-box">
         <div class="ico">📦</div>
         <p>Todavía no tenés pedidos registrados.<br>¡Pronto aparecerán aquí!</p>
       </div>`;
@@ -426,30 +827,33 @@ async function loadDashboard(userEmail) {
     const c = l.cargas || {};
     return `
       <tr>
-        <td><strong>${esc(c.reference || '—')}</strong></td>
-        <td style="white-space:nowrap">${c.date ? fDate(c.date) : '—'}</td>
+        <td><strong style="color:var(--dark)">${esc(c.reference || '—')}</strong></td>
+        <td style="white-space:nowrap;color:var(--muted)">${c.date ? fDate(c.date) : '—'}</td>
         <td>
-          <strong>${fLbs(l.weight_lbs)}</strong><br>
-          <span style="font-size:.76rem;color:var(--gray)">${fKg(l.weight_lbs)}</span>
+          <span style="font-weight:700;color:var(--dark)">${fLbs(l.weight_lbs)}</span><br>
+          <span style="font-size:.74rem;color:var(--faint)">${fKg(l.weight_lbs)}</span>
         </td>
-        <td style="font-weight:800;color:var(--pri)">${fCRC(l.charged_crc)}</td>
+        <td style="font-weight:800;color:var(--pri);font-size:.95rem">${fCRC(l.charged_crc)}</td>
         <td>${c.status === 'closed'
-          ? '<span class="badge-closed">✅ Entregado</span>'
-          : '<span class="badge-open">🚚 En camino</span>'}</td>
-        <td style="color:var(--gray);font-size:.82rem">${esc(l.notes || '—')}</td>
+          ? '<span class="badge badge-delivered">✅ Entregado</span>'
+          : '<span class="badge badge-transit">🚚 En camino</span>'}</td>
+        <td style="color:var(--muted);font-size:.82rem">${esc(l.notes || '—')}</td>
       </tr>`;
   }).join('');
 
   const totalRow = `
     <tr class="total-row">
-      <td colspan="2" style="font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">Total</td>
-      <td><strong>${fLbs(totalLbs)}</strong><br><span style="font-size:.76rem;color:var(--gray)">${fKg(totalLbs)}</span></td>
-      <td style="color:var(--pri);font-size:1.05rem">${fCRC(totalCobrado)}</td>
+      <td colspan="2" style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Total</td>
+      <td>
+        <span style="font-weight:900">${fLbs(totalLbs)}</span><br>
+        <span style="font-size:.74rem;color:var(--faint)">${fKg(totalLbs)}</span>
+      </td>
+      <td style="color:var(--pri);font-size:1rem;font-weight:900">${fCRC(totalCobrado)}</td>
       <td colspan="2"></td>
     </tr>`;
 
   document.getElementById('ordersContent').innerHTML = `
-    <div class="table-wrap">
+    <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
@@ -464,22 +868,22 @@ async function loadDashboard(userEmail) {
 
 /* ── TRACKING STATUS ── */
 const TRACKING_STATUS = {
-  registrado:    ['Registrado',          '#6B7280', '#F3F4F6'],
-  sin_datos:     ['Sin datos',           '#6B7280', '#F3F4F6'],
-  info_recibida: ['Info recibida',       '#1d4ed8', '#DBEAFE'],
-  en_transito:   ['🚚 En tránsito',     '#1d4ed8', '#DBEAFE'],
-  para_entrega:  ['🚀 Para entrega',    '#92400e', '#FEF3C7'],
-  entregado:     ['✅ Entregado',        '#065f46', '#D1FAE5'],
-  recogido:      ['📦 Recogido',         '#065f46', '#D1FAE5'],
-  sin_actividad: ['Sin actividad',       '#6B7280', '#F3F4F6'],
-  no_entregado:  ['⚠️ No entregado',   '#991b1b', '#FEE2E2'],
-  excepcion:     ['⚠️ Excepción',      '#991b1b', '#FEE2E2'],
+  registrado:    ['Registrado',        '#64748B', '#F1F5F9'],
+  sin_datos:     ['Sin datos',         '#64748B', '#F1F5F9'],
+  info_recibida: ['Info recibida',     '#2563EB', '#EFF6FF'],
+  en_transito:   ['🚚 En tránsito',   '#2563EB', '#EFF6FF'],
+  para_entrega:  ['🚀 Para entrega',  '#D97706', '#FFFBEB'],
+  entregado:     ['✅ Entregado',      '#059669', '#ECFDF5'],
+  recogido:      ['📦 Recogido',       '#059669', '#ECFDF5'],
+  sin_actividad: ['Sin actividad',     '#64748B', '#F1F5F9'],
+  no_entregado:  ['⚠️ No entregado', '#DC2626', '#FEF2F2'],
+  excepcion:     ['⚠️ Excepción',    '#DC2626', '#FEF2F2'],
 };
 
 function trackBadge(status) {
   const [label, color, bg] = TRACKING_STATUS[status] || TRACKING_STATUS.registrado;
   return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;
-    font-size:.72rem;font-weight:800;background:${bg};color:${color}">${label}</span>`;
+    font-size:.7rem;font-weight:700;background:${bg};color:${color};white-space:nowrap">${label}</span>`;
 }
 
 /* ── LOAD TRACKINGS ── */
@@ -498,7 +902,7 @@ async function loadTrackings(userEmail) {
 
   if (!items.length) {
     cont.innerHTML = `
-      <div class="empty-state">
+      <div class="empty-box">
         <div class="ico">📡</div>
         <p>No tenés paquetes en seguimiento.<br>Agregá el número de tracking arriba.</p>
       </div>`;
@@ -508,31 +912,26 @@ async function loadTrackings(userEmail) {
   const rows = items.map(item => `
     <tr>
       <td>
-        <strong style="font-family:monospace;font-size:.86rem">${esc(item.tracking_number)}</strong>
-        ${item.description ? `<br><span style="font-size:.75rem;color:var(--gray)">${esc(item.description)}</span>` : ''}
+        <strong style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(item.tracking_number)}</strong>
+        ${item.description ? `<br><span style="font-size:.74rem;color:var(--muted)">${esc(item.description)}</span>` : ''}
       </td>
       <td>${trackBadge(item.status)}</td>
-      <td style="font-size:.81rem;color:var(--gray);max-width:200px">
+      <td style="font-size:.81rem;color:var(--muted);max-width:200px">
         ${item.last_event ? esc(item.last_event) : '—'}
-        ${item.carrier ? `<br><span style="font-size:.74rem">${esc(item.carrier)}</span>` : ''}
+        ${item.carrier ? `<br><span style="font-size:.73rem;color:var(--faint)">${esc(item.carrier)}</span>` : ''}
       </td>
-      <td style="font-size:.77rem;color:var(--gray);white-space:nowrap">
+      <td style="font-size:.76rem;color:var(--faint);white-space:nowrap">
         ${item.last_checked_at
           ? new Date(item.last_checked_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})
           : new Date(item.created_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})}
       </td>
       <td>
-        <button onclick="deleteTracking('${item.id}')"
-          title="Eliminar"
-          style="background:none;border:none;cursor:pointer;color:var(--gray);
-                 font-size:.9rem;padding:3px 7px;border-radius:6px;line-height:1"
-          onmouseover="this.style.background='#FEE2E2';this.style.color='#991b1b'"
-          onmouseout="this.style.background='none';this.style.color='var(--gray)'">✕</button>
+        <button class="btn-del-track" onclick="deleteTracking('${item.id}')" title="Eliminar">✕</button>
       </td>
     </tr>`).join('');
 
   cont.innerHTML = `
-    <div class="table-wrap">
+    <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
@@ -547,19 +946,20 @@ async function loadTrackings(userEmail) {
 
 /* ── ADD TRACKING ── */
 async function addTracking() {
-  const btn     = document.getElementById('btnAddTracking');
-  const msgEl   = document.getElementById('alertMsg');
+  const btn      = document.getElementById('btnAddTracking');
+  const msgEl    = document.getElementById('alertMsg');
   const tracking = document.getElementById('alertTracking').value.trim().toUpperCase();
   const desc     = document.getElementById('alertDesc').value.trim();
 
+  msgEl.className = 'track-msg';
+
   if (!tracking) {
-    msgEl.style.cssText = 'display:block;padding:.6rem .9rem;border-radius:8px;margin-top:.75rem;font-size:.83rem;font-weight:600;background:#FEE2E2;color:#991b1b';
+    msgEl.className = 'track-msg err';
     msgEl.textContent = 'Ingresá el número de tracking.';
     return;
   }
 
   btn.disabled = true; btn.textContent = 'Agregando...';
-  msgEl.style.display = 'none';
 
   try {
     const { data: { session } } = await sb.auth.getSession();
@@ -575,12 +975,12 @@ async function addTracking() {
 
     document.getElementById('alertTracking').value = '';
     document.getElementById('alertDesc').value     = '';
-    msgEl.style.cssText = 'display:block;padding:.6rem .9rem;border-radius:8px;margin-top:.75rem;font-size:.83rem;font-weight:600;background:#D1FAE5;color:#065f46';
+    msgEl.className  = 'track-msg ok';
     msgEl.textContent = '✅ Paquete agregado. El estado se actualiza una vez al día.';
     loadTrackings(currentUserEmail);
-    setTimeout(() => { msgEl.style.display = 'none'; }, 6000);
+    setTimeout(() => { msgEl.className = 'track-msg'; }, 6000);
   } catch(e) {
-    msgEl.style.cssText = 'display:block;padding:.6rem .9rem;border-radius:8px;margin-top:.75rem;font-size:.83rem;font-weight:600;background:#FEE2E2;color:#991b1b';
+    msgEl.className  = 'track-msg err';
     msgEl.textContent = '❌ ' + (e.message || 'Error al agregar.');
   } finally {
     btn.disabled = false; btn.textContent = '+ Agregar';
