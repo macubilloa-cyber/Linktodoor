@@ -3,5 +3,8 @@
   "rewrites": [
     { "source": "/mi-cuenta", "destination": "/portal.html" },
     { "source": "/panel",     "destination": "/panel.html"  }
+  ],
+  "crons": [
+    { "path": "/api/check-trackings", "schedule": "0 14 * * *" }
   ]
 }

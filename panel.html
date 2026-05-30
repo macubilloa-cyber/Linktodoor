@@ -415,6 +415,24 @@
       .card { box-shadow: none; border: 1px solid #ccc; }
     }
 
+    /* ───── NAV BADGE ───── */
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--red);
+      color: white;
+      border-radius: 20px;
+      font-size: .63rem;
+      font-weight: 900;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      margin-left: .3rem;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
     /* ───── RESPONSIVE ───── */
     @media (max-width: 600px) {
       main { padding: 1.25rem 1rem; }
@@ -461,6 +479,7 @@
     <nav>
       <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
       <button class="nav-btn" id="nav-clientes" onclick="showView('clientes')">Clientes</button>
+      <button class="nav-btn" id="nav-alertas"  onclick="showView('alertas')">📡 Pre-alertas<span id="alertas-badge" class="nav-badge" style="display:none"></span></button>
     </nav>
     <div class="header-actions">
       <button class="btn btn-sm btn-secondary" onclick="openChangePw()" title="Cambiar contraseña">⚙</button>
@@ -562,6 +581,41 @@
         </div>
       </div>
       <div class="card" id="cierre-content"></div>
+    </div>
+
+    <!-- VIEW: PRE-ALERTAS -->
+    <div id="view-alertas" class="view">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Pre-alertas</div>
+          <div class="ph-sub">Paquetes en seguimiento de tus clientes · se revisan diariamente</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-secondary btn-sm" onclick="renderAlertas()">↻ Actualizar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Tracking</th>
+                <th>Estado</th>
+                <th>Último evento</th>
+                <th>Revisado</th>
+                <th>Notificar</th>
+              </tr>
+            </thead>
+            <tbody id="alertas-tbody"></tbody>
+          </table>
+        </div>
+        <div id="alertas-empty" class="empty" style="display:none">
+          <div class="ico">📡</div>
+          <p>No hay paquetes en seguimiento aún.<br>
+          Los clientes los agregan desde su Mi Cuenta.</p>
+        </div>
+      </div>
     </div>
 
     <!-- VIEW: CLIENTES -->
@@ -809,6 +863,7 @@ function showView(name) {
   currentView = name;
   if (name === 'cargas')   renderCargas();
   if (name === 'clientes') renderClientes();
+  if (name === 'alertas')  renderAlertas();
 }
 
 function showDetail(cargaId) {
@@ -1640,11 +1695,132 @@ function esc(s) {
 document.addEventListener('focusin', e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
 document.addEventListener('input',   e => { if (e.target.id === 'm-ccharge') e.target._userEdited = true; });
 
+/* ─── PRE-ALERTAS ─── */
+const ALERT_STATUS = {
+  registrado:    { label: 'Registrado',          color: '#6B7280', bg: '#F3F4F6' },
+  sin_datos:     { label: 'Sin datos',           color: '#6B7280', bg: '#F3F4F6' },
+  info_recibida: { label: 'Info recibida',       color: '#1d4ed8', bg: '#DBEAFE' },
+  en_transito:   { label: '🚚 En tránsito',     color: '#1d4ed8', bg: '#DBEAFE' },
+  para_entrega:  { label: '🚀 Para entrega',    color: '#92400e', bg: '#FEF3C7' },
+  entregado:     { label: '✅ Entregado',        color: '#065f46', bg: '#D1FAE5' },
+  recogido:      { label: '📦 Recogido',         color: '#065f46', bg: '#D1FAE5' },
+  sin_actividad: { label: 'Sin actividad',       color: '#6B7280', bg: '#F3F4F6' },
+  no_entregado:  { label: '⚠️ No entregado',   color: '#991b1b', bg: '#FEE2E2' },
+  excepcion:     { label: '⚠️ Excepción',      color: '#991b1b', bg: '#FEE2E2' },
+};
+
+async function updateAlertsBadge() {
+  const { count } = await sb.from('package_alerts')
+    .select('*', { count: 'exact', head: true })
+    .eq('needs_notify', true);
+  const badge = document.getElementById('alertas-badge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+async function renderAlertas() {
+  const tbody = document.getElementById('alertas-tbody');
+  const empty = document.getElementById('alertas-empty');
+  tbody.innerHTML = LOADING_ROW(6);
+  empty.style.display = 'none';
+
+  const [alertsRes, clientsRes] = await Promise.all([
+    sb.from('package_alerts').select('*')
+      .order('needs_notify', { ascending: false })
+      .order('created_at',   { ascending: false }),
+    sb.from('saved_clients').select('name, phone, email')
+  ]);
+
+  const alertList  = alertsRes.data  || [];
+  const clientList = clientsRes.data || [];
+
+  /* Update badge */
+  const pendingCount = alertList.filter(a => a.needs_notify).length;
+  const badge = document.getElementById('alertas-badge');
+  if (pendingCount > 0) { badge.textContent = pendingCount; badge.style.display = 'inline-flex'; }
+  else { badge.style.display = 'none'; }
+
+  if (!alertList.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+
+  const clientMap = {};
+  clientList.forEach(c => { if (c.email) clientMap[c.email] = c; });
+
+  tbody.innerHTML = alertList.map(alert => {
+    const client = clientMap[alert.user_email] || { name: alert.client_name || alert.user_email, phone: '' };
+    const sInfo  = ALERT_STATUS[alert.status] || ALERT_STATUS.registrado;
+    const needsNotify = alert.needs_notify;
+    const phone  = client.phone || '';
+
+    const notifyBtn = phone && needsNotify
+      ? `<button class="btn btn-sm btn-success"
+           onclick="sendAlertWhatsApp('${alert.id}','${esc(phone)}','${esc(client.name)}','${esc(alert.tracking_number)}','${esc(alert.description||'')}','${esc(alert.status_es||sInfo.label)}','${esc(alert.last_event||'')}')">
+           💬 Notificar
+         </button>`
+      : needsNotify
+        ? `<span title="Agregá el teléfono al cliente" style="font-size:.75rem;color:var(--yellow);font-weight:700;cursor:help">⚠ Sin tel.</span>`
+        : `<span style="font-size:.75rem;color:var(--gray)">Al día</span>`;
+
+    return `
+      <tr style="${needsNotify ? 'background:var(--yellow-light)' : ''}">
+        <td>
+          <strong>${esc(client.name)}</strong>
+          ${phone ? `<br><span style="font-size:.74rem;color:var(--gray)">${esc(phone)}</span>` : ''}
+        </td>
+        <td>
+          <strong style="font-family:monospace;font-size:.83rem">${esc(alert.tracking_number)}</strong>
+          ${alert.description ? `<br><span style="font-size:.73rem;color:var(--gray)">${esc(alert.description)}</span>` : ''}
+        </td>
+        <td>
+          <span class="badge" style="background:${sInfo.bg};color:${sInfo.color}">${sInfo.label}</span>
+        </td>
+        <td style="font-size:.8rem;color:var(--gray);max-width:190px">
+          ${alert.last_event ? esc(alert.last_event) : '—'}
+          ${alert.carrier ? `<br><span style="font-size:.72rem">${esc(alert.carrier)}</span>` : ''}
+        </td>
+        <td style="font-size:.77rem;color:var(--gray);white-space:nowrap">
+          ${alert.last_checked_at
+            ? new Date(alert.last_checked_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})
+            : '—'}
+        </td>
+        <td>${notifyBtn}</td>
+      </tr>`;
+  }).join('');
+}
+
+function sendAlertWhatsApp(alertId, phone, clientName, trackingNum, description, statusEs, lastEvent) {
+  const cleanPhone = phone.replace(/\D/g, '');
+  const fullPhone  = cleanPhone.startsWith('506') ? cleanPhone : '506' + cleanPhone;
+
+  const msg =
+    `¡Hola ${clientName}! 📦\n\n` +
+    `Actualización de tu paquete${description ? ` (${description})` : ''}:\n` +
+    `📍 *${statusEs}*\n` +
+    (lastEvent ? `\n📝 ${lastEvent}\n` : '') +
+    `\n🔍 Tracking: ${trackingNum}\n` +
+    `\nPodés ver más detalles en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
+
+  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+  markAlertNotified(alertId, statusEs);
+}
+
+async function markAlertNotified(alertId, statusEs) {
+  await sb.from('package_alerts')
+    .update({ needs_notify: false, last_notified_status: statusEs })
+    .eq('id', alertId);
+  renderAlertas();
+}
+
 /* ─── INIT ─── */
 if (DB.isLoggedIn()) {
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').hidden = false;
   showView('cargas');
+  updateAlertsBadge();
 }
 
 if (!localStorage.getItem('ltd_pw')) {
