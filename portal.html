@@ -291,7 +291,7 @@ async function doLogin() {
   btn.disabled = true; btn.textContent = 'Ingresando...';
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
   btn.disabled = false; btn.textContent = 'Entrar →';
-  if (error) showErr('Email o contraseña incorrectos. Si no tenés acceso escribinos por WhatsApp.');
+  if (error) showErr(error.message);
 }
 
 async function doLogout() {
