@@ -1120,6 +1120,7 @@ async function renderClientes() {
         <td style="color:var(--gray);font-size:.82rem">${esc(c.notes || '—')}</td>
         <td>
           <div style="display:flex;gap:.35rem">
+            <button class="btn btn-sm btn-success"   onclick="openActivarPortal('${c.id}','${esc(c.name)}','${esc(c.email || '')}')">🔑 Portal</button>
             <button class="btn btn-sm btn-secondary" onclick="openEditCliente('${c.id}')">✎</button>
             <button class="btn btn-sm btn-danger"    onclick="deleteCliente('${c.id}')">✕</button>
           </div>
@@ -1468,6 +1469,94 @@ async function deleteCliente(clientId) {
   if (!confirm('¿Eliminar este cliente de la lista?')) return;
   await DB.deleteSavedClient(clientId);
   renderClientes();
+}
+
+/* ─── ACTIVAR PORTAL ─── */
+function openActivarPortal(clientId, name, email) {
+  openModal(`
+    <div class="modal-head">
+      <span class="modal-title">🔑 Activar portal — ${esc(name)}</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <p style="font-size:.84rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">
+      Creá o actualizá el acceso de este cliente al portal <strong>linktodoor.co/mi-cuenta</strong>.
+      No se envía ningún email — vos le mandás las credenciales por WhatsApp.
+    </p>
+    <div class="fg">
+      <label>Email del cliente</label>
+      <input type="email" id="m-portal-email" value="${esc(email)}" placeholder="cliente@email.com" />
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <input type="text" id="m-portal-pw" placeholder="Ej: Linktodoor2024"
+        style="font-family:monospace;letter-spacing:.05em" />
+      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">
+        Podés usar cualquier contraseña. Se la mandás al cliente por WhatsApp.
+      </p>
+    </div>
+    <div id="m-portal-result" style="display:none;margin-bottom:1rem"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="m-portal-btn" onclick="doActivarPortal('${clientId}','${esc(name)}')">Activar acceso</button>
+    </div>
+  `);
+  document.getElementById('m-portal-email').focus();
+}
+
+async function doActivarPortal(clientId, name) {
+  const email = document.getElementById('m-portal-email').value.trim();
+  const pw    = document.getElementById('m-portal-pw').value.trim();
+  const btn   = document.getElementById('m-portal-btn');
+  const res   = document.getElementById('m-portal-result');
+
+  if (!email) { alert('Ingresá el email del cliente.'); return; }
+  if (!pw)    { alert('Ingresá una contraseña.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Activando...';
+  res.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/create-client', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await r.json();
+
+    if (!data.ok) {
+      btn.disabled = false; btn.textContent = 'Activar acceso';
+      res.innerHTML = `<div class="alert alert-danger">❌ ${esc(data.error)}</div>`;
+      res.style.display = 'block';
+      return;
+    }
+
+    /* Guardar email en saved_clients si no lo tenía */
+    await DB.updateSavedClient(clientId, name, '', email, '');
+
+    /* Mostrar éxito con plantilla WhatsApp */
+    const waMsg = encodeURIComponent(
+      `¡Hola ${name}! 👋\n\nYa podés ver tus pedidos en Linktodoor:\n\n` +
+      `🔗 linktodoor.co/mi-cuenta\n📧 Email: ${email}\n🔑 Contraseña: ${pw}\n\n` +
+      `Entrá y vas a ver el historial de tus cargas. Cualquier consulta, escribinos aquí.`
+    );
+
+    btn.disabled = false; btn.textContent = 'Activar acceso';
+    res.innerHTML = `
+      <div class="alert alert-info" style="margin-bottom:.6rem">
+        ✅ Acceso ${data.action === 'created' ? 'creado' : 'actualizado'} correctamente.
+      </div>
+      <a href="https://wa.me/?text=${waMsg}" target="_blank"
+        class="btn btn-success btn-full" style="text-decoration:none;justify-content:center">
+        💬 Enviar credenciales por WhatsApp
+      </a>`;
+    res.style.display = 'block';
+
+    renderClientes();
+  } catch {
+    btn.disabled = false; btn.textContent = 'Activar acceso';
+    res.innerHTML = `<div class="alert alert-danger">❌ Error de conexión. Intentá de nuevo.</div>`;
+    res.style.display = 'block';
+  }
 }
 
 /* ─── CAMBIAR CONTRASEÑA ─── */
