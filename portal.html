@@ -342,10 +342,12 @@ async function loadDashboard(userEmail) {
   document.getElementById('welcomeMsg').textContent = `¡Hola, ${clientRow.name}! 👋`;
 
   /* 2. Cargar sus líneas de carga_clients + datos de la carga */
-  const { data: lines } = await sb.from('carga_clients')
+  const { data: lines, error: linesErr } = await sb.from('carga_clients')
     .select('*, cargas(reference, date, status, total_weight_lbs)')
-    .eq('client_name', clientRow.name)
+    .ilike('client_name', clientRow.name)
     .order('created_at', { ascending: false });
+
+  if (linesErr) console.error('carga_clients error:', linesErr);
 
   const myLines = lines || [];
 
