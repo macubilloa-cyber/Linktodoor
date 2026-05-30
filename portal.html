@@ -318,23 +318,12 @@ async function doMagicLink() {
   const btn   = document.getElementById('btnMagic');
   if (!email) { showErr('Ingresá tu correo electrónico.'); return; }
   clearMsgs();
-
-  /* Verificar que el email esté registrado como cliente */
-  const { data: clientRow } = await sb.from('saved_clients')
-    .select('id').eq('email', email).limit(1).maybeSingle();
-
-  if (!clientRow) {
-    showErr('No encontramos ese email en nuestro sistema. Verificá que sea el correo con el que te registraste, o escribinos por WhatsApp.');
-    return;
-  }
-
   btn.disabled = true; btn.textContent = 'Enviando...';
   const { error } = await sb.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: window.location.origin + '/mi-cuenta' }
   });
   btn.disabled = false; btn.textContent = 'Enviarme el enlace ✉️';
-
   if (error) showErr(error.message);
   else showOk('✅ Revisá tu correo — te mandamos el enlace para entrar. Puede tardar un minuto.');
 }
