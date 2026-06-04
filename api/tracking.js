@@ -22,19 +22,29 @@ export default async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(
-      `https://box2boxcr.us/api/v1/tracking/${encodeURIComponent(q)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-          Accept: 'application/json'
-        }
-      }
-    );
+    const url = `https://box2boxcr.us/api/v1/tracking/${encodeURIComponent(q)}`;
+    console.log('[tracking] query:', q, '| url:', url);
 
-    const data = await upstream.json();
+    const upstream = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        Accept: 'application/json'
+      }
+    });
+
+    const rawText = await upstream.text();
+    console.log('[tracking] status:', upstream.status, '| raw:', rawText.slice(0, 500));
+
+    let data;
+    try { data = JSON.parse(rawText); }
+    catch { data = { _raw: rawText }; }
+
+    /* Si Box2Box devuelve ok:true pero paquetes vacío, intentar
+       buscar también por teléfono si q parece ser un tracking */
     return res.status(upstream.status).json(data);
-  } catch {
+
+  } catch (err) {
+    console.error('[tracking] fetch error:', err.message);
     return res.status(502).json({
       ok: false,
       error: { code: 'PROVIDER_UNAVAILABLE', message: 'Servicio no disponible. Intentá de nuevo en unos minutos.' }
