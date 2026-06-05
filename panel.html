@@ -241,6 +241,27 @@
         <div><div class="ph-title">Cargas</div><div class="ph-sub">Historial de envíos recibidos</div></div>
         <div class="ph-actions"><button class="btn btn-primary" onclick="openNuevaCarga()">+ Nueva Carga</button></div>
       </div>
+      <!-- FILTER BAR -->
+      <div class="card" style="margin-bottom:1rem;padding:.9rem 1.1rem">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span style="font-size:.76rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">Filtrar</span>
+          <div style="display:flex;align-items:center;gap:.35rem">
+            <label style="font-size:.78rem;font-weight:600;color:var(--gray);white-space:nowrap">Desde</label>
+            <input type="date" id="filter-from" style="width:148px;padding:.38rem .6rem;font-size:.84rem" onchange="applyFilter()" />
+          </div>
+          <div style="display:flex;align-items:center;gap:.35rem">
+            <label style="font-size:.78rem;font-weight:600;color:var(--gray);white-space:nowrap">Hasta</label>
+            <input type="date" id="filter-to" style="width:148px;padding:.38rem .6rem;font-size:.84rem" onchange="applyFilter()" />
+          </div>
+          <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('month')">Último mes</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('3month')">3 meses</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('year')">Este año</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('all')">Todo</button>
+          </div>
+          <span id="filter-label" style="font-size:.78rem;color:var(--gray);margin-left:auto;white-space:nowrap"></span>
+        </div>
+      </div>
       <div id="cargas-stats" class="stats"></div>
       <div class="card">
         <div class="table-wrap">
@@ -556,6 +577,9 @@ const DB = {
   logout:      () => sessionStorage.removeItem('ltd_auth'),
 };
 
+/* ─── STATE ─── */
+let _allCargas = [];
+
 /* ─── AUTH ─── */
 function doLogin() {
   const pw  = document.getElementById('login-pw').value;
@@ -626,8 +650,67 @@ async function renderCargas() {
   tbody.innerHTML     = LOADING_ROW(8);
   empty.style.display = 'none';
 
-  const cargas = await DB.getCargas();
+  _allCargas = await DB.getCargas();
+  applyFilter();
+}
 
+const fDateShort = d => {
+  const [y,m,day] = d.split('-');
+  return new Date(+y,+m-1,+day).toLocaleDateString('es-CR',{day:'numeric',month:'short',year:'numeric'});
+};
+
+function setPreset(period) {
+  const today = new Date();
+  const toStr = d => d.toISOString().slice(0, 10);
+  const fromInput = document.getElementById('filter-from');
+  const toInput   = document.getElementById('filter-to');
+
+  if (period === 'all') {
+    fromInput.value = '';
+    toInput.value   = '';
+  } else {
+    toInput.value = toStr(today);
+    if (period === 'month') {
+      const f = new Date(today); f.setMonth(f.getMonth() - 1);
+      fromInput.value = toStr(f);
+    } else if (period === '3month') {
+      const f = new Date(today); f.setMonth(f.getMonth() - 3);
+      fromInput.value = toStr(f);
+    } else if (period === 'year') {
+      fromInput.value = `${today.getFullYear()}-01-01`;
+    }
+  }
+  applyFilter();
+}
+
+function applyFilter() {
+  const from = document.getElementById('filter-from').value;
+  const to   = document.getElementById('filter-to').value;
+
+  const filtered = _allCargas.filter(c => {
+    if (from && c.date < from) return false;
+    if (to   && c.date > to)   return false;
+    return true;
+  });
+
+  renderCargasStats(filtered);
+  renderCargasTable(filtered);
+
+  const labelEl = document.getElementById('filter-label');
+  const n = filtered.length;
+  const countStr = `${n} carga${n !== 1 ? 's' : ''}`;
+  if (!from && !to) {
+    labelEl.textContent = countStr;
+  } else {
+    const parts = [];
+    if (from) parts.push(`desde ${fDateShort(from)}`);
+    if (to)   parts.push(`hasta ${fDateShort(to)}`);
+    labelEl.textContent = `${countStr} · ${parts.join(' ')}`;
+  }
+}
+
+function renderCargasStats(cargas) {
+  const statsEl      = document.getElementById('cargas-stats');
   const totalCargas  = cargas.length;
   const openCargas   = cargas.filter(c => c.status === 'open').length;
   const totalPagado  = cargas.reduce((s,c) => s + c.totalCostCRC, 0);
@@ -643,8 +726,17 @@ async function renderCargas() {
     <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(totalCobrado)}</div></div>
     <div class="stat"><div class="stat-label">Ganancia neta</div><div class="stat-val ${ganancia>=0?'green':'red'}">${fCRC(ganancia)}</div></div>
   `;
+}
 
-  if (!cargas.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+function renderCargasTable(cargas) {
+  const tbody = document.getElementById('cargas-tbody');
+  const empty = document.getElementById('cargas-empty');
+
+  if (!cargas.length) {
+    tbody.innerHTML     = '';
+    empty.style.display = '';
+    return;
+  }
   empty.style.display = 'none';
 
   tbody.innerHTML = cargas.map(c => {
