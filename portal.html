@@ -545,6 +545,75 @@
     }
     .btn-del-track:hover { background: var(--red-lt); color: var(--red); }
 
+    /* Carga cards */
+    .carga-list { padding: .75rem; display: flex; flex-direction: column; gap: .6rem; }
+    .carga-card {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.1rem 1.25rem;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, box-shadow .15s;
+      background: white;
+    }
+    .carga-card:hover { background: var(--pri-lt); border-color: var(--pri); box-shadow: 0 2px 12px rgba(91,91,214,.1); }
+    .carga-card:active { background: #e8eaff; }
+    .carga-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      margin-bottom: .5rem;
+    }
+    .carga-card-ref { font-size: 1rem; font-weight: 800; color: var(--dark); }
+    .carga-card-meta { font-size: .78rem; color: var(--muted); display: flex; gap: 1rem; margin-bottom: .65rem; }
+    .carga-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .carga-card-lbs { font-weight: 700; color: var(--dark); font-size: .9rem; }
+    .carga-card-kg { font-size: .74rem; color: var(--faint); margin-left: .4rem; }
+    .carga-card-right { display: flex; align-items: center; gap: .75rem; }
+    .carga-card-cobrado { font-weight: 900; color: var(--pri); font-size: .95rem; }
+    .carga-card-arrow { font-size: 1.5rem; color: var(--faint); line-height: 1; }
+
+    /* Detail view */
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .btn-back {
+      background: var(--light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .45rem .9rem;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--body);
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .btn-back:hover { background: var(--pri-lt); border-color: var(--pri); color: var(--pri); }
+    .detail-ref { font-size: 1.1rem; font-weight: 800; color: var(--dark); line-height: 1.2; }
+    .detail-meta {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .25rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .detail-notes {
+      padding: .85rem 1.25rem;
+      font-size: .83rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #FAFBFC;
+    }
+
     /* Responsive */
     @media (max-width: 700px) {
       .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -704,6 +773,7 @@ const SUPABASE_KEY = 'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUserEmail = null;
+let _myLines = [];
 
 const KG_TO_LBS = 2.20462;
 const fCRC  = n => '₡ ' + Math.round(n).toLocaleString('es-CR');
@@ -799,23 +869,29 @@ async function loadDashboard(userEmail) {
   document.getElementById('welcomeMsg').textContent = `¡Hola, ${clientRow.name}! 👋`;
 
   const { data: lines, error: linesErr } = await sb.from('carga_clients')
-    .select('*, cargas(reference, date, status, total_weight_lbs)')
+    .select('*, cargas(reference, date, status), packages(*)')
     .ilike('client_name', clientRow.name)
     .order('created_at', { ascending: false });
 
   if (linesErr) console.error('carga_clients error:', linesErr);
 
-  const myLines = lines || [];
+  _myLines = lines || [];
 
-  const totalLbs     = myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
-  const totalCobrado = myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
-  document.getElementById('statPedidos').textContent = myLines.length;
+  const totalLbs     = _myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
+  const totalCobrado = _myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
+  document.getElementById('statPedidos').textContent = _myLines.length;
   document.getElementById('statLbs').textContent     = fLbs(totalLbs);
   document.getElementById('statKg').textContent      = fKg(totalLbs);
   document.getElementById('statCobrado').textContent = fCRC(totalCobrado);
 
-  if (!myLines.length) {
-    document.getElementById('ordersContent').innerHTML = `
+  renderCargasList();
+}
+
+function renderCargasList() {
+  const cont = document.getElementById('ordersContent');
+
+  if (!_myLines.length) {
+    cont.innerHTML = `
       <div class="empty-box">
         <div class="ico">📦</div>
         <p>Todavía no tenés pedidos registrados.<br>¡Pronto aparecerán aquí!</p>
@@ -823,47 +899,108 @@ async function loadDashboard(userEmail) {
     return;
   }
 
-  const rows = myLines.map(l => {
+  const cards = _myLines.map((l, idx) => {
     const c = l.cargas || {};
+    const pkgs = l.packages || [];
+    const statusBadge = c.status === 'closed'
+      ? '<span class="badge badge-delivered">✅ Entregado</span>'
+      : '<span class="badge badge-transit">🚚 En camino</span>';
+    const pkgLabel = pkgs.length === 1 ? '1 paquete' : `${pkgs.length} paquetes`;
     return `
-      <tr>
-        <td><strong style="color:var(--dark)">${esc(c.reference || '—')}</strong></td>
-        <td style="white-space:nowrap;color:var(--muted)">${c.date ? fDate(c.date) : '—'}</td>
-        <td>
-          <span style="font-weight:700;color:var(--dark)">${fLbs(l.weight_lbs)}</span><br>
-          <span style="font-size:.74rem;color:var(--faint)">${fKg(l.weight_lbs)}</span>
-        </td>
-        <td style="font-weight:800;color:var(--pri);font-size:.95rem">${fCRC(l.charged_crc)}</td>
-        <td>${c.status === 'closed'
-          ? '<span class="badge badge-delivered">✅ Entregado</span>'
-          : '<span class="badge badge-transit">🚚 En camino</span>'}</td>
-        <td style="color:var(--muted);font-size:.82rem">${esc(l.notes || '—')}</td>
-      </tr>`;
+      <div class="carga-card" onclick="showCargaDetail(${idx})">
+        <div class="carga-card-top">
+          <div class="carga-card-ref">${esc(c.reference || '—')}</div>
+          ${statusBadge}
+        </div>
+        <div class="carga-card-meta">
+          <span>${c.date ? fDate(c.date) : '—'}</span>
+          <span>📦 ${pkgLabel}</span>
+        </div>
+        <div class="carga-card-footer">
+          <div>
+            <span class="carga-card-lbs">${fLbs(l.weight_lbs)}</span>
+            <span class="carga-card-kg">${fKg(l.weight_lbs)}</span>
+          </div>
+          <div class="carga-card-right">
+            <span class="carga-card-cobrado">${fCRC(l.charged_crc)}</span>
+            <span class="carga-card-arrow">›</span>
+          </div>
+        </div>
+      </div>`;
   }).join('');
 
-  const totalRow = `
-    <tr class="total-row">
-      <td colspan="2" style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Total</td>
-      <td>
-        <span style="font-weight:900">${fLbs(totalLbs)}</span><br>
-        <span style="font-size:.74rem;color:var(--faint)">${fKg(totalLbs)}</span>
-      </td>
-      <td style="color:var(--pri);font-size:1rem;font-weight:900">${fCRC(totalCobrado)}</td>
-      <td colspan="2"></td>
-    </tr>`;
+  cont.innerHTML = `<div class="carga-list">${cards}</div>`;
+}
+
+function showCargaDetail(idx) {
+  const l = _myLines[idx];
+  if (!l) return;
+  const c = l.cargas || {};
+  const pkgs = (l.packages || []).slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+  const totalLbs = pkgs.reduce((s, p) => s + (p.weight_lbs || 0), 0);
+  const totalCRC = pkgs.reduce((s, p) => s + (p.charged_crc || 0), 0);
+
+  let pkgRows = '';
+  if (pkgs.length) {
+    pkgRows = pkgs.map(p => `
+      <tr>
+        <td><span style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(p.guia || '—')}</span></td>
+        <td>
+          <span style="font-weight:700">${fLbs(p.weight_lbs)}</span><br>
+          <span style="font-size:.74rem;color:var(--faint)">${fKg(p.weight_lbs)}</span>
+        </td>
+        <td style="font-weight:800;color:var(--pri)">${fCRC(p.charged_crc)}</td>
+        <td style="font-size:.82rem;color:var(--muted)">${esc(p.notes || '—')}</td>
+      </tr>`).join('');
+    pkgRows += `
+      <tr class="total-row">
+        <td style="font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Total</td>
+        <td>
+          <span style="font-weight:900">${fLbs(totalLbs)}</span><br>
+          <span style="font-size:.74rem;color:var(--faint)">${fKg(totalLbs)}</span>
+        </td>
+        <td style="color:var(--pri);font-size:1rem;font-weight:900">${fCRC(totalCRC)}</td>
+        <td></td>
+      </tr>`;
+  } else {
+    pkgRows = `
+      <tr><td colspan="4">
+        <div class="empty-box" style="padding:2rem">
+          <div class="ico">📭</div>
+          <p style="font-size:.85rem">No hay paquetes registrados para esta carga aún.</p>
+        </div>
+      </td></tr>`;
+  }
+
+  const statusBadge = c.status === 'closed'
+    ? '<span class="badge badge-delivered">✅ Entregado</span>'
+    : '<span class="badge badge-transit">🚚 En camino</span>';
 
   document.getElementById('ordersContent').innerHTML = `
+    <div class="detail-header">
+      <button class="btn-back" onclick="renderCargasList()">← Volver</button>
+      <div>
+        <div class="detail-ref">${esc(c.reference || '—')}</div>
+        <div class="detail-meta">
+          ${c.date ? fDate(c.date) : '—'} &nbsp;•&nbsp; ${statusBadge}
+        </div>
+      </div>
+    </div>
     <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
-            <th>Carga</th><th>Fecha</th><th>Mis libras</th>
-            <th>Cobrado</th><th>Estado</th><th>Notas</th>
+            <th>Guía / Tracking</th>
+            <th>Peso</th>
+            <th>Cobrado</th>
+            <th>Notas</th>
           </tr>
         </thead>
-        <tbody>${rows}${totalRow}</tbody>
+        <tbody>${pkgRows}</tbody>
       </table>
-    </div>`;
+    </div>
+    ${l.notes ? `<div class="detail-notes"><strong>Notas:</strong> ${esc(l.notes)}</div>` : ''}`;
 }
 
 /* ── TRACKING STATUS ── */
