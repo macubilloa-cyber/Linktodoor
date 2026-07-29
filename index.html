@@ -448,6 +448,26 @@
     .tl-step.actual .tl-date{color:rgba(196,217,245,.45)}
     @media(max-width:600px){.track-addr-grid{grid-template-columns:1fr}}
 
+    /* ── COPY ADDR BTN ── */
+    .copy-addr-btn{margin-top:.9rem;background:rgba(255,255,255,.1);
+      color:var(--cream);border:1px solid rgba(255,255,255,.2);
+      border-radius:20px;padding:.4rem 1rem;font-size:.75rem;font-weight:700;
+      cursor:pointer;transition:var(--t);font-family:inherit;width:100%}
+    .copy-addr-btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4)}
+    .copy-addr-btn.copied{background:rgba(37,211,102,.2);border-color:rgba(37,211,102,.5);color:#86efac}
+
+    /* ── WHATSAPP FLOAT ── */
+    .wa-float{position:fixed;bottom:1.8rem;right:1.8rem;z-index:900;
+      background:#25D366;color:#fff;border-radius:50px;
+      padding:.85rem 1.4rem .85rem 1.1rem;display:flex;align-items:center;
+      gap:.55rem;font-weight:700;font-size:.92rem;text-decoration:none;
+      box-shadow:0 6px 24px rgba(37,211,102,.45);transition:var(--t);
+      animation:waPop .5s cubic-bezier(.34,1.56,.64,1) 2s both}
+    @keyframes waPop{from{transform:scale(0) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+    .wa-float:hover{background:#1fb855;transform:translateY(-3px);box-shadow:0 10px 32px rgba(37,211,102,.55)}
+    .wa-float svg{width:22px;height:22px;flex-shrink:0}
+    @media(max-width:500px){.wa-float span{display:none}.wa-float{padding:.9rem;border-radius:50%}}
+
     /* ── REGISTRO ── */
     #registro{background:var(--cream);padding:5rem 2rem}
     #registro .sec-tag{background:rgba(91,91,214,.1);color:var(--pri)}
@@ -805,19 +825,23 @@
 
   <!-- Paso 1: selección de bodega -->
   <div class="track-addr-grid reveal" id="trackAddrGrid">
-    <div class="track-addr-card" onclick="seleccionarBodega('b2b')" tabindex="0">
-      <div class="tac-icon">📦</div>
-      <div class="tac-label">Bodega Consolidado</div>
+    <div class="track-addr-card" tabindex="0">
+      <div class="tac-icon" onclick="seleccionarBodega('b2b')">📦</div>
+      <div class="tac-label" onclick="seleccionarBodega('b2b')">Bodega Consolidado</div>
       <div class="tac-addr">2071 NW 112th Ave</div>
       <div class="tac-addr">8800 NW 102nd ST</div>
       <div class="tac-city">Miami, FL</div>
+      <button class="copy-addr-btn" onclick="copiarDireccion(this,'2071 NW 112th Ave\n8800 NW 102nd ST\nMiami, FL 33172\nUnited States')">📋 Copiar dirección 2071</button>
+      <div style="font-size:.7rem;color:rgba(245,240,228,.3);margin-top:.5rem;cursor:pointer" onclick="seleccionarBodega('b2b')">Toca para rastrear →</div>
     </div>
-    <div class="track-addr-card flash" onclick="seleccionarBodega('cargotrack')" tabindex="0">
+    <div class="track-addr-card flash" tabindex="0">
       <div class="tac-badge">⚡ Flash · 3 días</div>
-      <div class="tac-icon">🏃</div>
-      <div class="tac-label">Bodega Flash</div>
+      <div class="tac-icon" onclick="seleccionarBodega('cargotrack')">🏃</div>
+      <div class="tac-label" onclick="seleccionarBodega('cargotrack')">Bodega Flash</div>
       <div class="tac-addr">5414 NW 79 Ave</div>
       <div class="tac-city">Doral, FL 33166</div>
+      <button class="copy-addr-btn" onclick="copiarDireccion(this,'5414 NW 79 Ave\nDoral, FL 33166\nUnited States')">📋 Copiar dirección Flash</button>
+      <div style="font-size:.7rem;color:rgba(245,240,228,.3);margin-top:.5rem;cursor:pointer" onclick="seleccionarBodega('cargotrack')">Toca para rastrear →</div>
     </div>
   </div>
 
@@ -951,6 +975,16 @@
     </div>
   </div>
 </footer>
+
+<!-- WHATSAPP FLOTANTE -->
+<a href="https://wa.me/50685173813?text=Hola%2C%20tengo%20una%20consulta%20sobre%20Linktodoor%20%F0%9F%93%A6"
+   class="wa-float" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.118 1.528 5.847L.057 23.882l6.196-1.623A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.001-1.371l-.36-.213-3.677.964.98-3.585-.234-.369A9.784 9.784 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+  </svg>
+  <span>¿Dudas? Escribinos</span>
+</a>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -1166,6 +1200,15 @@ function copiarNumero(num) {
   navigator.clipboard?.writeText(num).then(() => {
     const el = document.querySelector('.track-copy-num');
     if (el) { el.textContent = '¡Copiado!'; setTimeout(() => el.textContent = num, 1500); }
+  });
+}
+
+function copiarDireccion(btn, addr) {
+  navigator.clipboard?.writeText(addr).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ ¡Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2200);
   });
 }
 

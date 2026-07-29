@@ -24,116 +24,39 @@
       --radius:       12px;
       --shadow:       0 2px 12px rgba(0,0,0,.08);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--cream);
-      color: var(--dark);
-      min-height: 100vh;
-      font-size: 15px;
+      background: var(--cream); color: var(--dark); min-height: 100vh; font-size: 15px;
     }
 
-    /* ───── LOGIN ───── */
+    /* LOGIN */
     #screen-login {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
-      padding: 1rem;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%); padding: 1rem;
     }
-
     .login-card {
-      background: white;
-      border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 24px 64px rgba(0,0,0,.25);
+      background: white; border-radius: 16px; padding: 2.5rem;
+      width: 100%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,.25);
     }
+    .login-logo { text-align: center; margin-bottom: 2rem; }
+    .logo-wrap  { display: inline-flex; gap: 2px; margin-bottom: .4rem; }
+    .logo-l { background: var(--purple); color: white; padding: 7px 9px; border-radius: 6px 0 0 6px; font-weight: 900; font-size: 1rem; letter-spacing: .5px; }
+    .logo-r { background: var(--dark);   color: white; padding: 7px 9px; border-radius: 0 6px 6px 0; font-weight: 900; font-size: 1rem; letter-spacing: .5px; }
+    .login-sub { font-size: .82rem; color: var(--gray); display: block; margin-top: .25rem; }
 
-    .login-logo {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .logo-wrap { display: inline-flex; gap: 2px; margin-bottom: .4rem; }
-    .logo-l {
-      background: var(--purple);
-      color: white;
-      padding: 7px 9px;
-      border-radius: 6px 0 0 6px;
-      font-weight: 900;
-      font-size: 1rem;
-      letter-spacing: .5px;
-    }
-    .logo-r {
-      background: var(--dark);
-      color: white;
-      padding: 7px 9px;
-      border-radius: 0 6px 6px 0;
-      font-weight: 900;
-      font-size: 1rem;
-      letter-spacing: .5px;
-    }
-
-    .login-sub {
-      font-size: .82rem;
-      color: var(--gray);
-      display: block;
-      margin-top: .25rem;
-    }
-
-    /* ───── FORMS ───── */
+    /* FORMS */
     .fg { margin-bottom: 1rem; }
-    .fg label {
-      display: block;
-      font-size: .8rem;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: .3rem;
-      text-transform: uppercase;
-      letter-spacing: .3px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: .58rem .85rem;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: .92rem;
-      color: var(--dark);
-      background: white;
-      transition: border-color .15s;
-      font-family: inherit;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--purple);
-    }
-    textarea { resize: vertical; min-height: 72px; }
-
+    .fg label { display: block; font-size: .8rem; font-weight: 700; color: var(--dark); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .3px; }
+    input, select, textarea { width: 100%; padding: .58rem .85rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: .92rem; color: var(--dark); background: white; transition: border-color .15s; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--purple); }
+    textarea { resize: vertical; min-height: 64px; }
     .inline-row { display: flex; gap: .5rem; }
     .inline-row input { flex: 1; }
     .inline-row select { width: 90px; flex-shrink: 0; }
 
-    /* ───── BUTTONS ───── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      padding: .58rem 1.1rem;
-      border-radius: 8px;
-      border: none;
-      font-size: .88rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .15s;
-      font-family: inherit;
-      white-space: nowrap;
-    }
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: .35rem; padding: .58rem 1.1rem; border-radius: 8px; border: none; font-size: .88rem; font-weight: 700; cursor: pointer; transition: all .15s; font-family: inherit; white-space: nowrap; }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-primary   { background: var(--purple);      color: white; }
     .btn-primary:hover   { background: var(--purple-dark); }
@@ -146,266 +69,99 @@
     .btn-warn      { background: var(--yellow-light); color: #78350f; }
     .btn-warn:hover      { background: #fde68a; }
     .btn-full { width: 100%; justify-content: center; }
-    .btn-sm { padding: .32rem .7rem; font-size: .78rem; }
+    .btn-sm   { padding: .32rem .7rem; font-size: .78rem; }
     .btn-icon { padding: .38rem .55rem; }
 
-    /* ───── HEADER ───── */
+    /* HEADER */
     #screen-app { min-height: 100vh; }
-
-    header {
-      background: white;
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      height: 58px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-    }
-
-    .header-badge {
-      background: var(--purple-light);
-      color: var(--purple);
-      font-size: .68rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 20px;
-      letter-spacing: .3px;
-    }
-
+    header { background: white; border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; height: 58px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .header-badge { background: var(--purple-light); color: var(--purple); font-size: .68rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; letter-spacing: .3px; }
     nav { display: flex; gap: .2rem; flex: 1; }
-
-    .nav-btn {
-      padding: .38rem .85rem;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      font-size: .88rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--gray);
-      transition: all .15s;
-      font-family: inherit;
-    }
-    .nav-btn:hover, .nav-btn.active {
-      background: var(--purple-light);
-      color: var(--purple);
-    }
-
+    .nav-btn { padding: .38rem .85rem; border-radius: 8px; border: none; background: transparent; font-size: .88rem; font-weight: 600; cursor: pointer; color: var(--gray); transition: all .15s; font-family: inherit; }
+    .nav-btn:hover, .nav-btn.active { background: var(--purple-light); color: var(--purple); }
     .header-actions { display: flex; gap: .5rem; align-items: center; }
 
-    /* ───── LAYOUT ───── */
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-    }
-
+    /* LAYOUT */
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
     .view { display: none; }
     .view.active { display: block; }
 
-    /* ───── PAGE HEADER ───── */
-    .ph {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
+    /* PAGE HEADER */
+    .ph { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
     .ph-title { font-size: 1.35rem; font-weight: 800; }
-    .ph-sub { color: var(--gray); font-size: .82rem; margin-top: .2rem; }
+    .ph-sub   { color: var(--gray); font-size: .82rem; margin-top: .2rem; }
     .ph-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 
-    /* ───── CARDS ───── */
-    .card {
-      background: white;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 1.25rem;
-      box-shadow: var(--shadow);
-    }
+    /* CARDS */
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem; box-shadow: var(--shadow); }
 
-    /* ───── STATS ───── */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .stat {
-      background: white;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 1rem 1.2rem;
-    }
-    .stat-label {
-      font-size: .72rem;
-      color: var(--gray);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: .25rem;
-    }
-    .stat-val { font-size: 1.35rem; font-weight: 900; }
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat  { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.2rem; }
+    .stat-label { font-size: .72rem; color: var(--gray); font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-bottom: .25rem; }
+    .stat-val   { font-size: 1.35rem; font-weight: 900; }
     .stat-val.green  { color: var(--green); }
-    .stat-val.red    { color: var(--red); }
-    .stat-val.purple { color: var(--purple); }
+    .stat-val.red    { color: var(--red);   }
+    .stat-val.purple { color: var(--purple);}
 
-    /* ───── TABLE ───── */
+    /* TABLE */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-    thead th {
-      text-align: left;
-      padding: .55rem .75rem;
-      font-size: .72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      color: var(--gray);
-      border-bottom: 2px solid var(--border);
-    }
-    td {
-      padding: .7rem .75rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
+    thead th { text-align: left; padding: .55rem .75rem; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--gray); border-bottom: 2px solid var(--border); }
+    td { padding: .7rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: var(--light); }
-    .td-right { text-align: right; }
+    .td-right  { text-align: right; }
     .td-center { text-align: center; }
 
-    /* ───── BADGE ───── */
-    .badge {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
+    /* PACKAGE SUB-ROWS */
+    tr.pkg-sub td { background: var(--purple-light); border-bottom: 1px solid #d8d8f0; font-size: .8rem; padding: .45rem .75rem; }
+    tr.pkg-sub:hover td { background: #e4e4f4; }
+
+    /* BADGE */
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .72rem; font-weight: 800; letter-spacing: .2px; }
     .badge-open   { background: #DBEAFE; color: #1d4ed8; }
     .badge-closed { background: var(--green-light); color: #065f46; }
 
-    /* ───── MODAL ───── */
-    #modal-bg {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+    /* MODAL */
+    #modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
     #modal-bg.open { display: flex; }
-
-    .modal {
-      background: white;
-      border-radius: 14px;
-      padding: 1.75rem;
-      width: 100%;
-      max-width: 500px;
-      max-height: 92vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(0,0,0,.28);
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
+    .modal { background: white; border-radius: 14px; padding: 1.75rem; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.28); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
     .modal-title { font-size: 1.05rem; font-weight: 800; }
-    .modal-x {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      color: var(--gray);
-      line-height: 1;
-      padding: 2px 5px;
-    }
+    .modal-x { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--gray); line-height: 1; padding: 2px 5px; }
     .modal-x:hover { color: var(--dark); }
 
-    /* ───── MISC ───── */
+    /* MISC */
     hr.div { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--gray);
-      font-size: .88rem;
-      font-weight: 600;
-      padding: 0;
-      margin-bottom: 1.1rem;
-      font-family: inherit;
-    }
+    .back-btn { display: inline-flex; align-items: center; gap: .4rem; background: none; border: none; cursor: pointer; color: var(--gray); font-size: .88rem; font-weight: 600; padding: 0; margin-bottom: 1.1rem; font-family: inherit; }
     .back-btn:hover { color: var(--purple); }
-
-    .empty {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--gray);
-    }
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--gray); }
     .empty .ico { font-size: 2.2rem; margin-bottom: .75rem; }
-
-    .alert {
-      padding: .6rem .9rem;
-      border-radius: 8px;
-      font-size: .83rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
+    .alert { padding: .6rem .9rem; border-radius: 8px; font-size: .83rem; margin-bottom: 1rem; font-weight: 600; }
     .alert-info   { background: var(--purple-light); color: var(--purple); }
     .alert-warn   { background: var(--yellow-light); color: #78350f; }
     .alert-danger { background: var(--red-light);    color: #991b1b; }
 
-    /* ───── PROFIT BOX ───── */
-    .profit-box {
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      text-align: center;
-      margin: 1rem 0;
-      border: 2px solid var(--border);
-      background: var(--light);
-    }
+    /* PROFIT BOX */
+    .profit-box { border-radius: var(--radius); padding: 1.25rem; text-align: center; margin: 1rem 0; border: 2px solid var(--border); background: var(--light); }
     .profit-box.pos { background: var(--green-light); border-color: var(--green); }
     .profit-box.neg { background: var(--red-light);   border-color: var(--red);   }
     .profit-box .lbl { font-size: .8rem; font-weight: 700; color: var(--gray); margin-bottom: .35rem; }
     .profit-box .amt { font-size: 1.85rem; font-weight: 900; }
     .profit-box.pos .amt { color: var(--green); }
-    .profit-box.neg .amt { color: var(--red); }
+    .profit-box.neg .amt { color: var(--red);   }
 
-    /* ───── CIERRE PRINT ───── */
-    .cierre-header {
-      text-align: center;
-      padding-bottom: 1rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid var(--border);
-    }
+    /* CIERRE */
+    .cierre-header { text-align: center; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
     .cierre-header h2 { font-size: 1.5rem; font-weight: 900; }
     .cierre-header p  { color: var(--gray); font-size: .88rem; margin-top: .25rem; }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
     .kv { margin-bottom: .5rem; }
     .kv .k { font-size: .78rem; color: var(--gray); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
     .kv .v { font-size: 1rem; font-weight: 700; }
 
-    /* ───── PRINT ───── */
+    /* PRINT */
     @media print {
       body { background: white; }
       header, .no-print { display: none !important; }
@@ -449,10 +205,7 @@
 <div id="screen-login">
   <div class="login-card">
     <div class="login-logo">
-      <div class="logo-wrap">
-        <span class="logo-l">LINK</span>
-        <span class="logo-r">DOOR</span>
-      </div>
+      <div class="logo-wrap"><span class="logo-l">LINK</span><span class="logo-r">DOOR</span></div>
       <span class="login-sub">Panel Interno</span>
     </div>
     <div class="fg">
@@ -460,21 +213,15 @@
       <input type="password" id="login-pw" placeholder="Ingresá tu contraseña"
              onkeydown="if(event.key==='Enter')doLogin()" autofocus />
     </div>
-    <p id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none">
-      Contraseña incorrecta
-    </p>
+    <p id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none">Contraseña incorrecta</p>
     <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
 <!-- APP -->
 <div id="screen-app" hidden>
-
   <header class="no-print">
-    <div class="logo-wrap">
-      <span class="logo-l">LINK</span>
-      <span class="logo-r">DOOR</span>
-    </div>
+    <div class="logo-wrap"><span class="logo-l">LINK</span><span class="logo-r">DOOR</span></div>
     <span class="header-badge">PANEL INTERNO</span>
     <nav>
       <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
@@ -488,53 +235,53 @@
   </header>
 
   <main>
-
-    <!-- VIEW: CARGAS LIST -->
+    <!-- CARGAS LIST -->
     <div id="view-cargas" class="view">
       <div class="ph">
-        <div>
-          <div class="ph-title">Cargas</div>
-          <div class="ph-sub">Historial de envíos recibidos</div>
-        </div>
-        <div class="ph-actions">
-          <button class="btn btn-primary" onclick="openNuevaCarga()">+ Nueva Carga</button>
+        <div><div class="ph-title">Cargas</div><div class="ph-sub">Historial de envíos recibidos</div></div>
+        <div class="ph-actions"><button class="btn btn-primary" onclick="openNuevaCarga()">+ Nueva Carga</button></div>
+      </div>
+      <!-- FILTER BAR -->
+      <div class="card" style="margin-bottom:1rem;padding:.9rem 1.1rem">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span style="font-size:.76rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">Filtrar</span>
+          <div style="display:flex;align-items:center;gap:.35rem">
+            <label style="font-size:.78rem;font-weight:600;color:var(--gray);white-space:nowrap">Desde</label>
+            <input type="date" id="filter-from" style="width:148px;padding:.38rem .6rem;font-size:.84rem" onchange="applyFilter()" />
+          </div>
+          <div style="display:flex;align-items:center;gap:.35rem">
+            <label style="font-size:.78rem;font-weight:600;color:var(--gray);white-space:nowrap">Hasta</label>
+            <input type="date" id="filter-to" style="width:148px;padding:.38rem .6rem;font-size:.84rem" onchange="applyFilter()" />
+          </div>
+          <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('month')">Último mes</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('3month')">3 meses</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('year')">Este año</button>
+            <button class="btn btn-sm btn-secondary" onclick="setPreset('all')">Todo</button>
+          </div>
+          <span id="filter-label" style="font-size:.78rem;color:var(--gray);margin-left:auto;white-space:nowrap"></span>
         </div>
       </div>
       <div id="cargas-stats" class="stats"></div>
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Referencia</th>
-                <th>Fecha</th>
-                <th>Peso total</th>
-                <th>Costo pagado</th>
-                <th>Cobrado</th>
-                <th>Clientes</th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
+            <thead><tr><th>Referencia</th><th>Fecha</th><th>Peso total</th><th>Costo pagado</th><th>Cobrado</th><th>Clientes</th><th>Estado</th><th></th></tr></thead>
             <tbody id="cargas-tbody"></tbody>
           </table>
         </div>
         <div id="cargas-empty" class="empty" style="display:none">
-          <div class="ico">📦</div>
-          <p>No hay cargas aún.</p>
+          <div class="ico">📦</div><p>No hay cargas aún.</p>
           <button class="btn btn-primary" onclick="openNuevaCarga()">+ Crear primera carga</button>
         </div>
       </div>
     </div>
 
-    <!-- VIEW: CARGA DETAIL -->
+    <!-- CARGA DETAIL -->
     <div id="view-carga-detail" class="view">
       <button class="back-btn no-print" onclick="showView('cargas')">← Volver a cargas</button>
       <div class="ph">
-        <div>
-          <div class="ph-title" id="detail-title"></div>
-          <div class="ph-sub"   id="detail-sub"></div>
-        </div>
+        <div><div class="ph-title" id="detail-title"></div><div class="ph-sub" id="detail-sub"></div></div>
         <div class="ph-actions" id="detail-actions"></div>
       </div>
       <div class="stats" id="detail-stats"></div>
@@ -545,36 +292,20 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>Peso (lbs)</th>
-                <th>Peso (kg)</th>
-                <th>% del total</th>
-                <th>Cobrado</th>
-                <th>Notas</th>
-                <th class="no-print"></th>
-              </tr>
-            </thead>
+            <thead><tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th><th class="no-print"></th></tr></thead>
             <tbody id="detail-tbody"></tbody>
           </table>
         </div>
-        <div id="detail-empty" class="empty" style="display:none">
-          <div class="ico">👤</div>
-          <p>No hay clientes registrados en esta carga.</p>
-        </div>
+        <div id="detail-empty" class="empty" style="display:none"><div class="ico">👤</div><p>No hay clientes registrados.</p></div>
         <div id="detail-weight-alert" style="margin-top:1rem;display:none"></div>
       </div>
     </div>
 
-    <!-- VIEW: CIERRE CONTABLE -->
+    <!-- CIERRE CONTABLE -->
     <div id="view-cierre" class="view">
       <button class="back-btn no-print" id="cierre-back-btn">← Volver al detalle</button>
       <div class="ph no-print">
-        <div>
-          <div class="ph-title">Cierre Contable</div>
-        </div>
+        <div><div class="ph-title">Cierre Contable</div></div>
         <div class="ph-actions">
           <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
           <button class="btn btn-secondary" id="btn-exportcsv">⬇ Exportar CSV</button>
@@ -621,13 +352,8 @@
     <!-- VIEW: CLIENTES -->
     <div id="view-clientes" class="view">
       <div class="ph">
-        <div>
-          <div class="ph-title">Clientes</div>
-          <div class="ph-sub">Lista de clientes frecuentes</div>
-        </div>
-        <div class="ph-actions">
-          <button class="btn btn-primary" onclick="openNuevoCliente()">+ Nuevo Cliente</button>
-        </div>
+        <div><div class="ph-title">Clientes</div><div class="ph-sub">Lista de clientes frecuentes</div></div>
+        <div class="ph-actions"><button class="btn btn-primary" onclick="openNuevoCliente()">+ Nuevo Cliente</button></div>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -648,13 +374,11 @@
           </table>
         </div>
         <div id="clientes-empty" class="empty" style="display:none">
-          <div class="ico">👥</div>
-          <p>No hay clientes guardados.</p>
+          <div class="ico">👥</div><p>No hay clientes guardados.</p>
           <button class="btn btn-primary" onclick="openNuevoCliente()">+ Agregar cliente</button>
         </div>
       </div>
     </div>
-
   </main>
 </div>
 
@@ -670,30 +394,27 @@ const SUPABASE_KEY = 'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ─── CONSTANTS ─── */
-const KG_TO_LBS  = 2.20462;
+const KG_TO_LBS   = 2.20462;
 const RATE_PER_LB = 3950;
 
-/* ─── FORMAT HELPERS ─── */
+/* ─── FORMATTERS ─── */
 const fCRC  = n => '₡' + Math.round(n).toLocaleString('es-CR');
 const fLbs  = n => (+n).toFixed(2) + ' lbs';
 const fKg   = n => (+n / KG_TO_LBS).toFixed(2) + ' kg';
 const fPct  = n => (+n).toFixed(1) + '%';
 const fDate = d => {
   const [y,m,day] = d.split('-');
-  return new Date(+y, +m-1, +day).toLocaleDateString('es-CR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  return new Date(+y,+m-1,+day).toLocaleDateString('es-CR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 };
 
 /* ─── MAPPERS ─── */
-function mapCarga(row) {
+function mapPackage(row) {
   return {
-    id:            row.id,
-    reference:     row.reference,
-    date:          row.date,
-    totalWeightLbs: row.total_weight_lbs,
-    totalCostCRC:  row.total_cost_crc,
-    status:        row.status,
-    createdAt:     new Date(row.created_at).getTime(),
-    clients:       (row.carga_clients || []).map(mapClient)
+    id:         row.id,
+    guia:       row.guia || '',
+    weightLbs:  row.weight_lbs,
+    chargedCRC: row.charged_crc,
+    notes:      row.notes || '',
   };
 }
 
@@ -704,7 +425,23 @@ function mapClient(row) {
     weightLbs:  row.weight_lbs,
     chargedCRC: row.charged_crc,
     notes:      row.notes || '',
-    createdAt:  new Date(row.created_at).getTime()
+    createdAt:  new Date(row.created_at).getTime(),
+    packages:   (row.packages || [])
+      .sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
+      .map(mapPackage),
+  };
+}
+
+function mapCarga(row) {
+  return {
+    id:            row.id,
+    reference:     row.reference,
+    date:          row.date,
+    totalWeightLbs: row.total_weight_lbs,
+    totalCostCRC:  row.total_cost_crc,
+    status:        row.status,
+    createdAt:     new Date(row.created_at).getTime(),
+    clients:       (row.carga_clients || []).map(mapClient),
   };
 }
 
@@ -716,27 +453,23 @@ function mapSavedClient(row) {
 const DB = {
   async getCargas() {
     const { data, error } = await sb.from('cargas')
-      .select('*, carga_clients(*)')
+      .select('*, carga_clients(*, packages(*))')
       .order('created_at', { ascending: false });
     if (error) { console.error(error); return []; }
-    return (data || []).map(mapCarga);
+    return (data||[]).map(mapCarga);
   },
 
   async getCarga(id) {
     const { data, error } = await sb.from('cargas')
-      .select('*, carga_clients(*)')
-      .eq('id', id)
-      .single();
+      .select('*, carga_clients(*, packages(*))')
+      .eq('id', id).single();
     if (error) { console.error(error); return null; }
     return mapCarga(data);
   },
 
   async createCarga(reference, date, totalWeightLbs, totalCostCRC) {
     const { data, error } = await sb.from('cargas').insert({
-      reference, date,
-      total_weight_lbs: totalWeightLbs,
-      total_cost_crc:   totalCostCRC,
-      status: 'open'
+      reference, date, total_weight_lbs: totalWeightLbs, total_cost_crc: totalCostCRC, status: 'open'
     }).select().single();
     if (error) { console.error(error); return null; }
     return mapCarga({ ...data, carga_clients: [] });
@@ -755,6 +488,10 @@ const DB = {
   },
 
   async deleteCarga(id) {
+    const clients = await sb.from('carga_clients').select('id').eq('carga_id', id);
+    if (clients.data) {
+      for (const c of clients.data) await sb.from('packages').delete().eq('carga_client_id', c.id);
+    }
     await sb.from('carga_clients').delete().eq('carga_id', id);
     const { error } = await sb.from('cargas').delete().eq('id', id);
     if (error) console.error(error);
@@ -767,7 +504,7 @@ const DB = {
       weight_lbs: weightLbs, charged_crc: chargedCRC, notes
     }).select().single();
     if (error) { console.error(error); return null; }
-    return mapClient(data);
+    return mapClient({ ...data, packages: [] });
   },
 
   async updateClient(clientId, changes) {
@@ -782,20 +519,33 @@ const DB = {
   },
 
   async deleteClient(clientId) {
+    await sb.from('packages').delete().eq('carga_client_id', clientId);
     const { error } = await sb.from('carga_clients').delete().eq('id', clientId);
     if (error) console.error(error);
     return !error;
   },
 
+  async savePackagesForClient(cargaClientId, pkgs) {
+    await sb.from('packages').delete().eq('carga_client_id', cargaClientId);
+    if (!pkgs.length) return true;
+    const rows = pkgs.map(p => {
+      const w = parseFloat(p.weight) || 0;
+      const wLbs = p.unit === 'kg' ? w * KG_TO_LBS : w;
+      return { carga_client_id: cargaClientId, guia: p.guia||'', weight_lbs: wLbs, charged_crc: parseFloat(p.charged)||0, notes: p.notes||'' };
+    });
+    const { error } = await sb.from('packages').insert(rows);
+    if (error) { console.error(error); return false; }
+    return true;
+  },
+
   async getClients() {
     const { data, error } = await sb.from('saved_clients').select('*').order('name');
     if (error) { console.error(error); return []; }
-    return (data || []).map(mapSavedClient);
+    return (data||[]).map(mapSavedClient);
   },
 
   async upsertSavedClient(name) {
-    const { data: existing } = await sb.from('saved_clients')
-      .select('id').ilike('name', name).limit(1);
+    const { data: existing } = await sb.from('saved_clients').select('id').ilike('name', name).limit(1);
     if (existing && existing.length > 0) return;
     await sb.from('saved_clients').insert({ name, phone: '', notes: '' });
   },
@@ -826,6 +576,9 @@ const DB = {
   login:       () => sessionStorage.setItem('ltd_auth', '1'),
   logout:      () => sessionStorage.removeItem('ltd_auth'),
 };
+
+/* ─── STATE ─── */
+let _allCargas = [];
 
 /* ─── AUTH ─── */
 function doLogin() {
@@ -885,7 +638,6 @@ function showCierre(cargaId) {
   renderCierre(cargaId);
 }
 
-/* ─── LOADING ─── */
 const LOADING_ROW = cols => `<tr><td colspan="${cols}" style="text-align:center;padding:2rem;color:var(--gray)">Cargando...</td></tr>`;
 
 /* ─── RENDER: CARGAS LIST ─── */
@@ -894,12 +646,71 @@ async function renderCargas() {
   const tbody   = document.getElementById('cargas-tbody');
   const empty   = document.getElementById('cargas-empty');
 
-  statsEl.innerHTML = '';
-  tbody.innerHTML   = LOADING_ROW(8);
+  statsEl.innerHTML   = '';
+  tbody.innerHTML     = LOADING_ROW(8);
   empty.style.display = 'none';
 
-  const cargas = await DB.getCargas();
+  _allCargas = await DB.getCargas();
+  applyFilter();
+}
 
+const fDateShort = d => {
+  const [y,m,day] = d.split('-');
+  return new Date(+y,+m-1,+day).toLocaleDateString('es-CR',{day:'numeric',month:'short',year:'numeric'});
+};
+
+function setPreset(period) {
+  const today = new Date();
+  const toStr = d => d.toISOString().slice(0, 10);
+  const fromInput = document.getElementById('filter-from');
+  const toInput   = document.getElementById('filter-to');
+
+  if (period === 'all') {
+    fromInput.value = '';
+    toInput.value   = '';
+  } else {
+    toInput.value = toStr(today);
+    if (period === 'month') {
+      const f = new Date(today); f.setMonth(f.getMonth() - 1);
+      fromInput.value = toStr(f);
+    } else if (period === '3month') {
+      const f = new Date(today); f.setMonth(f.getMonth() - 3);
+      fromInput.value = toStr(f);
+    } else if (period === 'year') {
+      fromInput.value = `${today.getFullYear()}-01-01`;
+    }
+  }
+  applyFilter();
+}
+
+function applyFilter() {
+  const from = document.getElementById('filter-from').value;
+  const to   = document.getElementById('filter-to').value;
+
+  const filtered = _allCargas.filter(c => {
+    if (from && c.date < from) return false;
+    if (to   && c.date > to)   return false;
+    return true;
+  });
+
+  renderCargasStats(filtered);
+  renderCargasTable(filtered);
+
+  const labelEl = document.getElementById('filter-label');
+  const n = filtered.length;
+  const countStr = `${n} carga${n !== 1 ? 's' : ''}`;
+  if (!from && !to) {
+    labelEl.textContent = countStr;
+  } else {
+    const parts = [];
+    if (from) parts.push(`desde ${fDateShort(from)}`);
+    if (to)   parts.push(`hasta ${fDateShort(to)}`);
+    labelEl.textContent = `${countStr} · ${parts.join(' ')}`;
+  }
+}
+
+function renderCargasStats(cargas) {
+  const statsEl      = document.getElementById('cargas-stats');
   const totalCargas  = cargas.length;
   const openCargas   = cargas.filter(c => c.status === 'open').length;
   const totalPagado  = cargas.reduce((s,c) => s + c.totalCostCRC, 0);
@@ -913,10 +724,19 @@ async function renderCargas() {
     <div class="stat"><div class="stat-label">Peso total traído</div><div class="stat-val purple">${fLbs(totalPesoLbs)}<span style="display:block;font-size:.8rem;font-weight:600;color:var(--gray)">${fKg(totalPesoLbs)}</span></div></div>
     <div class="stat"><div class="stat-label">Total pagado</div><div class="stat-val red">${fCRC(totalPagado)}</div></div>
     <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(totalCobrado)}</div></div>
-    <div class="stat"><div class="stat-label">Ganancia neta</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
+    <div class="stat"><div class="stat-label">Ganancia neta</div><div class="stat-val ${ganancia>=0?'green':'red'}">${fCRC(ganancia)}</div></div>
   `;
+}
 
-  if (!cargas.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+function renderCargasTable(cargas) {
+  const tbody = document.getElementById('cargas-tbody');
+  const empty = document.getElementById('cargas-empty');
+
+  if (!cargas.length) {
+    tbody.innerHTML     = '';
+    empty.style.display = '';
+    return;
+  }
   empty.style.display = 'none';
 
   tbody.innerHTML = cargas.map(c => {
@@ -929,12 +749,12 @@ async function renderCargas() {
         <td style="color:var(--red);font-weight:700">${fCRC(c.totalCostCRC)}</td>
         <td style="font-weight:700">${fCRC(cobrado)}</td>
         <td class="td-center">${c.clients.length}</td>
-        <td><span class="badge badge-${c.status}">${c.status === 'open' ? 'Abierta' : 'Cerrada'}</span></td>
+        <td><span class="badge badge-${c.status}">${c.status==='open'?'Abierta':'Cerrada'}</span></td>
         <td>
           <div style="display:flex;gap:.35rem">
             <button class="btn btn-sm btn-secondary" onclick="showDetail('${c.id}')">Ver</button>
             <button class="btn btn-sm btn-secondary" onclick="showCierre('${c.id}')">Cierre</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteCarga('${c.id}')">✕</button>
+            <button class="btn btn-sm btn-danger"    onclick="deleteCarga('${c.id}')">✕</button>
           </div>
         </td>
       </tr>`;
@@ -943,11 +763,11 @@ async function renderCargas() {
 
 /* ─── RENDER: CARGA DETAIL ─── */
 async function renderDetail(cargaId) {
-  document.getElementById('detail-title').textContent = 'Cargando...';
-  document.getElementById('detail-sub').textContent   = '';
-  document.getElementById('detail-actions').innerHTML = '';
-  document.getElementById('detail-stats').innerHTML   = '';
-  document.getElementById('detail-tbody').innerHTML   = LOADING_ROW(8);
+  document.getElementById('detail-title').textContent  = 'Cargando...';
+  document.getElementById('detail-sub').textContent    = '';
+  document.getElementById('detail-actions').innerHTML  = '';
+  document.getElementById('detail-stats').innerHTML    = '';
+  document.getElementById('detail-tbody').innerHTML    = LOADING_ROW(8);
   document.getElementById('detail-empty').style.display = 'none';
 
   const carga = await DB.getCarga(cargaId);
@@ -955,7 +775,7 @@ async function renderDetail(cargaId) {
 
   document.getElementById('detail-title').textContent = carga.reference;
   document.getElementById('detail-sub').textContent   =
-    fDate(carga.date) + ' · ' + (carga.status === 'open' ? 'Carga abierta' : 'Carga cerrada');
+    fDate(carga.date) + ' · ' + (carga.status==='open' ? 'Carga abierta' : 'Carga cerrada');
 
   const cobrado     = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
   const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
@@ -979,10 +799,10 @@ async function renderDetail(cargaId) {
   document.getElementById('detail-stats').innerHTML = `
     <div class="stat"><div class="stat-label">Peso total</div><div class="stat-val purple">${fLbs(carga.totalWeightLbs)}</div></div>
     <div class="stat"><div class="stat-label">Peso asignado</div><div class="stat-val">${fLbs(assignedLbs)}</div></div>
-    <div class="stat"><div class="stat-label">Peso pendiente</div><div class="stat-val ${pendingLbs < 0 ? 'red' : ''}">${fLbs(pendingLbs)}</div></div>
+    <div class="stat"><div class="stat-label">Peso pendiente</div><div class="stat-val ${pendingLbs<0?'red':''}">${fLbs(pendingLbs)}</div></div>
     <div class="stat"><div class="stat-label">Costo pagado</div><div class="stat-val red">${fCRC(carga.totalCostCRC)}</div></div>
     <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(cobrado)}</div></div>
-    <div class="stat"><div class="stat-label">Ganancia</div><div class="stat-val ${ganancia >= 0 ? 'green' : 'red'}">${fCRC(ganancia)}</div></div>
+    <div class="stat"><div class="stat-label">Ganancia</div><div class="stat-val ${ganancia>=0?'green':'red'}">${fCRC(ganancia)}</div></div>
   `;
 
   const tbody = document.getElementById('detail-tbody');
@@ -1000,24 +820,49 @@ async function renderDetail(cargaId) {
       ? `+${fLbs(diffLbs)} de más`
       : diffLbs < -0.01 ? `${fLbs(Math.abs(diffLbs))} pendiente` : 'Cuadra ✓';
 
-    tbody.innerHTML = carga.clients.map((cl, i) => {
-      const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+    const clientRows = carga.clients.map((cl, i) => {
+      const pct     = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+      const hasPkgs = cl.packages && cl.packages.length > 0;
       const editBtns = carga.status === 'open'
         ? `<button class="btn btn-sm btn-secondary" onclick="openEditClient('${cargaId}','${cl.id}')">✎</button>
            <button class="btn btn-sm btn-danger"    onclick="deleteClient('${cargaId}','${cl.id}')">✕</button>`
         : '';
+
+      const pkgToggle = hasPkgs
+        ? `<button id="pkg-btn-${cl.id}" onclick="togglePkgs('${cl.id}',${cl.packages.length})"
+             style="background:var(--purple-light);color:var(--purple);border:none;border-radius:20px;cursor:pointer;padding:2px 8px;font-size:.7rem;font-weight:800;margin-left:.4rem;font-family:inherit">
+             ▶ ${cl.packages.length} paq.</button>`
+        : '';
+
+      const pkgSubRows = hasPkgs ? cl.packages.map((p, pi) => `
+        <tr class="pkg-sub pkg-group-${cl.id}" style="display:none">
+          <td></td>
+          <td style="padding-left:2rem;color:var(--gray)">
+            📦 <strong style="color:var(--dark)">${esc(p.guia || `Paquete ${pi+1}`)}</strong>
+          </td>
+          <td>${fLbs(p.weightLbs)}</td>
+          <td style="color:var(--gray)">${fKg(p.weightLbs)}</td>
+          <td></td>
+          <td style="font-weight:700;color:var(--purple)">${fCRC(p.chargedCRC)}</td>
+          <td style="color:var(--gray)">${esc(p.notes||'')}</td>
+          <td></td>
+        </tr>`).join('') : '';
+
       return `
         <tr>
           <td class="td-center" style="color:var(--gray);font-size:.78rem">${i+1}</td>
-          <td><strong>${esc(cl.clientName)}</strong></td>
+          <td><strong>${esc(cl.clientName)}</strong>${pkgToggle}</td>
           <td>${fLbs(cl.weightLbs)}</td>
           <td style="color:var(--gray)">${fKg(cl.weightLbs)}</td>
           <td>${fPct(pct)}</td>
           <td style="font-weight:700;color:var(--purple)">${fCRC(cl.chargedCRC)}</td>
-          <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes || '')}</td>
+          <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes||'')}</td>
           <td class="no-print"><div style="display:flex;gap:.3rem">${editBtns}</div></td>
-        </tr>`;
-    }).join('') + `
+        </tr>
+        ${pkgSubRows}`;
+    }).join('');
+
+    const totalsRow = `
       <tr style="background:var(--light);border-top:2px solid var(--border)">
         <td></td>
         <td style="font-weight:800;font-size:.82rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">TOTAL</td>
@@ -1028,18 +873,28 @@ async function renderDetail(cargaId) {
         <td style="font-size:.8rem;font-weight:700;color:${diffColor}">${diffLabel}</td>
         <td></td>
       </tr>`;
+
+    tbody.innerHTML = clientRows + totalsRow;
   }
 
   const alertEl = document.getElementById('detail-weight-alert');
   if (pendingLbs < -0.01) {
     alertEl.style.display = '';
-    alertEl.innerHTML = `<div class="alert alert-danger">⚠ El peso asignado a clientes (${fLbs(assignedLbs)}) supera el peso total de la carga (${fLbs(carga.totalWeightLbs)}).</div>`;
+    alertEl.innerHTML = `<div class="alert alert-danger">⚠ El peso asignado (${fLbs(assignedLbs)}) supera el total de la carga (${fLbs(carga.totalWeightLbs)}).</div>`;
   } else if (pendingLbs > 0.01 && carga.clients.length > 0) {
     alertEl.style.display = '';
-    alertEl.innerHTML = `<div class="alert alert-warn">Quedan ${fLbs(pendingLbs)} sin asignar a ningún cliente.</div>`;
+    alertEl.innerHTML = `<div class="alert alert-warn">Quedan ${fLbs(pendingLbs)} sin asignar.</div>`;
   } else {
     alertEl.style.display = 'none';
   }
+}
+
+function togglePkgs(clientId, count) {
+  const rows = document.querySelectorAll(`.pkg-group-${clientId}`);
+  const btn  = document.getElementById(`pkg-btn-${clientId}`);
+  const isOpen = rows.length && rows[0].style.display !== 'none';
+  rows.forEach(r => r.style.display = isOpen ? 'none' : '');
+  if (btn) btn.textContent = isOpen ? `▶ ${count} paq.` : `▼ ${count} paq.`;
 }
 
 /* ─── RENDER: CIERRE ─── */
@@ -1055,17 +910,31 @@ async function renderCierre(cargaId) {
   const assignedLbs = carga.clients.reduce((s,cl) => s + cl.weightLbs, 0);
 
   const rows = carga.clients.map((cl, i) => {
-    const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+    const pct     = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100) : 0;
+    const hasPkgs = cl.packages && cl.packages.length > 0;
+
+    const pkgRows = hasPkgs ? cl.packages.map((p, pi) => `
+      <tr style="background:var(--purple-light)">
+        <td style="padding-left:2rem;font-size:.78rem;color:var(--gray)">└ 📦 ${esc(p.guia || `Paquete ${pi+1}`)}</td>
+        <td></td>
+        <td style="font-size:.78rem">${fLbs(p.weightLbs)}</td>
+        <td style="font-size:.78rem;color:var(--gray)">${fKg(p.weightLbs)}</td>
+        <td></td>
+        <td style="font-size:.78rem;font-weight:700;color:var(--purple)">${fCRC(p.chargedCRC)}</td>
+        <td style="font-size:.78rem;color:var(--gray)">${esc(p.notes||'')}</td>
+      </tr>`).join('') : '';
+
     return `
       <tr>
         <td>${i+1}</td>
-        <td><strong>${esc(cl.clientName)}</strong></td>
+        <td><strong>${esc(cl.clientName)}</strong>${hasPkgs ? ` <span style="font-size:.72rem;color:var(--gray);font-weight:600">${cl.packages.length} paq.</span>` : ''}</td>
         <td>${fLbs(cl.weightLbs)}</td>
         <td>${fKg(cl.weightLbs)}</td>
         <td>${fPct(pct)}</td>
         <td style="font-weight:700">${fCRC(cl.chargedCRC)}</td>
-        <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes || '')}</td>
-      </tr>`;
+        <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes||'')}</td>
+      </tr>
+      ${pkgRows}`;
   }).join('');
 
   const totalsRow = carga.clients.length ? `
@@ -1080,19 +949,17 @@ async function renderCierre(cargaId) {
 
   content.innerHTML = `
     <div class="cierre-header">
-      <div class="logo-wrap" style="margin-bottom:.5rem">
-        <span class="logo-l">LINK</span><span class="logo-r">DOOR</span>
-      </div>
+      <div class="logo-wrap" style="margin-bottom:.5rem"><span class="logo-l">LINK</span><span class="logo-r">DOOR</span></div>
       <h2>Cierre Contable</h2>
       <p>${esc(carga.reference)} · ${fDate(carga.date)}</p>
-      <p style="margin-top:.3rem"><span class="badge badge-${carga.status}">${carga.status === 'open' ? 'Carga abierta (preliminar)' : 'Carga cerrada'}</span></p>
+      <p style="margin-top:.3rem"><span class="badge badge-${carga.status}">${carga.status==='open'?'Carga abierta (preliminar)':'Carga cerrada'}</span></p>
     </div>
 
     <div class="two-col">
       <div>
         <div class="kv"><div class="k">Referencia</div><div class="v">${esc(carga.reference)}</div></div>
         <div class="kv"><div class="k">Fecha</div><div class="v">${fDate(carga.date)}</div></div>
-        <div class="kv"><div class="k">Estado</div><div class="v">${carga.status === 'open' ? 'Abierta' : 'Cerrada'}</div></div>
+        <div class="kv"><div class="k">Estado</div><div class="v">${carga.status==='open'?'Abierta':'Cerrada'}</div></div>
       </div>
       <div>
         <div class="kv"><div class="k">Peso total recibido</div><div class="v">${fLbs(carga.totalWeightLbs)} / ${fKg(carga.totalWeightLbs)}</div></div>
@@ -1100,32 +967,24 @@ async function renderCierre(cargaId) {
         <div class="kv"><div class="k">Clientes</div><div class="v">${carga.clients.length}</div></div>
       </div>
     </div>
-
     <hr class="div">
-
     <div class="stats" style="margin-bottom:0">
       <div class="stat"><div class="stat-label">Costo pagado</div><div class="stat-val red">${fCRC(carga.totalCostCRC)}</div></div>
       <div class="stat"><div class="stat-label">Total cobrado</div><div class="stat-val purple">${fCRC(cobrado)}</div></div>
     </div>
-
-    <div class="profit-box ${ganancia >= 0 ? 'pos' : 'neg'}">
+    <div class="profit-box ${ganancia>=0?'pos':'neg'}">
       <div class="lbl">GANANCIA NETA</div>
       <div class="amt">${fCRC(ganancia)}</div>
     </div>
-
     <hr class="div">
-
     <div style="margin-bottom:.75rem"><strong>Detalle por cliente</strong></div>
     ${carga.clients.length ? `
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th></tr>
-        </thead>
+        <thead><tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% total</th><th>Cobrado</th><th>Notas</th></tr></thead>
         <tbody>${rows}${totalsRow}</tbody>
       </table>
     </div>` : `<div class="empty"><div class="ico">📋</div><p>No hay clientes en esta carga.</p></div>`}
-
     <div style="margin-top:1.5rem;color:var(--gray);font-size:.75rem;text-align:right">
       Generado el ${new Date().toLocaleString('es-CR')} · Linktodoor
     </div>
@@ -1138,7 +997,7 @@ async function renderCierre(cargaId) {
 async function renderClientes() {
   const tbody = document.getElementById('clientes-tbody');
   const empty = document.getElementById('clientes-empty');
-  tbody.innerHTML = LOADING_ROW(7);
+  tbody.innerHTML = LOADING_ROW(8);
   empty.style.display = 'none';
 
   const [clients, cargas] = await Promise.all([DB.getClients(), DB.getCargas()]);
@@ -1148,11 +1007,15 @@ async function renderClientes() {
 
   const totals = {};
   clients.forEach(c => {
-    let lbs = 0, count = 0;
+    let lbs = 0, pkgCount = 0, cargaCount = 0;
     cargas.forEach(cg => cg.clients.forEach(cl => {
-      if (cl.clientName.toLowerCase() === c.name.toLowerCase()) { lbs += cl.weightLbs; count++; }
+      if (cl.clientName.toLowerCase() === c.name.toLowerCase()) {
+        lbs += cl.weightLbs;
+        pkgCount += cl.packages ? cl.packages.length : 0;
+        cargaCount++;
+      }
     }));
-    totals[c.id] = { lbs, count };
+    totals[c.id] = { lbs, pkgCount, cargaCount };
   });
 
   const sorted = [...clients].sort((a,b) => totals[b.id].lbs - totals[a.id].lbs);
@@ -1192,6 +1055,88 @@ function openModal(html) {
 function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
 function onModalBgClick(e) { if (e.target === document.getElementById('modal-bg')) closeModal(); }
 
+/* ─── PACKAGE MODAL STATE ─── */
+let _pkgs = [];
+
+function addPkgRow() {
+  _pkgs.push({ guia: '', weight: '', unit: 'lbs', charged: '', notes: '', _manualCharge: false });
+  renderPkgRows();
+}
+
+function removePkgRow(idx) {
+  _pkgs.splice(idx, 1);
+  renderPkgRows();
+  updatePkgTotal();
+}
+
+function renderPkgRows() {
+  const container = document.getElementById('pkg-rows');
+  if (!container) return;
+  container.innerHTML = _pkgs.map((p, i) => `
+    <div style="background:var(--light);border:1px solid var(--border);border-radius:8px;padding:.75rem;margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <span style="font-size:.72rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">📦 Paquete ${i+1}</span>
+        ${_pkgs.length > 1 ? `<button type="button" class="btn btn-sm btn-danger btn-icon" onclick="removePkgRow(${i})">✕</button>` : ''}
+      </div>
+      <div class="fg" style="margin-bottom:.45rem">
+        <label>Guía / Rastreo</label>
+        <input type="text" id="pkg-g-${i}" value="${esc(p.guia||'')}" placeholder="Ej: 1Z999AA10123456784"
+               oninput="_pkgs[${i}].guia=this.value" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <div class="fg" style="margin-bottom:0">
+          <label>Peso</label>
+          <div class="inline-row">
+            <input type="number" id="pkg-w-${i}" value="${p.weight||''}" placeholder="0.00" min="0" step="0.01"
+                   oninput="_pkgs[${i}].weight=this.value;onPkgWeightChange(${i})" />
+            <select id="pkg-u-${i}" onchange="_pkgs[${i}].unit=this.value;onPkgWeightChange(${i})">
+              <option value="lbs" ${(p.unit||'lbs')==='lbs'?'selected':''}>lbs</option>
+              <option value="kg"  ${(p.unit||'lbs')==='kg' ?'selected':''}>kg</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Cobrado (₡)</label>
+          <input type="number" id="pkg-c-${i}" value="${p.charged||''}" placeholder="Auto" min="0" step="1"
+                 oninput="_pkgs[${i}].charged=this.value;_pkgs[${i}]._manualCharge=true;updatePkgTotal()" />
+        </div>
+      </div>
+    </div>
+  `).join('') + `
+    <button type="button" class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:.75rem" onclick="addPkgRow()">+ Agregar paquete</button>
+    <div id="pkg-total" style="padding:.6rem .85rem;background:var(--purple-light);border-radius:8px;font-weight:700;color:var(--purple);text-align:center;font-size:.9rem">${getPkgTotalStr()}</div>
+  `;
+}
+
+function onPkgWeightChange(idx) {
+  const p = _pkgs[idx];
+  if (!p._manualCharge) {
+    const w    = parseFloat(document.getElementById(`pkg-w-${idx}`)?.value) || 0;
+    const unit = document.getElementById(`pkg-u-${idx}`)?.value || 'lbs';
+    const wLbs = unit === 'kg' ? w * KG_TO_LBS : w;
+    p.charged  = Math.round(wLbs * RATE_PER_LB);
+    const chargeEl = document.getElementById(`pkg-c-${idx}`);
+    if (chargeEl) chargeEl.value = p.charged || '';
+  }
+  updatePkgTotal();
+}
+
+function updatePkgTotal() {
+  const el = document.getElementById('pkg-total');
+  if (el) el.textContent = getPkgTotalStr();
+}
+
+function getPkgTotalStr() {
+  let lbs = 0, charged = 0;
+  _pkgs.forEach((p, i) => {
+    const w    = parseFloat(document.getElementById(`pkg-w-${i}`)?.value ?? p.weight) || 0;
+    const unit = document.getElementById(`pkg-u-${i}`)?.value ?? p.unit ?? 'lbs';
+    lbs     += unit === 'kg' ? w * KG_TO_LBS : w;
+    charged += parseFloat(document.getElementById(`pkg-c-${i}`)?.value ?? p.charged) || 0;
+  });
+  return `Total: ${fLbs(lbs)} · ${fCRC(charged)}`;
+}
+
 /* ─── NUEVA / EDITAR CARGA ─── */
 function openNuevaCarga() {
   const today = new Date().toISOString().slice(0,10);
@@ -1200,14 +1145,8 @@ function openNuevaCarga() {
       <span class="modal-title">Nueva Carga</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg">
-      <label>Referencia / nombre de la carga</label>
-      <input type="text" id="m-ref" placeholder="Ej: Carga mayo #1" />
-    </div>
-    <div class="fg">
-      <label>Fecha de recepción</label>
-      <input type="date" id="m-date" value="${today}" />
-    </div>
+    <div class="fg"><label>Referencia / nombre</label><input type="text" id="m-ref" placeholder="Ej: Carga mayo #1" /></div>
+    <div class="fg"><label>Fecha de recepción</label><input type="date" id="m-date" value="${today}" /></div>
     <div class="fg">
       <label>Peso total recibido</label>
       <div class="inline-row">
@@ -1215,10 +1154,7 @@ function openNuevaCarga() {
         <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
       </div>
     </div>
-    <div class="fg">
-      <label>Costo total pagado (₡ colones)</label>
-      <input type="number" id="m-cost" placeholder="0" min="0" step="1" />
-    </div>
+    <div class="fg"><label>Costo total pagado (₡)</label><input type="number" id="m-cost" placeholder="0" min="0" step="1" /></div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveCarga(null)">Guardar</button>
@@ -1235,25 +1171,16 @@ async function openEditCarga(cargaId) {
       <span class="modal-title">Editar Carga</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
+    <div class="fg"><label>Referencia</label><input type="text" id="m-ref" value="${esc(carga.reference)}" /></div>
+    <div class="fg"><label>Fecha</label><input type="date" id="m-date" value="${carga.date}" /></div>
     <div class="fg">
-      <label>Referencia</label>
-      <input type="text" id="m-ref" value="${esc(carga.reference)}" />
-    </div>
-    <div class="fg">
-      <label>Fecha de recepción</label>
-      <input type="date" id="m-date" value="${carga.date}" />
-    </div>
-    <div class="fg">
-      <label>Peso total recibido</label>
+      <label>Peso total (lbs)</label>
       <div class="inline-row">
         <input type="number" id="m-weight" value="${carga.totalWeightLbs.toFixed(3)}" min="0" step="0.01" />
         <select id="m-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
       </div>
     </div>
-    <div class="fg">
-      <label>Costo total pagado (₡)</label>
-      <input type="number" id="m-cost" value="${carga.totalCostCRC}" min="0" step="1" />
-    </div>
+    <div class="fg"><label>Costo total pagado (₡)</label><input type="number" id="m-cost" value="${carga.totalCostCRC}" min="0" step="1" /></div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveCarga('${cargaId}')">Guardar</button>
@@ -1268,8 +1195,8 @@ async function saveCarga(editId) {
   const unit  = document.getElementById('m-unit').value;
   const cost  = parseFloat(document.getElementById('m-cost').value) || 0;
 
-  if (!ref)  { alert('Ingresá una referencia para la carga.'); return; }
-  if (!date) { alert('Seleccioná la fecha.'); return; }
+  if (!ref)  { alert('Ingresá una referencia.'); return; }
+  if (!date) { alert('Seleccioná la fecha.');    return; }
 
   const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
   const btn = document.getElementById('m-save-btn');
@@ -1277,8 +1204,7 @@ async function saveCarga(editId) {
 
   if (editId) {
     await DB.updateCarga(editId, { reference: ref, date, totalWeightLbs: weightLbs, totalCostCRC: cost });
-    closeModal();
-    renderDetail(editId);
+    closeModal(); renderDetail(editId);
   } else {
     const newCarga = await DB.createCarga(ref, date, weightLbs, cost);
     closeModal();
@@ -1293,7 +1219,7 @@ async function deleteCarga(cargaId) {
 }
 
 async function closeCarga(cargaId) {
-  if (!confirm('¿Cerrar esta carga? Quedará marcada como cerrada y no se podrán agregar más clientes.')) return;
+  if (!confirm('¿Cerrar esta carga? No se podrán agregar más clientes.')) return;
   await DB.updateCarga(cargaId, { status: 'closed' });
   renderDetail(cargaId);
 }
@@ -1303,7 +1229,7 @@ async function reopenCarga(cargaId) {
   renderDetail(cargaId);
 }
 
-/* ─── AGREGAR / EDITAR CLIENTE EN CARGA ─── */
+/* ─── AGREGAR / EDITAR CLIENTE ─── */
 async function openAddClient() {
   const carga = await DB.getCarga(currentCargaId);
   if (!carga || carga.status === 'closed') return;
@@ -1314,11 +1240,9 @@ async function openAddClient() {
 
   const clientOptions = savedClients
     .sort((a,b) => a.name.localeCompare(b.name))
-    .map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+    .map(c => `<option value="${esc(c.name)}">`).join('');
 
-  const pendingInfo = pendingLbs > 0.001
-    ? `<div class="alert alert-info" style="margin-top:.5rem;margin-bottom:0">Peso pendiente: ${fLbs(pendingLbs)} / ${fKg(pendingLbs)}</div>`
-    : '';
+  _pkgs = [{ guia: '', weight: '', unit: 'lbs', charged: '', notes: '', _manualCharge: false }];
 
   openModal(`
     <div class="modal-head">
@@ -1327,34 +1251,18 @@ async function openAddClient() {
     </div>
     <div class="fg">
       <label>Nombre del cliente</label>
-      <input type="text" id="m-cname" placeholder="Nombre del cliente" list="clients-datalist" />
-      <datalist id="clients-datalist">${clientOptions}</datalist>
+      <input type="text" id="m-cname" placeholder="Nombre del cliente" list="clients-dl" />
+      <datalist id="clients-dl">${clientOptions}</datalist>
     </div>
-    <div class="fg">
-      <label>Peso del cliente</label>
-      <div class="inline-row">
-        <input type="number" id="m-cweight" placeholder="0.00" min="0" step="0.01" oninput="autoCalcCharge()" />
-        <select id="m-cunit" onchange="autoCalcCharge()">
-          <option value="lbs">lbs</option>
-          <option value="kg">kg</option>
-        </select>
-      </div>
-      ${pendingInfo}
-    </div>
-    <div class="fg">
-      <label>Monto cobrado (₡ colones)</label>
-      <input type="number" id="m-ccharge" placeholder="Se calcula automáticamente" min="0" step="1" />
-      <p style="font-size:.75rem;color:var(--gray);margin-top:.25rem">Tarifa base: ${fCRC(RATE_PER_LB)}/lb</p>
-    </div>
-    <div class="fg">
-      <label>Notas (opcional)</label>
-      <textarea id="m-cnotes" placeholder="Número de rastreo, descripción, etc."></textarea>
-    </div>
-    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+    ${pendingLbs > 0.001 ? `<div class="alert alert-info" style="margin-bottom:.75rem">Peso pendiente en carga: <strong>${fLbs(pendingLbs)} / ${fKg(pendingLbs)}</strong></div>` : ''}
+    <div style="font-size:.78rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.3px;margin-bottom:.5rem">Paquetes — tarifa base ${fCRC(RATE_PER_LB)}/lb</div>
+    <div id="pkg-rows"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.75rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveClient(null)">Agregar</button>
     </div>
   `);
+  renderPkgRows();
   document.getElementById('m-cname').focus();
 }
 
@@ -1362,6 +1270,15 @@ async function openEditClient(cargaId, clientId) {
   const carga  = await DB.getCarga(cargaId);
   const client = carga?.clients.find(cl => cl.id === clientId);
   if (!client) return;
+
+  if (client.packages && client.packages.length > 0) {
+    _pkgs = client.packages.map(p => ({
+      guia: p.guia, weight: p.weightLbs.toFixed(3), unit: 'lbs',
+      charged: p.chargedCRC, notes: p.notes, _manualCharge: true
+    }));
+  } else {
+    _pkgs = [{ guia: '', weight: client.weightLbs.toFixed(3), unit: 'lbs', charged: client.chargedCRC, notes: '', _manualCharge: true }];
+  }
 
   openModal(`
     <div class="modal-head">
@@ -1372,58 +1289,52 @@ async function openEditClient(cargaId, clientId) {
       <label>Nombre del cliente</label>
       <input type="text" id="m-cname" value="${esc(client.clientName)}" />
     </div>
-    <div class="fg">
-      <label>Peso</label>
-      <div class="inline-row">
-        <input type="number" id="m-cweight" value="${client.weightLbs.toFixed(3)}" min="0" step="0.01" oninput="autoCalcCharge()" />
-        <select id="m-cunit" onchange="autoCalcCharge()">
-          <option value="lbs">lbs</option>
-          <option value="kg">kg</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg">
-      <label>Monto cobrado (₡)</label>
-      <input type="number" id="m-ccharge" value="${client.chargedCRC}" min="0" step="1" />
-    </div>
-    <div class="fg">
-      <label>Notas</label>
-      <textarea id="m-cnotes">${esc(client.notes || '')}</textarea>
-    </div>
-    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+    <div style="font-size:.78rem;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.3px;margin-bottom:.5rem">Paquetes</div>
+    <div id="pkg-rows"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.75rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveClient('${clientId}')">Guardar</button>
     </div>
   `);
-}
-
-function autoCalcCharge() {
-  const wRaw = parseFloat(document.getElementById('m-cweight')?.value) || 0;
-  const unit = document.getElementById('m-cunit')?.value || 'lbs';
-  const wLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
-  const chargeEl = document.getElementById('m-ccharge');
-  if (chargeEl && !chargeEl._userEdited) chargeEl.value = Math.round(wLbs * RATE_PER_LB);
+  renderPkgRows();
 }
 
 async function saveClient(editId) {
-  const name   = document.getElementById('m-cname').value.trim();
-  const wRaw   = parseFloat(document.getElementById('m-cweight').value) || 0;
-  const unit   = document.getElementById('m-cunit').value;
-  const charge = parseFloat(document.getElementById('m-ccharge').value) || 0;
-  const notes  = document.getElementById('m-cnotes').value.trim();
+  const name = document.getElementById('m-cname').value.trim();
+  if (!name) { alert('Ingresá el nombre del cliente.'); return; }
+  if (!_pkgs.length) { alert('Agregá al menos un paquete.'); return; }
 
-  if (!name)    { alert('Ingresá el nombre del cliente.'); return; }
-  if (wRaw <= 0) { alert('Ingresá un peso válido.'); return; }
+  for (let i = 0; i < _pkgs.length; i++) {
+    const w = parseFloat(document.getElementById(`pkg-w-${i}`)?.value ?? _pkgs[i].weight) || 0;
+    if (w <= 0) { alert(`El paquete ${i+1} necesita un peso válido.`); return; }
+    _pkgs[i].weight  = document.getElementById(`pkg-w-${i}`)?.value ?? _pkgs[i].weight;
+    _pkgs[i].unit    = document.getElementById(`pkg-u-${i}`)?.value ?? _pkgs[i].unit;
+    _pkgs[i].charged = document.getElementById(`pkg-c-${i}`)?.value ?? _pkgs[i].charged;
+    _pkgs[i].guia    = document.getElementById(`pkg-g-${i}`)?.value ?? _pkgs[i].guia;
+  }
 
-  const weightLbs = unit === 'kg' ? wRaw * KG_TO_LBS : wRaw;
+  const totalWeightLbs = _pkgs.reduce((s,p) => {
+    const w = parseFloat(p.weight) || 0;
+    return s + (p.unit === 'kg' ? w * KG_TO_LBS : w);
+  }, 0);
+  const totalCharged = _pkgs.reduce((s,p) => s + (parseFloat(p.charged)||0), 0);
+
   const btn = document.getElementById('m-save-btn');
   if (btn) btn.disabled = true;
 
   if (editId) {
-    await DB.updateClient(editId, { clientName: name, weightLbs, chargedCRC: charge, notes });
+    await DB.updateClient(editId, { clientName: name, weightLbs: totalWeightLbs, chargedCRC: totalCharged, notes: '' });
+    await DB.savePackagesForClient(editId, _pkgs);
   } else {
-    await DB.addClient(currentCargaId, name, weightLbs, charge, notes);
-    await DB.upsertSavedClient(name);
+    const client = await DB.addClient(currentCargaId, name, totalWeightLbs, totalCharged, '');
+    if (client) {
+      await DB.savePackagesForClient(client.id, _pkgs);
+      await DB.upsertSavedClient(name);
+    } else {
+      alert('Error al guardar. Intentá de nuevo.');
+      if (btn) btn.disabled = false;
+      return;
+    }
   }
   closeModal();
   renderDetail(currentCargaId);
@@ -1505,12 +1416,9 @@ async function saveCliente(editId) {
   const phone = document.getElementById('m-clphone').value.trim();
   const email = document.getElementById('m-clemail').value.trim();
   const notes = document.getElementById('m-clnotes').value.trim();
-
   if (!name) { alert('Ingresá el nombre del cliente.'); return; }
-
   const btn = document.getElementById('m-save-btn');
   if (btn) btn.disabled = true;
-
   if (editId) {
     await DB.updateSavedClient(editId, name, phone, email, notes);
   } else {
@@ -1621,18 +1529,9 @@ function openChangePw() {
       <span class="modal-title">Cambiar Contraseña</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg">
-      <label>Contraseña actual</label>
-      <input type="password" id="m-pw-old" placeholder="Contraseña actual" />
-    </div>
-    <div class="fg">
-      <label>Nueva contraseña</label>
-      <input type="password" id="m-pw-new" placeholder="Nueva contraseña" />
-    </div>
-    <div class="fg">
-      <label>Confirmar nueva contraseña</label>
-      <input type="password" id="m-pw-confirm" placeholder="Repetir contraseña" />
-    </div>
+    <div class="fg"><label>Contraseña actual</label><input type="password" id="m-pw-old" placeholder="Contraseña actual" /></div>
+    <div class="fg"><label>Nueva contraseña</label><input type="password" id="m-pw-new" placeholder="Nueva contraseña" /></div>
+    <div class="fg"><label>Confirmar nueva contraseña</label><input type="password" id="m-pw-confirm" placeholder="Repetir contraseña" /></div>
     <p id="m-pw-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -1646,14 +1545,10 @@ function doChangePw() {
   const nw   = document.getElementById('m-pw-new').value;
   const conf = document.getElementById('m-pw-confirm').value;
   const err  = document.getElementById('m-pw-err');
-
   if (old !== DB.getPassword()) { err.textContent = 'Contraseña actual incorrecta.'; err.style.display = ''; return; }
   if (!nw)                      { err.textContent = 'Ingresá una nueva contraseña.'; err.style.display = ''; return; }
   if (nw !== conf)              { err.textContent = 'Las contraseñas no coinciden.';  err.style.display = ''; return; }
-
-  DB.setPassword(nw);
-  closeModal();
-  alert('Contraseña cambiada exitosamente.');
+  DB.setPassword(nw); closeModal(); alert('Contraseña cambiada exitosamente.');
 }
 
 /* ─── EXPORT CSV ─── */
@@ -1661,23 +1556,26 @@ function exportCSV(carga) {
   const cobrado  = carga.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
   const ganancia = cobrado - carga.totalCostCRC;
 
-  const header = ['#','Cliente','Peso (lbs)','Peso (kg)','% del total','Cobrado (₡)','Notas'].join(',');
-  const rows   = carga.clients.map((cl, i) => {
-    const pct = carga.totalWeightLbs > 0 ? (cl.weightLbs / carga.totalWeightLbs * 100).toFixed(1) : '0';
-    return [i+1, `"${cl.clientName}"`, cl.weightLbs.toFixed(2), (cl.weightLbs/KG_TO_LBS).toFixed(2), pct, Math.round(cl.chargedCRC), `"${cl.notes || ''}"`].join(',');
+  const lines = ['Referencia,' + carga.reference, 'Fecha,' + carga.date, ''];
+  lines.push('#,Cliente,Guía,Peso (lbs),Peso (kg),Cobrado (₡),Notas');
+
+  let rowNum = 1;
+  carga.clients.forEach(cl => {
+    if (cl.packages && cl.packages.length > 0) {
+      cl.packages.forEach(p => {
+        lines.push([rowNum++, `"${cl.clientName}"`, `"${p.guia||''}"`, p.weightLbs.toFixed(2),
+          (p.weightLbs/KG_TO_LBS).toFixed(2), Math.round(p.chargedCRC), `"${p.notes||''}"`].join(','));
+      });
+    } else {
+      lines.push([rowNum++, `"${cl.clientName}"`, '', cl.weightLbs.toFixed(2),
+        (cl.weightLbs/KG_TO_LBS).toFixed(2), Math.round(cl.chargedCRC), `"${cl.notes||''}"`].join(','));
+    }
   });
 
-  const summary = [
-    '', 'Resumen',
-    `Referencia,"${carga.reference}"`,
-    `Fecha,${carga.date}`,
-    `Peso total (lbs),${carga.totalWeightLbs.toFixed(2)}`,
-    `Costo pagado,${carga.totalCostCRC}`,
-    `Total cobrado,${cobrado}`,
-    `Ganancia,${ganancia}`,
-  ];
+  lines.push('', 'Resumen', `Peso total (lbs),${carga.totalWeightLbs.toFixed(2)}`,
+    `Costo pagado,${carga.totalCostCRC}`, `Total cobrado,${cobrado}`, `Ganancia,${ganancia}`);
 
-  const csv  = [header, ...rows, ...summary].join('\n');
+  const csv  = lines.join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
