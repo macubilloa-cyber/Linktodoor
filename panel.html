@@ -563,35 +563,55 @@ const DB = {
   },
 
   async getClients() {
-    const { data, error } = await sb.from('saved_clients').select('*').order('name');
-    if (error) { console.error(error); return []; }
-    return (data||[]).map(mapSavedClient);
+    const r = await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'list' })
+    }).catch(() => null);
+    if (!r || !r.ok) { console.error('getClients failed'); return []; }
+    const d = await r.json();
+    return (d.data || []).map(mapSavedClient);
   },
 
   async upsertSavedClient(name) {
-    const { data: existing } = await sb.from('saved_clients').select('id').ilike('name', name).limit(1);
-    if (existing && existing.length > 0) return;
-    await sb.from('saved_clients').insert({ name, phone: '', notes: '' });
+    const clients = await DB.getClients();
+    if (clients.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+    await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', name, phone: '', email: '', notes: '' })
+    }).catch(() => null);
   },
 
   async createSavedClient(name, phone, email, notes) {
-    const { error } = await sb.from('saved_clients')
-      .insert({ name, phone: phone || '', email: email || '', notes: notes || '' });
-    if (error) console.error(error);
-    return !error;
+    const r = await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', name, phone, email, notes })
+    }).catch(() => null);
+    if (!r) return false;
+    const d = await r.json();
+    if (!d.ok) { console.error('createSavedClient:', d.error); }
+    return d.ok;
   },
 
   async updateSavedClient(id, name, phone, email, notes) {
-    const { error } = await sb.from('saved_clients')
-      .update({ name, phone: phone || '', email: email || '', notes: notes || '' }).eq('id', id);
-    if (error) console.error(error);
-    return !error;
+    const r = await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', id, name, phone, email, notes })
+    }).catch(() => null);
+    if (!r) return false;
+    const d = await r.json();
+    if (!d.ok) { console.error('updateSavedClient:', d.error); }
+    return d.ok;
   },
 
   async deleteSavedClient(id) {
-    const { error } = await sb.from('saved_clients').delete().eq('id', id);
-    if (error) console.error(error);
-    return !error;
+    const r = await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    }).catch(() => null);
+    if (!r) return false;
+    const d = await r.json();
+    if (!d.ok) { console.error('deleteSavedClient:', d.error); }
+    return d.ok;
   },
 
   getPassword: () => localStorage.getItem('ltd_pw') || 'linktodoor',
@@ -1459,6 +1479,7 @@ function openNuevoCliente() {
       <label>Notas (opcional)</label>
       <textarea id="m-clnotes" placeholder="Dirección, indicaciones, etc."></textarea>
     </div>
+    <p id="m-cl-err" style="display:none;color:var(--red);font-size:.82rem;margin-bottom:.5rem;font-weight:600"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveCliente(null)">Guardar</button>
@@ -1493,6 +1514,7 @@ async function openEditCliente(clientId) {
       <label>Notas</label>
       <textarea id="m-clnotes">${esc(client.notes || '')}</textarea>
     </div>
+    <p id="m-cl-err" style="display:none;color:var(--red);font-size:.82rem;margin-bottom:.5rem;font-weight:600"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="m-save-btn" onclick="saveCliente('${clientId}')">Guardar</button>
@@ -1507,11 +1529,15 @@ async function saveCliente(editId) {
   const notes = document.getElementById('m-clnotes').value.trim();
   if (!name) { alert('Ingresá el nombre del cliente.'); return; }
   const btn = document.getElementById('m-save-btn');
-  if (btn) btn.disabled = true;
-  if (editId) {
-    await DB.updateSavedClient(editId, name, phone, email, notes);
-  } else {
-    await DB.createSavedClient(name, phone, email, notes);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+  const ok = editId
+    ? await DB.updateSavedClient(editId, name, phone, email, notes)
+    : await DB.createSavedClient(name, phone, email, notes);
+  if (!ok) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
+    const errEl = document.getElementById('m-cl-err');
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = '❌ Error al guardar. Verificá la conexión o revisá la consola.'; }
+    return;
   }
   closeModal();
   renderClientes();
