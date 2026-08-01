@@ -1,4 +1,5 @@
 const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
+const ANON_KEY     = 'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7,8 +8,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-  if (!serviceKey) return res.status(500).json({ ok: false, error: 'SUPABASE_SERVICE_KEY no configurado.' });
+  // Use service key if available (bypasses RLS), otherwise fall back to anon key
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || ANON_KEY;
 
   const h = {
     'Authorization': `Bearer ${serviceKey}`,

@@ -1109,7 +1109,15 @@ async function renderClientes() {
   tbody.innerHTML = LOADING_ROW(8);
   empty.style.display = 'none';
 
-  const [clients, cargas] = await Promise.all([DB.getClients(), DB.getCargas()]);
+  let clients, cargas;
+  try {
+    [clients, cargas] = await Promise.all([DB.getClients(), DB.getCargas()]);
+  } catch(e) {
+    tbody.innerHTML = '';
+    empty.innerHTML = `<div class="ico">⚠️</div><p style="color:var(--red)">Error cargando clientes:<br><code style="font-size:.78rem">${e.message}</code></p>`;
+    empty.style.display = '';
+    return;
+  }
 
   if (!clients.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
   empty.style.display = 'none';
@@ -1530,13 +1538,23 @@ async function saveCliente(editId) {
   if (!name) { alert('Ingresá el nombre del cliente.'); return; }
   const btn = document.getElementById('m-save-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
-  const ok = editId
-    ? await DB.updateSavedClient(editId, name, phone, email, notes)
-    : await DB.createSavedClient(name, phone, email, notes);
-  if (!ok) {
+  let saveResult = null;
+  try {
+    const r = await fetch('/api/save-client', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editId
+        ? { action: 'update', id: editId, name, phone, email, notes }
+        : { action: 'create', name, phone, email, notes })
+    });
+    saveResult = await r.json();
+  } catch(e) {
     if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
-    const errEl = document.getElementById('m-cl-err');
-    if (errEl) { errEl.style.display = 'block'; errEl.textContent = '❌ Error al guardar. Verificá la conexión o revisá la consola.'; }
+    alert('❌ Error de conexión: ' + e.message);
+    return;
+  }
+  if (!saveResult?.ok) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
+    alert('❌ Error al guardar: ' + (saveResult?.error || 'Desconocido'));
     return;
   }
   closeModal();
