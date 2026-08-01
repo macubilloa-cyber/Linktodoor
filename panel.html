@@ -387,6 +387,30 @@
   <div class="modal" id="modal-box"></div>
 </div>
 
+<!-- COBRO MODAL -->
+<div id="cobro-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3)">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:1rem;font-weight:800">💬 Cobro al cliente</div>
+        <div style="font-size:.8rem;color:#6B7280;margin-top:.1rem" id="cobro-subtitle"></div>
+      </div>
+      <button onclick="closeCobro()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:#6B7280;line-height:1;padding:2px 6px">✕</button>
+    </div>
+    <div id="cobro-preview" style="padding:1.25rem 1.5rem;background:#F9FAFB;font-size:.85rem;white-space:pre-wrap;font-family:inherit;line-height:1.7;border-bottom:1px solid #E5E7EB;color:#1E293B"></div>
+    <div style="padding:1.25rem 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <button onclick="copyCobro()" id="cobro-copy-btn"
+        style="flex:1;padding:.75rem;background:#5B5BD6;color:white;border:none;border-radius:8px;font-weight:800;font-size:.87rem;cursor:pointer;font-family:inherit;transition:background .15s">
+        📋 Copiar mensaje
+      </button>
+      <a id="cobro-wa-btn" href="#" target="_blank"
+        style="flex:1;padding:.75rem;background:#25D366;color:white;border:none;border-radius:8px;font-weight:800;font-size:.87rem;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem">
+        💬 Enviar por WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ─── SUPABASE ─── */
 const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
@@ -857,7 +881,10 @@ async function renderDetail(cargaId) {
           <td>${fPct(pct)}</td>
           <td style="font-weight:700;color:var(--purple)">${fCRC(cl.chargedCRC)}</td>
           <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes||'')}</td>
-          <td class="no-print"><div style="display:flex;gap:.3rem">${editBtns}</div></td>
+          <td class="no-print"><div style="display:flex;gap:.3rem">
+            <button class="btn btn-sm btn-success" title="Cobrar" onclick="openCobro('${cargaId}','${cl.id}')">💬</button>
+            ${editBtns}
+          </div></td>
         </tr>
         ${pkgSubRows}`;
     }).join('');
@@ -895,6 +922,68 @@ function togglePkgs(clientId, count) {
   const isOpen = rows.length && rows[0].style.display !== 'none';
   rows.forEach(r => r.style.display = isOpen ? 'none' : '');
   if (btn) btn.textContent = isOpen ? `▶ ${count} paq.` : `▼ ${count} paq.`;
+}
+
+/* ─── COBRO (BILLING) ─── */
+let _cobroText = '';
+
+async function openCobro(cargaId, clientId) {
+  const carga = await DB.getCarga(cargaId);
+  if (!carga) return;
+
+  const cl = carga.clients.find(c => c.id === clientId);
+  if (!cl) return;
+
+  const pkgs = cl.packages || [];
+  const hasPkgs = pkgs.length > 0;
+
+  let lines = `Hola ${cl.clientName},\n\nTe enviamos el cobro de tu envío en la carga *${carga.reference}* (${fDate(carga.date)}):\n\n`;
+
+  if (hasPkgs) {
+    pkgs.forEach((p, i) => {
+      lines += `📦 Paquete ${i+1}`;
+      if (p.guia) lines += ` · Guía: ${p.guia}`;
+      lines += `\n   Peso: ${fLbs(p.weightLbs)} · Cobrado: ${fCRC(p.chargedCRC)}`;
+      if (p.notes) lines += ` · ${p.notes}`;
+      lines += '\n\n';
+    });
+  } else {
+    lines += `📦 Peso: ${fLbs(cl.weightLbs)}\n\n`;
+  }
+
+  lines += `💰 *Total: ${fCRC(cl.chargedCRC)}*\n\n`;
+  lines += `Podés ver el detalle en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
+
+  _cobroText = lines;
+
+  document.getElementById('cobro-subtitle').textContent = `${cl.clientName} — ${fCRC(cl.chargedCRC)}`;
+  document.getElementById('cobro-preview').textContent  = lines;
+
+  // Try to find client phone from saved_clients
+  const { data: saved } = await sb.from('saved_clients').select('phone').ilike('name', cl.clientName).limit(1);
+  const raw = saved?.[0]?.phone || '';
+  const clean = raw.replace(/\D/g, '');
+  const phone = clean ? (clean.startsWith('506') ? clean : '506' + clean) : '';
+  const waUrl = phone
+    ? `https://wa.me/${phone}?text=${encodeURIComponent(lines)}`
+    : `https://wa.me/?text=${encodeURIComponent(lines)}`;
+
+  document.getElementById('cobro-wa-btn').href = waUrl;
+  document.getElementById('cobro-bg').style.display = 'flex';
+}
+
+function closeCobro() {
+  document.getElementById('cobro-bg').style.display = 'none';
+}
+
+function copyCobro() {
+  const btn = document.getElementById('cobro-copy-btn');
+  navigator.clipboard?.writeText(_cobroText).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ ¡Copiado!';
+    btn.style.background = '#059669';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = '#5B5BD6'; }, 2500);
+  });
 }
 
 /* ─── RENDER: CIERRE ─── */
