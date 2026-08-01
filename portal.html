@@ -10,620 +10,251 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --pri:      #5B5BD6;
-      --pri-dk:   #4848b8;
-      --pri-lt:   #EEF2FF;
-      --bg:       #F2F1EE;
-      --surface:  #FFFFFF;
-      --dark:     #0D0D1A;
-      --body:     #1E293B;
-      --muted:    #64748B;
-      --faint:    #94A3B8;
-      --border:   #E2E8F0;
-      --light:    #F8FAFC;
-      --green:    #059669;
-      --green-lt: #ECFDF5;
-      --blue:     #2563EB;
-      --blue-lt:  #EFF6FF;
-      --amber:    #D97706;
-      --amber-lt: #FFFBEB;
-      --red:      #DC2626;
-      --red-lt:   #FEF2F2;
-      --r:        14px;
-      --r-lg:     20px;
-      --cream:    #F5F0E4;
-      --lblue:    #C4D9F5;
+      --pri:#5B5BD6; --pri-dk:#4848b8; --pri-lt:#EEF2FF;
+      --bg:#F2F1EE; --surface:#FFFFFF; --dark:#0D0D1A; --body:#1E293B;
+      --muted:#64748B; --faint:#94A3B8; --border:#E2E8F0; --light:#F8FAFC;
+      --green:#059669; --green-lt:#ECFDF5; --blue:#2563EB; --blue-lt:#EFF6FF;
+      --amber:#D97706; --amber-lt:#FFFBEB; --red:#DC2626; --red-lt:#FEF2F2;
+      --r:14px; --r-lg:20px; --cream:#F5F0E4; --lblue:#C4D9F5;
     }
-
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+    body { font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--body); min-height:100vh; -webkit-font-smoothing:antialiased; }
 
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--body);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ═══════════════════════════════════
-       LOGIN
-    ═══════════════════════════════════ */
+    /* ── LOGIN ── */
     #screen-login {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(-45deg, #12122a, #2525a0, #5B5BD6, #3a3abf, #5252cc, #1a1a40);
-      background-size: 400% 400%;
-      animation: bgShift 18s ease infinite;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(-45deg,#12122a,#2525a0,#5B5BD6,#3a3abf,#5252cc,#1a1a40);
+      background-size:400% 400%; animation:bgShift 18s ease infinite; padding:1.5rem; position:relative; overflow:hidden;
     }
-    #screen-login::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 75% 25%, rgba(255,255,255,.07) 0%, transparent 55%),
-        radial-gradient(ellipse at 20% 80%, rgba(255,255,255,.04) 0%, transparent 45%);
-      pointer-events: none;
-    }
-    @keyframes bgShift {
-      0%, 100% { background-position: 0% 50% }
-      50%       { background-position: 100% 50% }
-    }
+    #screen-login::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 75% 25%,rgba(255,255,255,.07) 0%,transparent 55%),radial-gradient(ellipse at 20% 80%,rgba(255,255,255,.04) 0%,transparent 45%); pointer-events:none; }
+    @keyframes bgShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+    .login-card { background:white; border-radius:24px; padding:2.75rem 2.5rem 2.25rem; width:100%; max-width:420px; box-shadow:0 40px 100px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08); position:relative; z-index:1; }
+    .login-brand { display:flex; align-items:center; gap:.75rem; margin-bottom:1.75rem; }
+    .login-logo-mark { background:var(--pri); border-radius:10px; padding:.45rem .65rem; display:flex; flex-direction:column; gap:1px; line-height:1; flex-shrink:0; }
+    .login-logo-mark span { font-size:.75rem; font-weight:900; letter-spacing:.5px; }
+    .login-logo-mark .l1 { color:var(--cream); } .login-logo-mark .l2 { color:var(--lblue); }
+    .login-brand-text h1 { font-size:1.15rem; font-weight:900; color:var(--dark); line-height:1.1; }
+    .login-brand-text p  { font-size:.78rem; color:var(--muted); margin-top:.1rem; }
+    .login-divider { height:1px; background:var(--border); margin-bottom:1.75rem; }
+    .login-heading h2 { font-size:1.3rem; font-weight:800; color:var(--dark); }
+    .login-heading p  { font-size:.84rem; color:var(--muted); margin-top:.25rem; margin-bottom:1.5rem; }
+    .field { margin-bottom:1rem; }
+    .field label { display:block; font-size:.73rem; font-weight:700; color:var(--body); text-transform:uppercase; letter-spacing:.35px; margin-bottom:.4rem; }
+    .field input { width:100%; padding:.85rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-size:.95rem; color:var(--dark); font-family:inherit; outline:none; transition:border-color .2s,box-shadow .2s,background .2s; background:var(--light); }
+    .field input:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(91,91,214,.12); background:white; }
+    .msg-err { border-left:3px solid var(--red); background:var(--red-lt); color:var(--red); border-radius:0 8px 8px 0; padding:.65rem .9rem; font-size:.82rem; font-weight:600; margin-bottom:1rem; display:none; }
+    .msg-ok  { border-left:3px solid var(--green); background:var(--green-lt); color:var(--green); border-radius:0 8px 8px 0; padding:.65rem .9rem; font-size:.82rem; font-weight:600; margin-bottom:1rem; display:none; }
+    .btn-submit { width:100%; padding:.95rem; background:var(--pri); color:white; border:none; border-radius:10px; font-weight:800; font-size:1rem; cursor:pointer; font-family:inherit; transition:all .2s; margin-top:.5rem; letter-spacing:.2px; }
+    .btn-submit:hover { background:var(--pri-dk); transform:translateY(-1px); box-shadow:0 8px 24px rgba(91,91,214,.35); }
+    .btn-submit:active { transform:translateY(0); box-shadow:none; }
+    .btn-submit:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+    .login-help { text-align:center; margin-top:1.25rem; font-size:.79rem; color:var(--muted); line-height:1.6; }
+    .login-help a { color:var(--pri); font-weight:700; text-decoration:none; }
+    .login-help a:hover { text-decoration:underline; }
 
-    .login-card {
-      background: white;
-      border-radius: 24px;
-      padding: 2.75rem 2.5rem 2.25rem;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 40px 100px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.08);
-      position: relative;
-      z-index: 1;
-    }
+    /* ── APP SHELL ── */
+    #screen-app { display:none; min-height:100vh; }
+    .app-header { background:var(--dark); height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; position:sticky; top:0; z-index:200; box-shadow:0 1px 0 rgba(255,255,255,.05); }
+    .app-logo { display:flex; align-items:center; gap:.6rem; text-decoration:none; }
+    .app-logo-mark { background:var(--pri); border-radius:7px; padding:.28rem .5rem; display:flex; flex-direction:column; gap:1px; line-height:1; }
+    .app-logo-mark span { font-size:.62rem; font-weight:900; letter-spacing:.5px; }
+    .app-logo-mark .l1 { color:var(--cream); } .app-logo-mark .l2 { color:var(--lblue); }
+    .app-logo-name { font-size:.95rem; font-weight:800; color:white; }
+    .app-header-right { display:flex; align-items:center; gap:.75rem; }
+    .user-email { font-size:.8rem; color:rgba(255,255,255,.4); font-weight:500; }
+    .user-avatar { width:32px; height:32px; background:linear-gradient(135deg,var(--pri),var(--pri-dk)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:900; color:white; flex-shrink:0; box-shadow:0 0 0 2px rgba(255,255,255,.1); }
+    .btn-signout { background:rgba(255,255,255,.07); color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:.38rem .85rem; font-size:.8rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .18s; }
+    .btn-signout:hover { background:rgba(255,255,255,.14); color:white; }
 
-    .login-brand {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      margin-bottom: 1.75rem;
-    }
-    .login-logo-mark {
-      background: var(--pri);
-      border-radius: 10px;
-      padding: .45rem .65rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-    .login-logo-mark span { font-size: .75rem; font-weight: 900; letter-spacing: .5px; }
-    .login-logo-mark .l1 { color: var(--cream); }
-    .login-logo-mark .l2 { color: var(--lblue); }
-    .login-brand-text h1 { font-size: 1.15rem; font-weight: 900; color: var(--dark); line-height: 1.1; }
-    .login-brand-text p  { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
+    /* ── TABS ── */
+    .tab-strip { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:58px; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .tab-inner { max-width:900px; margin:0 auto; display:flex; padding:0 .5rem; }
+    .tab-btn { flex:1; padding:.65rem .3rem; border:none; background:none; cursor:pointer; font-family:inherit; font-size:.76rem; font-weight:700; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:.15rem; border-bottom:2.5px solid transparent; transition:all .15s; white-space:nowrap; }
+    .tab-btn .tab-icon { font-size:1.05rem; }
+    .tab-btn:hover { color:var(--pri); background:var(--pri-lt); }
+    .tab-btn.active { color:var(--pri); border-bottom-color:var(--pri); background:rgba(91,91,214,.04); }
 
-    .login-divider { height: 1px; background: var(--border); margin-bottom: 1.75rem; }
+    /* ── LAYOUT ── */
+    .app-main { max-width:900px; margin:0 auto; padding:1.75rem 1.25rem 4rem; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
 
-    .login-heading h2 { font-size: 1.3rem; font-weight: 800; color: var(--dark); }
-    .login-heading p  { font-size: .84rem; color: var(--muted); margin-top: .25rem; margin-bottom: 1.5rem; }
+    /* ── HERO ── */
+    .portal-hero { background:linear-gradient(135deg,#0d0d1e 0%,#2a2a8a 50%,var(--pri) 100%); border-radius:var(--r-lg); padding:1.75rem 2rem 1.5rem; margin-bottom:1.25rem; position:relative; overflow:hidden; }
+    .portal-hero::before { content:''; position:absolute; width:260px; height:260px; background:radial-gradient(circle,rgba(255,255,255,.07) 0%,transparent 70%); top:-80px; right:-60px; border-radius:50%; }
+    .hero-greeting { font-size:1.5rem; font-weight:900; color:white; position:relative; z-index:1; line-height:1.2; }
+    .hero-sub { font-size:.83rem; color:rgba(255,255,255,.5); margin-top:.35rem; position:relative; z-index:1; }
 
-    .field { margin-bottom: 1rem; }
-    .field label {
-      display: block;
-      font-size: .73rem;
-      font-weight: 700;
-      color: var(--body);
-      text-transform: uppercase;
-      letter-spacing: .35px;
-      margin-bottom: .4rem;
-    }
-    .field input {
-      width: 100%;
-      padding: .85rem 1rem;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: .95rem;
-      color: var(--dark);
-      font-family: inherit;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s, background .2s;
-      background: var(--light);
-    }
-    .field input:focus {
-      border-color: var(--pri);
-      box-shadow: 0 0 0 3px rgba(91,91,214,.12);
-      background: white;
-    }
+    /* ── STATS ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; margin-bottom:1.75rem; }
+    .stat-card { background:var(--surface); border-radius:var(--r); padding:1.2rem 1.3rem; border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); position:relative; overflow:hidden; transition:box-shadow .2s,transform .2s; }
+    .stat-card:hover { box-shadow:0 4px 24px rgba(0,0,0,.1); transform:translateY(-1px); }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; border-radius:3px 0 0 3px; }
+    .stat-card:nth-child(1)::before { background:var(--pri); }
+    .stat-card:nth-child(2)::before { background:var(--blue); }
+    .stat-card:nth-child(3)::before { background:var(--green); }
+    .stat-icon { font-size:1.15rem; margin-bottom:.5rem; display:block; }
+    .stat-label { font-size:.67rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.65px; margin-bottom:.2rem; }
+    .stat-value { font-size:1.4rem; font-weight:900; color:var(--dark); line-height:1.1; }
+    .stat-sub   { font-size:.71rem; color:var(--faint); margin-top:.15rem; }
 
-    .msg-err {
-      border-left: 3px solid var(--red);
-      background: var(--red-lt);
-      color: var(--red);
-      border-radius: 0 8px 8px 0;
-      padding: .65rem .9rem;
-      font-size: .82rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .msg-ok {
-      border-left: 3px solid var(--green);
-      background: var(--green-lt);
-      color: var(--green);
-      border-radius: 0 8px 8px 0;
-      padding: .65rem .9rem;
-      font-size: .82rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      display: none;
-    }
+    /* ── SECTION HEAD ── */
+    .section-head { display:flex; align-items:center; gap:.5rem; margin-bottom:.85rem; }
+    .section-head-bar { width:3px; height:1rem; background:var(--pri); border-radius:2px; flex-shrink:0; }
+    .section-head-title { font-size:.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.75px; }
 
-    .btn-submit {
-      width: 100%;
-      padding: .95rem;
-      background: var(--pri);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all .2s;
-      margin-top: .5rem;
-      letter-spacing: .2px;
-    }
-    .btn-submit:hover {
-      background: var(--pri-dk);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(91,91,214,.35);
-    }
-    .btn-submit:active { transform: translateY(0); box-shadow: none; }
-    .btn-submit:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+    /* ── DATA CARD ── */
+    .data-card { background:var(--surface); border-radius:var(--r); border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); overflow:hidden; }
 
-    .login-help {
-      text-align: center;
-      margin-top: 1.25rem;
-      font-size: .79rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .login-help a { color: var(--pri); font-weight: 700; text-decoration: none; }
-    .login-help a:hover { text-decoration: underline; }
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    thead th { text-align:left; padding:.7rem 1.1rem; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.65px; color:var(--muted); background:#FAFBFC; border-bottom:1px solid var(--border); }
+    td { padding:.9rem 1.1rem; border-bottom:1px solid #F1F5F9; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr { transition:background .1s; }
+    tbody tr:hover { background:#FAFBFC; }
+    .badge { display:inline-flex; align-items:center; gap:.2rem; padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:700; white-space:nowrap; }
+    .badge-delivered { background:var(--green-lt); color:var(--green); }
+    .badge-transit   { background:var(--blue-lt);  color:var(--blue); }
+    .total-row td { font-weight:800; background:#F8FAFC; border-top:1.5px solid var(--border)!important; color:var(--dark); }
 
-    /* ═══════════════════════════════════
-       APP SHELL
-    ═══════════════════════════════════ */
-    #screen-app { display: none; min-height: 100vh; }
+    /* ── EMPTY / LOADING ── */
+    .empty-box { text-align:center; padding:3.5rem 1.5rem; color:var(--muted); }
+    .empty-box .ico { font-size:2rem; margin-bottom:.75rem; }
+    .empty-box p { font-size:.9rem; line-height:1.75; }
+    .loading-box { display:flex; flex-direction:column; align-items:center; padding:3rem; gap:.75rem; color:var(--muted); font-size:.87rem; }
+    .spin { width:30px; height:30px; border:2.5px solid rgba(91,91,214,.15); border-top-color:var(--pri); border-radius:50%; animation:doSpin .75s linear infinite; }
+    @keyframes doSpin { to { transform:rotate(360deg) } }
+    .section-block { margin-top:2rem; }
 
-    .app-header {
-      background: var(--dark);
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.75rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 1px 0 rgba(255,255,255,.05);
-    }
-    .app-logo {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      text-decoration: none;
-    }
-    .app-logo-mark {
-      background: var(--pri);
-      border-radius: 7px;
-      padding: .28rem .5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      line-height: 1;
-    }
-    .app-logo-mark span { font-size: .62rem; font-weight: 900; letter-spacing: .5px; }
-    .app-logo-mark .l1 { color: var(--cream); }
-    .app-logo-mark .l2 { color: var(--lblue); }
-    .app-logo-name { font-size: .95rem; font-weight: 800; color: white; }
+    /* ── ORDERS ── */
+    .carga-list { padding:.75rem; display:flex; flex-direction:column; gap:.6rem; }
+    .carga-card { border:1px solid var(--border); border-radius:var(--r); padding:1.1rem 1.25rem; cursor:pointer; transition:background .15s,border-color .15s,box-shadow .15s; background:white; }
+    .carga-card:hover { background:var(--pri-lt); border-color:var(--pri); box-shadow:0 2px 12px rgba(91,91,214,.1); }
+    .carga-card-top { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.5rem; }
+    .carga-card-ref { font-size:1rem; font-weight:800; color:var(--dark); }
+    .carga-card-meta { font-size:.78rem; color:var(--muted); display:flex; gap:1rem; margin-bottom:.65rem; }
+    .carga-card-footer { display:flex; align-items:center; justify-content:space-between; }
+    .carga-card-lbs { font-weight:700; color:var(--dark); font-size:.9rem; }
+    .carga-card-kg { font-size:.74rem; color:var(--faint); margin-left:.4rem; }
+    .carga-card-right { display:flex; align-items:center; gap:.75rem; }
+    .carga-card-cobrado { font-weight:900; color:var(--pri); font-size:.95rem; }
+    .carga-card-arrow { font-size:1.5rem; color:var(--faint); line-height:1; }
+    .detail-header { display:flex; align-items:flex-start; gap:1rem; padding:1.1rem 1.25rem; border-bottom:1px solid var(--border); }
+    .btn-back { background:var(--light); border:1px solid var(--border); border-radius:8px; padding:.45rem .9rem; font-size:.82rem; font-weight:700; color:var(--body); cursor:pointer; font-family:inherit; white-space:nowrap; transition:all .15s; flex-shrink:0; }
+    .btn-back:hover { background:var(--pri-lt); border-color:var(--pri); color:var(--pri); }
+    .detail-ref { font-size:1.1rem; font-weight:800; color:var(--dark); line-height:1.2; }
+    .detail-meta { font-size:.8rem; color:var(--muted); margin-top:.25rem; display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+    .detail-notes { padding:.85rem 1.25rem; font-size:.83rem; color:var(--muted); border-top:1px solid var(--border); background:#FAFBFC; }
 
-    .app-header-right { display: flex; align-items: center; gap: .75rem; }
-    .user-email { font-size: .8rem; color: rgba(255,255,255,.4); font-weight: 500; }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--pri), var(--pri-dk));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .72rem;
-      font-weight: 900;
-      color: white;
-      letter-spacing: .5px;
-      flex-shrink: 0;
-      box-shadow: 0 0 0 2px rgba(255,255,255,.1);
-    }
-    .btn-signout {
-      background: rgba(255,255,255,.07);
-      color: rgba(255,255,255,.6);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 8px;
-      padding: .38rem .85rem;
-      font-size: .8rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all .18s;
-    }
-    .btn-signout:hover { background: rgba(255,255,255,.14); color: white; }
+    /* ── TRACKING FORM ── */
+    .tracking-form-card { background:var(--surface); border-radius:var(--r); border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); padding:1.5rem; margin-bottom:1.25rem; }
+    .tracking-form-intro { font-size:.84rem; color:var(--muted); line-height:1.65; margin-bottom:1.1rem; padding-bottom:1.1rem; border-bottom:1px solid var(--border); }
+    .tracking-inputs { display:flex; gap:.75rem; flex-wrap:wrap; align-items:flex-start; }
+    .t-input { padding:.75rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-size:.87rem; font-family:inherit; color:var(--dark); background:var(--light); outline:none; transition:border-color .18s,box-shadow .18s,background .18s; }
+    .t-input:focus { border-color:var(--pri); background:white; box-shadow:0 0 0 3px rgba(91,91,214,.1); }
+    .t-input.t-narrow { flex:1; min-width:170px; }
+    .t-input.t-wide   { flex:2; min-width:190px; }
+    .btn-add-track { padding:.75rem 1.3rem; background:var(--pri); color:white; border:none; border-radius:10px; font-weight:800; font-size:.87rem; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; transition:all .18s; }
+    .btn-add-track:hover { background:var(--pri-dk); box-shadow:0 4px 16px rgba(91,91,214,.3); transform:translateY(-1px); }
+    .btn-add-track:active { transform:none; box-shadow:none; }
+    .btn-add-track:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+    .track-msg { margin-top:.75rem; font-size:.82rem; font-weight:600; padding:.6rem .9rem; border-radius:0 8px 8px 0; display:none; }
+    .track-msg.ok  { display:block; background:var(--green-lt); color:var(--green); border-left:3px solid var(--green); }
+    .track-msg.err { display:block; background:var(--red-lt);   color:var(--red);   border-left:3px solid var(--red); }
+    .btn-del-track { background:none; border:none; cursor:pointer; color:var(--faint); font-size:.88rem; padding:4px 8px; border-radius:6px; line-height:1; transition:all .15s; }
+    .btn-del-track:hover { background:var(--red-lt); color:var(--red); }
 
-    /* ═══════════════════════════════════
-       MAIN LAYOUT
-    ═══════════════════════════════════ */
-    .app-main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
-    }
+    /* ── BODEGA CARDS ── */
+    .bodega-intro { background:var(--pri-lt); border-radius:var(--r); padding:1rem 1.3rem; font-size:.84rem; color:var(--pri); font-weight:600; margin-bottom:1.5rem; border:1px solid rgba(91,91,214,.2); display:flex; gap:.75rem; align-items:flex-start; line-height:1.55; }
+    .bodega-intro .bi-icon { font-size:1.3rem; flex-shrink:0; margin-top:.05rem; }
+    .bodega-cards { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+    .bodega-card { background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); box-shadow:0 2px 16px rgba(0,0,0,.06); overflow:hidden; }
+    .bodega-card-header { padding:1.25rem 1.4rem 1rem; }
+    .bodega-card.consolidada .bodega-card-header { background:linear-gradient(135deg,#1a1a4e 0%,var(--pri) 100%); }
+    .bodega-card.flash       .bodega-card-header { background:linear-gradient(135deg,#0c3a2e 0%,#059669 100%); }
+    .bodega-badge { display:inline-flex; align-items:center; gap:.3rem; padding:3px 12px; border-radius:20px; font-size:.68rem; font-weight:800; letter-spacing:.3px; margin-bottom:.65rem; background:rgba(255,255,255,.18); color:rgba(255,255,255,.9); }
+    .bodega-name { font-size:1.25rem; font-weight:900; color:white; margin-bottom:.2rem; }
+    .bodega-days { font-size:.79rem; color:rgba(255,255,255,.65); }
+    .bodega-addr { padding:1.1rem 1.4rem 0; }
+    .addr-field { display:flex; gap:.6rem; padding:.48rem 0; border-bottom:1px solid var(--border); align-items:baseline; font-size:.86rem; }
+    .addr-field:last-child { border-bottom:none; }
+    .addr-key { font-size:.68rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; min-width:72px; flex-shrink:0; }
+    .addr-val { color:var(--dark); font-weight:600; word-break:break-word; flex:1; }
+    .addr-val.hi { color:var(--pri); font-weight:900; }
+    .bodega-copy-btn { display:flex; align-items:center; justify-content:center; gap:.5rem; width:calc(100% - 2.8rem); margin:1.1rem 1.4rem 1.3rem; padding:.82rem; background:var(--pri); color:white; border:none; border-radius:10px; font-weight:800; font-size:.87rem; cursor:pointer; font-family:inherit; transition:all .18s; }
+    .bodega-copy-btn:hover { background:var(--pri-dk); box-shadow:0 4px 16px rgba(91,91,214,.3); transform:translateY(-1px); }
+    .bodega-copy-btn:active { transform:none; box-shadow:none; }
+    .bodega-copy-btn.green-flash .bodega-card.flash & { background:var(--green); }
+    .bodega-copy-btn.copied { background:var(--green); transform:none; box-shadow:none; }
 
-    /* Hero banner */
-    .portal-hero {
-      background: linear-gradient(135deg, #0d0d1e 0%, #2a2a8a 50%, var(--pri) 100%);
-      border-radius: var(--r-lg);
-      padding: 2rem 2.25rem 1.75rem;
-      margin-bottom: 1.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .portal-hero::before {
-      content: '';
-      position: absolute;
-      width: 260px; height: 260px;
-      background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 70%);
-      top: -80px; right: -60px;
-      border-radius: 50%;
-    }
-    .portal-hero::after {
-      content: '';
-      position: absolute;
-      width: 160px; height: 160px;
-      background: radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 70%);
-      bottom: -50px; left: 10px;
-      border-radius: 50%;
-    }
-    .hero-greeting {
-      font-size: 1.7rem;
-      font-weight: 900;
-      color: white;
-      position: relative;
-      z-index: 1;
-      line-height: 1.2;
-    }
-    .hero-sub {
-      font-size: .84rem;
-      color: rgba(255,255,255,.5);
-      margin-top: .4rem;
-      position: relative;
-      z-index: 1;
-    }
+    /* ── OFERTAS ── */
+    .ofertas-hero { background:linear-gradient(135deg,#b45309 0%,#D97706 60%,#f59e0b 100%); border-radius:var(--r-lg); padding:1.75rem 2rem; margin-bottom:1.5rem; color:white; position:relative; overflow:hidden; }
+    .ofertas-hero::before { content:''; position:absolute; width:200px; height:200px; background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%); top:-60px; right:-40px; border-radius:50%; }
+    .ofertas-hero h2 { font-size:1.4rem; font-weight:900; margin-bottom:.3rem; position:relative; z-index:1; }
+    .ofertas-hero p  { font-size:.85rem; opacity:.85; position:relative; z-index:1; }
+    .ofertas-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.75rem; }
+    .oferta-card { background:var(--surface); border-radius:var(--r); border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); padding:1.4rem; transition:box-shadow .2s,transform .2s; }
+    .oferta-card:hover { box-shadow:0 4px 24px rgba(0,0,0,.1); transform:translateY(-2px); }
+    .oferta-icon { font-size:1.9rem; margin-bottom:.65rem; display:block; }
+    .oferta-title { font-size:.97rem; font-weight:800; color:var(--dark); margin-bottom:.35rem; }
+    .oferta-desc  { font-size:.82rem; color:var(--muted); line-height:1.55; }
+    .oferta-tag { display:inline-block; margin-top:.75rem; padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:800; }
+    .tag-purple { background:var(--pri-lt); color:var(--pri); }
+    .tag-green  { background:var(--green-lt); color:var(--green); }
+    .tag-amber  { background:var(--amber-lt); color:var(--amber); }
+    .tag-blue   { background:var(--blue-lt); color:var(--blue); }
+    .stores-section { margin-top:1.75rem; }
+    .stores-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; margin-top:1rem; }
+    .store-btn { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:.9rem .5rem; cursor:pointer; text-align:center; font-family:inherit; transition:all .15s; text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:.35rem; }
+    .store-btn:hover { border-color:var(--pri); background:var(--pri-lt); transform:translateY(-1px); box-shadow:0 4px 16px rgba(91,91,214,.1); }
+    .store-icon { font-size:1.5rem; }
+    .store-name { font-size:.72rem; font-weight:700; color:var(--muted); }
+    .wa-promo-btn { display:inline-flex; align-items:center; gap:.5rem; margin-top:1.25rem; padding:.85rem 1.5rem; background:#25D366; color:white; border:none; border-radius:12px; font-weight:800; font-size:.88rem; cursor:pointer; font-family:inherit; text-decoration:none; transition:all .18s; }
+    .wa-promo-btn:hover { background:#1ebe5d; transform:translateY(-1px); box-shadow:0 4px 16px rgba(37,211,102,.4); }
 
-    /* Stats */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: var(--surface);
-      border-radius: var(--r);
-      padding: 1.3rem 1.4rem;
-      border: 1px solid rgba(0,0,0,.05);
-      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
-      position: relative;
-      overflow: hidden;
-      transition: box-shadow .2s, transform .2s;
-    }
-    .stat-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.1); transform: translateY(-1px); }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px; height: 100%;
-      border-radius: 3px 0 0 3px;
-    }
-    .stat-card:nth-child(1)::before { background: var(--pri); }
-    .stat-card:nth-child(2)::before { background: var(--blue); }
-    .stat-card:nth-child(3)::before { background: var(--green); }
-    .stat-icon { font-size: 1.2rem; margin-bottom: .55rem; display: block; }
-    .stat-label {
-      font-size: .68rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .65px;
-      margin-bottom: .25rem;
-    }
-    .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--dark); line-height: 1.1; }
-    .stat-sub   { font-size: .72rem; color: var(--faint); margin-top: .2rem; }
+    /* ── PROFILE ── */
+    .profile-card { background:var(--surface); border-radius:var(--r-lg); border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); overflow:hidden; margin-bottom:1.25rem; }
+    .profile-header { background:linear-gradient(135deg,#0d0d1e 0%,#2a2a8a 50%,var(--pri) 100%); padding:2rem; display:flex; align-items:center; gap:1.25rem; }
+    .profile-avatar-lg { width:64px; height:64px; background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:900; color:white; flex-shrink:0; }
+    .profile-name  { font-size:1.2rem; font-weight:900; color:white; line-height:1.2; }
+    .profile-email { font-size:.82rem; color:rgba(255,255,255,.6); margin-top:.2rem; }
+    .profile-body { padding:1.5rem; }
+    .profile-field { margin-bottom:1.1rem; }
+    .profile-field label { display:block; font-size:.72rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:.4rem; }
+    .profile-field input, .profile-field textarea { width:100%; padding:.82rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-size:.9rem; font-family:inherit; color:var(--dark); background:var(--light); outline:none; transition:border-color .18s,box-shadow .18s; }
+    .profile-field input:focus, .profile-field textarea:focus { border-color:var(--pri); background:white; box-shadow:0 0 0 3px rgba(91,91,214,.1); }
+    .profile-field input[readonly] { opacity:.65; cursor:not-allowed; }
+    .profile-field textarea { min-height:72px; resize:vertical; }
+    .btn-save-profile { padding:.85rem 1.75rem; background:var(--pri); color:white; border:none; border-radius:10px; font-weight:800; font-size:.9rem; cursor:pointer; font-family:inherit; transition:all .18s; }
+    .btn-save-profile:hover { background:var(--pri-dk); box-shadow:0 4px 16px rgba(91,91,214,.3); transform:translateY(-1px); }
+    .btn-save-profile:active { transform:none; box-shadow:none; }
+    .btn-save-profile:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+    .profile-msg { font-size:.82rem; font-weight:600; padding:.6rem .9rem; border-radius:0 8px 8px 0; margin-top:.85rem; display:none; }
+    .profile-msg.ok  { display:block; background:var(--green-lt); color:var(--green); border-left:3px solid var(--green); }
+    .profile-msg.err { display:block; background:var(--red-lt);   color:var(--red);   border-left:3px solid var(--red); }
+    .contact-card { background:#E8F5E9; border:1px solid #C8E6C9; border-radius:var(--r); padding:1.1rem 1.4rem; display:flex; gap:.75rem; align-items:center; margin-top:1.25rem; }
+    .contact-card .cc-icon { font-size:1.5rem; flex-shrink:0; }
+    .contact-card p { font-size:.84rem; color:#2E7D32; font-weight:600; line-height:1.5; }
+    .contact-card a { color:#1B5E20; }
 
-    /* Section headers */
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      margin-bottom: .85rem;
-    }
-    .section-head-bar {
-      width: 3px; height: 1rem;
-      background: var(--pri);
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .section-head-title {
-      font-size: .75rem;
-      font-weight: 800;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .75px;
-    }
-
-    /* Data card */
-    .data-card {
-      background: var(--surface);
-      border-radius: var(--r);
-      border: 1px solid rgba(0,0,0,.05);
-      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
-      overflow: hidden;
-    }
-
-    /* Table */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-    thead th {
-      text-align: left;
-      padding: .7rem 1.1rem;
-      font-size: .68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .65px;
-      color: var(--muted);
-      background: #FAFBFC;
-      border-bottom: 1px solid var(--border);
-    }
-    td {
-      padding: .9rem 1.1rem;
-      border-bottom: 1px solid #F1F5F9;
-      vertical-align: middle;
-    }
-    tr:last-child td { border-bottom: none; }
-    tbody tr { transition: background .1s; }
-    tbody tr:hover { background: #FAFBFC; }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .2rem;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: .7rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .badge-delivered { background: var(--green-lt); color: var(--green); }
-    .badge-transit   { background: var(--blue-lt);  color: var(--blue); }
-
-    .total-row td {
-      font-weight: 800;
-      background: #F8FAFC;
-      border-top: 1.5px solid var(--border) !important;
-      color: var(--dark);
-    }
-
-    /* Empty / Loading */
-    .empty-box {
-      text-align: center;
-      padding: 3.5rem 1.5rem;
-      color: var(--muted);
-    }
-    .empty-box .ico { font-size: 2rem; margin-bottom: .75rem; }
-    .empty-box p { font-size: .9rem; line-height: 1.75; }
-
-    .loading-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem;
-      gap: .75rem;
-      color: var(--muted);
-      font-size: .87rem;
-    }
-    .spin {
-      width: 30px; height: 30px;
-      border: 2.5px solid rgba(91,91,214,.15);
-      border-top-color: var(--pri);
-      border-radius: 50%;
-      animation: doSpin .75s linear infinite;
-    }
-    @keyframes doSpin { to { transform: rotate(360deg) } }
-
-    /* Section spacer */
-    .section-block { margin-top: 2.25rem; }
-
-    /* Tracking form */
-    .tracking-form-card {
-      background: var(--surface);
-      border-radius: var(--r);
-      border: 1px solid rgba(0,0,0,.05);
-      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
-    }
-    .tracking-form-intro {
-      font-size: .84rem;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 1.1rem;
-      padding-bottom: 1.1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .tracking-inputs {
-      display: flex;
-      gap: .75rem;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-    .t-input {
-      padding: .75rem 1rem;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: .87rem;
-      font-family: inherit;
-      color: var(--dark);
-      background: var(--light);
-      outline: none;
-      transition: border-color .18s, box-shadow .18s, background .18s;
-    }
-    .t-input:focus {
-      border-color: var(--pri);
-      background: white;
-      box-shadow: 0 0 0 3px rgba(91,91,214,.1);
-    }
-    .t-input.t-narrow { flex: 1; min-width: 170px; }
-    .t-input.t-wide   { flex: 2; min-width: 190px; }
-
-    .btn-add-track {
-      padding: .75rem 1.3rem;
-      background: var(--pri);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: .87rem;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: all .18s;
-    }
-    .btn-add-track:hover {
-      background: var(--pri-dk);
-      box-shadow: 0 4px 16px rgba(91,91,214,.3);
-      transform: translateY(-1px);
-    }
-    .btn-add-track:active { transform: none; box-shadow: none; }
-    .btn-add-track:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    .track-msg {
-      margin-top: .75rem;
-      font-size: .82rem;
-      font-weight: 600;
-      padding: .6rem .9rem;
-      border-radius: 0 8px 8px 0;
-      display: none;
-    }
-    .track-msg.ok  { display: block; background: var(--green-lt); color: var(--green); border-left: 3px solid var(--green); }
-    .track-msg.err { display: block; background: var(--red-lt);   color: var(--red);   border-left: 3px solid var(--red); }
-
-    .btn-del-track {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--faint);
-      font-size: .88rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      line-height: 1;
-      transition: all .15s;
-    }
-    .btn-del-track:hover { background: var(--red-lt); color: var(--red); }
-
-    /* Carga cards */
-    .carga-list { padding: .75rem; display: flex; flex-direction: column; gap: .6rem; }
-    .carga-card {
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 1.1rem 1.25rem;
-      cursor: pointer;
-      transition: background .15s, border-color .15s, box-shadow .15s;
-      background: white;
-    }
-    .carga-card:hover { background: var(--pri-lt); border-color: var(--pri); box-shadow: 0 2px 12px rgba(91,91,214,.1); }
-    .carga-card:active { background: #e8eaff; }
-    .carga-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: .75rem;
-      margin-bottom: .5rem;
-    }
-    .carga-card-ref { font-size: 1rem; font-weight: 800; color: var(--dark); }
-    .carga-card-meta { font-size: .78rem; color: var(--muted); display: flex; gap: 1rem; margin-bottom: .65rem; }
-    .carga-card-footer { display: flex; align-items: center; justify-content: space-between; }
-    .carga-card-lbs { font-weight: 700; color: var(--dark); font-size: .9rem; }
-    .carga-card-kg { font-size: .74rem; color: var(--faint); margin-left: .4rem; }
-    .carga-card-right { display: flex; align-items: center; gap: .75rem; }
-    .carga-card-cobrado { font-weight: 900; color: var(--pri); font-size: .95rem; }
-    .carga-card-arrow { font-size: 1.5rem; color: var(--faint); line-height: 1; }
-
-    /* Detail view */
-    .detail-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1.1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .btn-back {
-      background: var(--light);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .45rem .9rem;
-      font-size: .82rem;
-      font-weight: 700;
-      color: var(--body);
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-      transition: all .15s;
-      flex-shrink: 0;
-    }
-    .btn-back:hover { background: var(--pri-lt); border-color: var(--pri); color: var(--pri); }
-    .detail-ref { font-size: 1.1rem; font-weight: 800; color: var(--dark); line-height: 1.2; }
-    .detail-meta {
-      font-size: .8rem;
-      color: var(--muted);
-      margin-top: .25rem;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-      flex-wrap: wrap;
-    }
-    .detail-notes {
-      padding: .85rem 1.25rem;
-      font-size: .83rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      background: #FAFBFC;
-    }
-
-    /* Responsive */
-    @media (max-width: 700px) {
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .stats-grid .stat-card:nth-child(3) { grid-column: 1 / -1; }
-      .app-header { padding: 0 1rem; }
-      .app-main { padding: 1.25rem 1rem 3rem; }
-      .portal-hero { padding: 1.5rem 1.4rem; }
-      .hero-greeting { font-size: 1.35rem; }
-      .user-email, .app-logo-name { display: none; }
-      .login-card { padding: 2.25rem 1.75rem 2rem; }
+    /* ── RESPONSIVE ── */
+    @media (max-width:700px) {
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .stats-grid .stat-card:nth-child(3) { grid-column:1 / -1; }
+      .app-header { padding:0 1rem; }
+      .app-main { padding:1.25rem 1rem 3rem; }
+      .portal-hero { padding:1.5rem 1.4rem; }
+      .hero-greeting { font-size:1.25rem; }
+      .user-email, .app-logo-name { display:none; }
+      .login-card { padding:2.25rem 1.75rem 2rem; }
+      .tab-btn .tab-label { display:none; }
+      .tab-btn .tab-icon { font-size:1.25rem; }
+      .tab-btn { padding:.7rem .3rem; }
+      .bodega-cards { grid-template-columns:1fr; }
+      .ofertas-grid { grid-template-columns:1fr; }
+      .stores-grid { grid-template-columns:repeat(2,1fr); }
     }
   </style>
 </head>
@@ -645,23 +276,19 @@
     <div class="login-divider"></div>
     <div class="login-heading">
       <h2>Mi Cuenta</h2>
-      <p>Ingresá para ver tus pedidos y cobros</p>
+      <p>Ingresá para ver tus pedidos y paquetes</p>
     </div>
-
     <div class="msg-err" id="msgErr"></div>
     <div class="msg-ok"  id="msgOk"></div>
-
     <div id="formLogin">
       <div class="field">
         <label>Correo electrónico</label>
-        <input type="email" id="loginEmail"
-          placeholder="tu@email.com" autocomplete="email"
+        <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email"
           onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()" />
       </div>
       <div class="field">
         <label>Contraseña</label>
-        <input type="password" id="loginPw"
-          placeholder="••••••••" autocomplete="current-password"
+        <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"
           onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
       <button class="btn-submit" id="btnLogin" onclick="doLogin()">Entrar →</button>
@@ -675,6 +302,8 @@
 
 <!-- ═══ APP ═══ -->
 <div id="screen-app">
+
+  <!-- Header -->
   <header class="app-header">
     <a href="https://linktodoor.co" class="app-logo">
       <div class="app-logo-mark">
@@ -690,55 +319,193 @@
     </div>
   </header>
 
+  <!-- Tabs -->
+  <div class="tab-strip">
+    <div class="tab-inner">
+      <button class="tab-btn active" id="tbtn-inicio"  onclick="switchTab('inicio')">
+        <span class="tab-icon">🏠</span><span class="tab-label">Inicio</span>
+      </button>
+      <button class="tab-btn" id="tbtn-bodegas" onclick="switchTab('bodegas')">
+        <span class="tab-icon">📮</span><span class="tab-label">Mis Bodegas</span>
+      </button>
+      <button class="tab-btn" id="tbtn-alertas" onclick="switchTab('alertas')">
+        <span class="tab-icon">📡</span><span class="tab-label">Pre-alertas</span>
+      </button>
+      <button class="tab-btn" id="tbtn-ofertas" onclick="switchTab('ofertas')">
+        <span class="tab-icon">🎁</span><span class="tab-label">Ofertas</span>
+      </button>
+      <button class="tab-btn" id="tbtn-perfil"  onclick="switchTab('perfil')">
+        <span class="tab-icon">👤</span><span class="tab-label">Mi Perfil</span>
+      </button>
+    </div>
+  </div>
+
   <main class="app-main">
 
-    <!-- Hero -->
-    <div class="portal-hero">
-      <div class="hero-greeting" id="welcomeMsg">¡Hola! 👋</div>
-      <div class="hero-sub">Aquí podés ver el historial de tus pedidos y cobros.</div>
-    </div>
+    <!-- ══ TAB: INICIO ══ -->
+    <div id="tab-inicio" class="tab-panel active">
 
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-icon">📦</span>
-        <div class="stat-label">Pedidos</div>
-        <div class="stat-value" id="statPedidos">—</div>
+      <div class="portal-hero">
+        <div class="hero-greeting" id="welcomeMsg">¡Hola! 👋</div>
+        <div class="hero-sub">Aquí podés ver tus pedidos, cobros y paquetes.</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-icon">⚖️</span>
-        <div class="stat-label">Total libras</div>
-        <div class="stat-value" id="statLbs">—</div>
-        <div class="stat-sub" id="statKg"></div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">💰</span>
-        <div class="stat-label">Total cobrado</div>
-        <div class="stat-value" id="statCobrado">—</div>
-      </div>
-    </div>
 
-    <!-- Orders -->
-    <div class="section-head">
-      <div class="section-head-bar"></div>
-      <div class="section-head-title">Mis pedidos</div>
-    </div>
-    <div class="data-card">
-      <div id="ordersContent">
-        <div class="loading-box"><div class="spin"></div><span>Cargando tus pedidos...</span></div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon">📦</span>
+          <div class="stat-label">Pedidos</div>
+          <div class="stat-value" id="statPedidos">—</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">⚖️</span>
+          <div class="stat-label">Total libras</div>
+          <div class="stat-value" id="statLbs">—</div>
+          <div class="stat-sub" id="statKg"></div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">💰</span>
+          <div class="stat-label">Total cobrado</div>
+          <div class="stat-value" id="statCobrado">—</div>
+        </div>
       </div>
-    </div>
 
-    <!-- Pre-alerta -->
-    <div class="section-block">
+      <div class="section-head">
+        <div class="section-head-bar"></div>
+        <div class="section-head-title">Mis pedidos</div>
+      </div>
+      <div class="data-card">
+        <div id="ordersContent">
+          <div class="loading-box"><div class="spin"></div><span>Cargando tus pedidos...</span></div>
+        </div>
+      </div>
+
+    </div><!-- /tab-inicio -->
+
+    <!-- ══ TAB: MIS BODEGAS ══ -->
+    <div id="tab-bodegas" class="tab-panel">
+
+      <div class="bodega-intro">
+        <span class="bi-icon">💡</span>
+        <div>Usá estas direcciones para enviar tus compras directamente a nuestras bodegas en Miami.
+        Tu nombre ya está incluido — solo copiá y pegá en la tienda.<br>
+        <strong>¿Dudas?</strong> <a href="https://wa.me/50685173813" target="_blank" style="color:var(--pri)">Escribinos por WhatsApp</a></div>
+      </div>
+
+      <div class="bodega-cards">
+
+        <!-- CONSOLIDADA -->
+        <div class="bodega-card consolidada">
+          <div class="bodega-card-header">
+            <div class="bodega-badge">📦 Consolidada</div>
+            <div class="bodega-name">Bodega 2071</div>
+            <div class="bodega-days">~5 días hábiles · Ideal para múltiples paquetes</div>
+          </div>
+          <div class="bodega-addr">
+            <div class="addr-field">
+              <span class="addr-key">Nombre</span>
+              <span class="addr-val hi" id="addr2071-nombre">UNILTD [Tu nombre]</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Apellido</span>
+              <span class="addr-val hi" id="addr2071-apellido">[Tu apellido]</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Dirección</span>
+              <span class="addr-val">2071 NW 112th Ave Ste 107</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Suite/Apto</span>
+              <span class="addr-val">Internacional Logistics EB6888</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Ciudad</span>
+              <span class="addr-val">Miami, FL 33172-6538</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">País</span>
+              <span class="addr-val">United States</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Teléfono</span>
+              <span class="addr-val">786-694-4285</span>
+            </div>
+          </div>
+          <button class="bodega-copy-btn" id="copy2071" onclick="copyBodega('2071')">
+            📋 Copiar dirección completa
+          </button>
+        </div>
+
+        <!-- FLASH -->
+        <div class="bodega-card flash">
+          <div class="bodega-card-header">
+            <div class="bodega-badge">⚡ Flash</div>
+            <div class="bodega-name">Bodega 5414</div>
+            <div class="bodega-days">3 días hábiles · Más rápido</div>
+          </div>
+          <div class="bodega-addr">
+            <div class="addr-field">
+              <span class="addr-key">Nombre</span>
+              <span class="addr-val hi" id="addrFlash-nombre">[Tu nombre]</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Apellido</span>
+              <span class="addr-val hi">AM</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Dirección</span>
+              <span class="addr-val">5414 NW 79 Ave</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Suite/Apto</span>
+              <span class="addr-val">AM 2708</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Ciudad</span>
+              <span class="addr-val">Doral, FL 33166</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">País</span>
+              <span class="addr-val">United States</span>
+            </div>
+            <div class="addr-field">
+              <span class="addr-key">Teléfono</span>
+              <span class="addr-val">786-331-8418</span>
+            </div>
+          </div>
+          <button class="bodega-copy-btn" id="copyFlash" onclick="copyBodega('flash')" style="background:#059669">
+            📋 Copiar dirección completa
+          </button>
+        </div>
+
+      </div><!-- /bodega-cards -->
+
+      <!-- Info cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem">
+        <div class="data-card" style="padding:1.25rem">
+          <div style="font-size:1.4rem;margin-bottom:.6rem">📦</div>
+          <div style="font-size:.88rem;font-weight:800;color:var(--dark);margin-bottom:.35rem">Compra sin tarjeta USA</div>
+          <div style="font-size:.82rem;color:var(--muted);line-height:1.55">Mandanos el link de lo que querés y nosotros hacemos la compra por vos. Sin necesidad de tarjeta ni cuenta en EE.UU.</div>
+        </div>
+        <div class="data-card" style="padding:1.25rem">
+          <div style="font-size:1.4rem;margin-bottom:.6rem">🚚</div>
+          <div style="font-size:.88rem;font-weight:800;color:var(--dark);margin-bottom:.35rem">Entregas Mar y Vie</div>
+          <div style="font-size:.82rem;color:var(--muted);line-height:1.55">Hacemos entregas en San José los martes y viernes. Precio único: <strong style="color:var(--pri)">₡3,950/libra</strong>. Sin cargos ocultos.</div>
+        </div>
+      </div>
+
+    </div><!-- /tab-bodegas -->
+
+    <!-- ══ TAB: PRE-ALERTAS ══ -->
+    <div id="tab-alertas" class="tab-panel">
+
       <div class="section-head">
         <div class="section-head-bar" style="background:var(--amber)"></div>
-        <div class="section-head-title">Pre-alertar paquete</div>
+        <div class="section-head-title">Agregar paquete en seguimiento</div>
       </div>
       <div class="tracking-form-card">
         <p class="tracking-form-intro">
-          Ingresá el número de rastreo de tu paquete y nosotros revisamos el estado una vez al día.
-          Te avisamos por WhatsApp cuando cambie.
+          Ingresá el número de rastreo de tu paquete y lo revisamos una vez al día.
+          Te avisamos por WhatsApp cuando cambie el estado.
         </p>
         <div class="tracking-inputs">
           <input id="alertTracking" type="text" class="t-input t-narrow"
@@ -762,10 +529,144 @@
           <div class="loading-box"><div class="spin"></div><span>Cargando...</span></div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /tab-alertas -->
+
+    <!-- ══ TAB: OFERTAS ══ -->
+    <div id="tab-ofertas" class="tab-panel">
+
+      <div class="ofertas-hero">
+        <h2>Ofertas y beneficios</h2>
+        <p>Todo lo que podés aprovechar con tu cuenta Linktodoor</p>
+      </div>
+
+      <div class="ofertas-grid">
+        <div class="oferta-card">
+          <span class="oferta-icon">🛒</span>
+          <div class="oferta-title">Comprá sin tarjeta USA</div>
+          <div class="oferta-desc">Mandanos el link de cualquier tienda y nosotros hacemos la compra por vos. Amazon, Nike, Shein, y más.</div>
+          <span class="oferta-tag tag-purple">Servicio incluido</span>
+        </div>
+        <div class="oferta-card">
+          <span class="oferta-icon">⚡</span>
+          <div class="oferta-title">Flash: 3 días hábiles</div>
+          <div class="oferta-desc">Con la bodega 5414 (Flash) tus paquetes llegan en solo 3 días hábiles desde que llegan a Miami.</div>
+          <span class="oferta-tag tag-green">Más rápido</span>
+        </div>
+        <div class="oferta-card">
+          <span class="oferta-icon">📦</span>
+          <div class="oferta-title">Consolidado = ahorro</div>
+          <div class="oferta-desc">Juntá varios paquetes en un solo envío con la bodega 2071. Pagás por peso, no por paquete.</div>
+          <span class="oferta-tag tag-amber">Ahorrá en envíos</span>
+        </div>
+        <div class="oferta-card">
+          <span class="oferta-icon">🤝</span>
+          <div class="oferta-title">Referí a un amigo</div>
+          <div class="oferta-desc">Referí a alguien y ambos obtienen beneficios en su próximo envío. Escribinos al WhatsApp para activarlo.</div>
+          <span class="oferta-tag tag-blue">Preguntá por el beneficio</span>
+        </div>
+      </div>
+
+      <!-- Tiendas populares -->
+      <div class="stores-section">
+        <div class="section-head">
+          <div class="section-head-bar" style="background:var(--amber)"></div>
+          <div class="section-head-title">Tiendas populares</div>
+        </div>
+        <div class="stores-grid">
+          <a class="store-btn" href="https://www.amazon.com" target="_blank">
+            <span class="store-icon">📦</span>
+            <span class="store-name">Amazon</span>
+          </a>
+          <a class="store-btn" href="https://www.shein.com" target="_blank">
+            <span class="store-icon">👗</span>
+            <span class="store-name">Shein</span>
+          </a>
+          <a class="store-btn" href="https://www.nike.com" target="_blank">
+            <span class="store-icon">👟</span>
+            <span class="store-name">Nike</span>
+          </a>
+          <a class="store-btn" href="https://www.ebay.com" target="_blank">
+            <span class="store-icon">🛍️</span>
+            <span class="store-name">eBay</span>
+          </a>
+          <a class="store-btn" href="https://www.target.com" target="_blank">
+            <span class="store-icon">🎯</span>
+            <span class="store-name">Target</span>
+          </a>
+          <a class="store-btn" href="https://www.walmart.com" target="_blank">
+            <span class="store-icon">🏪</span>
+            <span class="store-name">Walmart</span>
+          </a>
+          <a class="store-btn" href="https://www.adidas.com" target="_blank">
+            <span class="store-icon">🎽</span>
+            <span class="store-name">Adidas</span>
+          </a>
+          <a class="store-btn" href="https://www.bestbuy.com" target="_blank">
+            <span class="store-icon">💻</span>
+            <span class="store-name">Best Buy</span>
+          </a>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:2rem;padding:1.5rem;background:var(--surface);border-radius:var(--r);border:1px solid rgba(0,0,0,.05)">
+        <div style="font-size:1.5rem;margin-bottom:.5rem">💬</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--dark);margin-bottom:.35rem">¿Encontraste algo y no tenés tarjeta?</div>
+        <div style="font-size:.83rem;color:var(--muted);margin-bottom:1rem">Mandanos el link por WhatsApp y nosotros hacemos la compra por vos</div>
+        <a href="https://wa.me/50685173813?text=Hola%2C%20quiero%20que%20hagan%20una%20compra%20por%20m%C3%AD" target="_blank" class="wa-promo-btn">
+          💬 Enviar link por WhatsApp
+        </a>
+      </div>
+
+    </div><!-- /tab-ofertas -->
+
+    <!-- ══ TAB: MI PERFIL ══ -->
+    <div id="tab-perfil" class="tab-panel">
+
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar-lg" id="profileAvatarLg"></div>
+          <div>
+            <div class="profile-name" id="profileName">—</div>
+            <div class="profile-email" id="profileEmailTxt">—</div>
+          </div>
+        </div>
+        <div class="profile-body">
+          <div class="profile-field">
+            <label>Nombre completo</label>
+            <input type="text" id="profileNameInput" readonly />
+          </div>
+          <div class="profile-field">
+            <label>Email</label>
+            <input type="email" id="profileEmailInput" readonly />
+          </div>
+          <div class="profile-field">
+            <label>WhatsApp (con código de país)</label>
+            <input type="tel" id="profilePhone" placeholder="50612345678" />
+          </div>
+          <div class="profile-field">
+            <label>Dirección de entrega en San José</label>
+            <textarea id="profileAddress" placeholder="Ej: Santa Ana, Los Pinos, 200m norte del parque..."></textarea>
+          </div>
+          <button class="btn-save-profile" id="btnSaveProfile" onclick="saveProfile()">
+            Guardar cambios
+          </button>
+          <div class="profile-msg" id="profileMsg"></div>
+        </div>
+      </div>
+
+      <div class="contact-card">
+        <span class="cc-icon">💬</span>
+        <div>
+          <p>¿Necesitás cambiar tu correo o contraseña?<br>
+          Escribinos al <a href="https://wa.me/50685173813" target="_blank">WhatsApp +506 8517-3813</a> y te ayudamos.</p>
+        </div>
+      </div>
+
+    </div><!-- /tab-perfil -->
 
   </main>
-</div>
+</div><!-- /screen-app -->
 
 <script>
 const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
@@ -774,6 +675,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUserEmail = null;
 let _myLines = [];
+let _clientRow = null;
 
 const KG_TO_LBS = 2.20462;
 const fCRC  = n => '₡ ' + Math.round(n).toLocaleString('es-CR');
@@ -785,7 +687,7 @@ const fDate = d => {
 };
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-/* ── UI helpers ── */
+/* ── Login helpers ── */
 function showErr(msg) {
   const el = document.getElementById('msgErr');
   el.textContent = msg; el.style.display = 'block';
@@ -800,12 +702,8 @@ function clearMsgs() {
   document.getElementById('msgErr').style.display = 'none';
   document.getElementById('msgOk').style.display  = 'none';
 }
-function showLogin() {
-  clearMsgs();
-  setTimeout(() => document.getElementById('loginEmail').focus(), 50);
-}
 
-/* ── AUTH ── */
+/* ── Auth ── */
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw    = document.getElementById('loginPw').value;
@@ -822,7 +720,7 @@ async function doLogout() {
   await sb.auth.signOut();
 }
 
-/* ── SESSION ── */
+/* ── Session ── */
 sb.auth.onAuthStateChange(async (event, session) => {
   if (session) {
     currentUserEmail = session.user.email;
@@ -834,26 +732,38 @@ sb.auth.onAuthStateChange(async (event, session) => {
     loadTrackings(session.user.email);
   } else {
     currentUserEmail = null;
+    _clientRow = null;
     document.getElementById('screen-app').style.display   = 'none';
     document.getElementById('screen-login').style.display = 'flex';
-    showLogin();
+    clearMsgs();
+    setTimeout(() => document.getElementById('loginEmail').focus(), 50);
   }
 });
 
-/* ── DASHBOARD ── */
+/* ── Tabs ── */
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tbtn-' + name).classList.add('active');
+}
+
+/* ── Dashboard ── */
 async function loadDashboard(userEmail) {
-  const { data: clientRow } = await sb.from('saved_clients')
-    .select('id, name')
+  const { data: cr } = await sb.from('saved_clients')
+    .select('id, name, phone, notes')
     .eq('email', userEmail)
     .limit(1)
     .maybeSingle();
 
-  if (!clientRow) {
-    document.getElementById('welcomeMsg').textContent    = '¡Hola! 👋';
-    document.getElementById('statPedidos').textContent   = '0';
-    document.getElementById('statLbs').textContent       = '0.00 lbs';
-    document.getElementById('statCobrado').textContent   = '₡ 0';
-    document.getElementById('ordersContent').innerHTML   = `
+  _clientRow = cr;
+
+  if (!cr) {
+    document.getElementById('welcomeMsg').textContent  = '¡Hola! 👋';
+    document.getElementById('statPedidos').textContent = '0';
+    document.getElementById('statLbs').textContent     = '0.00 lbs';
+    document.getElementById('statCobrado').textContent = '₡ 0';
+    document.getElementById('ordersContent').innerHTML = `
       <div class="empty-box">
         <div class="ico">⏳</div>
         <p>Tu cuenta está siendo configurada.<br>
@@ -863,17 +773,18 @@ async function loadDashboard(userEmail) {
           ¿Dudas? Escribinos por WhatsApp →
         </a></p>
       </div>`;
+    populateProfile(null, userEmail);
     return;
   }
 
-  document.getElementById('welcomeMsg').textContent = `¡Hola, ${clientRow.name}! 👋`;
+  document.getElementById('welcomeMsg').textContent = `¡Hola, ${cr.name}! 👋`;
+  populateProfile(cr, userEmail);
+  populateBodegas(cr.name);
 
-  const { data: lines, error: linesErr } = await sb.from('carga_clients')
+  const { data: lines } = await sb.from('carga_clients')
     .select('*, cargas(reference, date, status), packages(*)')
-    .ilike('client_name', clientRow.name)
+    .ilike('client_name', cr.name)
     .order('created_at', { ascending: false });
-
-  if (linesErr) console.error('carga_clients error:', linesErr);
 
   _myLines = lines || [];
 
@@ -887,9 +798,68 @@ async function loadDashboard(userEmail) {
   renderCargasList();
 }
 
+/* ── Populate bodegas with client name ── */
+function populateBodegas(fullName) {
+  const parts     = (fullName || '').trim().split(/\s+/);
+  const firstName = parts[0] || '';
+  const lastName  = parts.slice(1).join(' ') || parts[0] || '';
+
+  document.getElementById('addr2071-nombre').textContent  = `UNILTD ${firstName}`;
+  document.getElementById('addr2071-apellido').textContent = lastName;
+  document.getElementById('addrFlash-nombre').textContent  = firstName;
+}
+
+/* ── Copy bodega address ── */
+function copyBodega(type) {
+  const nombre2071  = document.getElementById('addr2071-nombre').textContent;
+  const apellido2071 = document.getElementById('addr2071-apellido').textContent;
+  const nombreFlash  = document.getElementById('addrFlash-nombre').textContent;
+
+  const text2071 = [
+    'BODEGA CONSOLIDADA · 2071',
+    '',
+    `Nombre:    ${nombre2071}`,
+    `Apellido:  ${apellido2071}`,
+    'Teléfono:  786-694-4285',
+    '',
+    'Dirección: 2071 NW 112th Ave Ste 107',
+    'Suite/Apto: Internacional Logistics EB6888',
+    'Ciudad:    Miami',
+    'Estado:    Florida',
+    'ZIP:       33172-6538',
+    'País:      United States'
+  ].join('\n');
+
+  const textFlash = [
+    'BODEGA FLASH · 5414 (3 días hábiles)',
+    '',
+    `Nombre:    ${nombreFlash}`,
+    'Apellido:  AM',
+    'Teléfono:  786-331-8418',
+    '',
+    'Dirección: 5414 NW 79 Ave',
+    'Suite/Apto: AM 2708',
+    'Ciudad:    Doral',
+    'Estado:    Florida',
+    'ZIP:       33166',
+    'País:      United States'
+  ].join('\n');
+
+  const text = type === '2071' ? text2071 : textFlash;
+  const btnId = type === '2071' ? 'copy2071' : 'copyFlash';
+  const btn = document.getElementById(btnId);
+
+  navigator.clipboard?.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ ¡Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2500);
+  });
+}
+
+/* ── Orders ── */
 function renderCargasList() {
   const cont = document.getElementById('ordersContent');
-
   if (!_myLines.length) {
     cont.innerHTML = `
       <div class="empty-box">
@@ -938,9 +908,6 @@ function showCargaDetail(idx) {
   const c = l.cargas || {};
   const pkgs = (l.packages || []).slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-  const totalLbs = pkgs.reduce((s, p) => s + (p.weight_lbs || 0), 0);
-  const totalCRC = pkgs.reduce((s, p) => s + (p.charged_crc || 0), 0);
-
   let pkgRows = '';
   if (pkgs.length) {
     pkgRows = pkgs.map(p => `
@@ -953,6 +920,8 @@ function showCargaDetail(idx) {
         <td style="font-weight:800;color:var(--pri)">${fCRC(p.charged_crc)}</td>
         <td style="font-size:.82rem;color:var(--muted)">${esc(p.notes || '—')}</td>
       </tr>`).join('');
+    const totalLbs = pkgs.reduce((s, p) => s + (p.weight_lbs || 0), 0);
+    const totalCRC = pkgs.reduce((s, p) => s + (p.charged_crc || 0), 0);
     pkgRows += `
       <tr class="total-row">
         <td style="font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Total</td>
@@ -964,13 +933,7 @@ function showCargaDetail(idx) {
         <td></td>
       </tr>`;
   } else {
-    pkgRows = `
-      <tr><td colspan="4">
-        <div class="empty-box" style="padding:2rem">
-          <div class="ico">📭</div>
-          <p style="font-size:.85rem">No hay paquetes registrados para esta carga aún.</p>
-        </div>
-      </td></tr>`;
+    pkgRows = `<tr><td colspan="4"><div class="empty-box" style="padding:2rem"><div class="ico">📭</div><p>Sin paquetes registrados aún.</p></div></td></tr>`;
   }
 
   const statusBadge = c.status === 'closed'
@@ -982,20 +945,13 @@ function showCargaDetail(idx) {
       <button class="btn-back" onclick="renderCargasList()">← Volver</button>
       <div>
         <div class="detail-ref">${esc(c.reference || '—')}</div>
-        <div class="detail-meta">
-          ${c.date ? fDate(c.date) : '—'} &nbsp;•&nbsp; ${statusBadge}
-        </div>
+        <div class="detail-meta">${c.date ? fDate(c.date) : '—'} &nbsp;•&nbsp; ${statusBadge}</div>
       </div>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Guía / Tracking</th>
-            <th>Peso</th>
-            <th>Cobrado</th>
-            <th>Notas</th>
-          </tr>
+          <tr><th>Guía / Tracking</th><th>Peso</th><th>Cobrado</th><th>Notas</th></tr>
         </thead>
         <tbody>${pkgRows}</tbody>
       </table>
@@ -1003,27 +959,25 @@ function showCargaDetail(idx) {
     ${l.notes ? `<div class="detail-notes"><strong>Notas:</strong> ${esc(l.notes)}</div>` : ''}`;
 }
 
-/* ── TRACKING STATUS ── */
+/* ── Tracking status ── */
 const TRACKING_STATUS = {
-  registrado:    ['Registrado',        '#64748B', '#F1F5F9'],
-  sin_datos:     ['Sin datos',         '#64748B', '#F1F5F9'],
-  info_recibida: ['Info recibida',     '#2563EB', '#EFF6FF'],
-  en_transito:   ['🚚 En tránsito',   '#2563EB', '#EFF6FF'],
-  para_entrega:  ['🚀 Para entrega',  '#D97706', '#FFFBEB'],
-  entregado:     ['✅ Entregado',      '#059669', '#ECFDF5'],
-  recogido:      ['📦 Recogido',       '#059669', '#ECFDF5'],
-  sin_actividad: ['Sin actividad',     '#64748B', '#F1F5F9'],
-  no_entregado:  ['⚠️ No entregado', '#DC2626', '#FEF2F2'],
-  excepcion:     ['⚠️ Excepción',    '#DC2626', '#FEF2F2'],
+  registrado:    ['Registrado',       '#64748B','#F1F5F9'],
+  sin_datos:     ['Sin datos',        '#64748B','#F1F5F9'],
+  info_recibida: ['Info recibida',    '#2563EB','#EFF6FF'],
+  en_transito:   ['🚚 En tránsito',  '#2563EB','#EFF6FF'],
+  para_entrega:  ['🚀 Para entrega', '#D97706','#FFFBEB'],
+  entregado:     ['✅ Entregado',     '#059669','#ECFDF5'],
+  recogido:      ['📦 Recogido',      '#059669','#ECFDF5'],
+  sin_actividad: ['Sin actividad',    '#64748B','#F1F5F9'],
+  no_entregado:  ['⚠️ No entregado','#DC2626','#FEF2F2'],
+  excepcion:     ['⚠️ Excepción',   '#DC2626','#FEF2F2'],
 };
-
 function trackBadge(status) {
   const [label, color, bg] = TRACKING_STATUS[status] || TRACKING_STATUS.registrado;
-  return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;
-    font-size:.7rem;font-weight:700;background:${bg};color:${color};white-space:nowrap">${label}</span>`;
+  return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;background:${bg};color:${color};white-space:nowrap">${label}</span>`;
 }
 
-/* ── LOAD TRACKINGS ── */
+/* ── Load trackings ── */
 async function loadTrackings(userEmail) {
   const cont = document.getElementById('trackingsContent');
   if (!cont) return;
@@ -1034,7 +988,6 @@ async function loadTrackings(userEmail) {
     .order('created_at', { ascending: false });
 
   if (error) console.error('trackings error:', error);
-
   const items = data || [];
 
   if (!items.length) {
@@ -1071,17 +1024,14 @@ async function loadTrackings(userEmail) {
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Tracking</th><th>Estado</th>
-            <th>Último evento</th><th>Actualizado</th><th></th>
-          </tr>
+          <tr><th>Tracking</th><th>Estado</th><th>Último evento</th><th>Actualizado</th><th></th></tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
 }
 
-/* ── ADD TRACKING ── */
+/* ── Add tracking ── */
 async function addTracking() {
   const btn      = document.getElementById('btnAddTracking');
   const msgEl    = document.getElementById('alertMsg');
@@ -1089,15 +1039,9 @@ async function addTracking() {
   const desc     = document.getElementById('alertDesc').value.trim();
 
   msgEl.className = 'track-msg';
-
-  if (!tracking) {
-    msgEl.className = 'track-msg err';
-    msgEl.textContent = 'Ingresá el número de tracking.';
-    return;
-  }
+  if (!tracking) { msgEl.className = 'track-msg err'; msgEl.textContent = 'Ingresá el número de tracking.'; return; }
 
   btn.disabled = true; btn.textContent = 'Agregando...';
-
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) throw new Error('No hay sesión activa.');
@@ -1124,13 +1068,53 @@ async function addTracking() {
   }
 }
 
-/* ── DELETE TRACKING ── */
+/* ── Delete tracking ── */
 async function deleteTracking(id) {
   if (!confirm('¿Eliminar este paquete del seguimiento?')) return;
-  await sb.from('package_alerts').delete()
-    .eq('id', id)
-    .eq('user_email', currentUserEmail);
+  await sb.from('package_alerts').delete().eq('id', id).eq('user_email', currentUserEmail);
   loadTrackings(currentUserEmail);
+}
+
+/* ── Profile ── */
+function populateProfile(cr, email) {
+  const name = cr?.name || '';
+  document.getElementById('profileAvatarLg').textContent = (name || email || '?').charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent     = name || email;
+  document.getElementById('profileEmailTxt').textContent = email;
+  document.getElementById('profileNameInput').value      = name;
+  document.getElementById('profileEmailInput').value     = email;
+  document.getElementById('profilePhone').value          = cr?.phone || '';
+  document.getElementById('profileAddress').value        = cr?.notes || '';
+}
+
+async function saveProfile() {
+  const btn     = document.getElementById('btnSaveProfile');
+  const msgEl   = document.getElementById('profileMsg');
+  const phone   = document.getElementById('profilePhone').value.trim();
+  const address = document.getElementById('profileAddress').value.trim();
+
+  msgEl.className = 'profile-msg';
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  try {
+    if (!_clientRow) throw new Error('No se encontró tu perfil. Contactá al soporte.');
+
+    const { error } = await sb.from('saved_clients')
+      .update({ phone, notes: address })
+      .eq('id', _clientRow.id);
+
+    if (error) throw new Error('No se pudo guardar. ' + (error.message || ''));
+
+    _clientRow = { ..._clientRow, phone, notes: address };
+    msgEl.className  = 'profile-msg ok';
+    msgEl.textContent = '✅ Perfil actualizado correctamente.';
+    setTimeout(() => { msgEl.className = 'profile-msg'; }, 5000);
+  } catch(e) {
+    msgEl.className  = 'profile-msg err';
+    msgEl.textContent = '❌ ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar cambios';
+  }
 }
 </script>
 </body>
