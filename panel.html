@@ -566,9 +566,9 @@ const DB = {
     const r = await fetch('/api/save-client', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'list' })
-    }).catch(() => null);
-    if (!r || !r.ok) { console.error('getClients failed'); return []; }
+    });
     const d = await r.json();
+    if (!d.ok) { console.error('getClients error:', d.error); return []; }
     return (d.data || []).map(mapSavedClient);
   },
 
@@ -1119,7 +1119,12 @@ async function renderClientes() {
     return;
   }
 
-  if (!clients.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  if (!clients.length) {
+    tbody.innerHTML = '';
+    empty.innerHTML = `<div class="ico">👥</div><p>No hay clientes guardados.</p><p style="font-size:.75rem;color:var(--gray);margin-top:.25rem">API respondió OK con 0 clientes.</p>`;
+    empty.style.display = '';
+    return;
+  }
   empty.style.display = 'none';
 
   const totals = {};
