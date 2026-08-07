@@ -677,6 +677,17 @@ let currentUserEmail = null;
 let _myLines = [];
 let _clientRow = null;
 
+async function portalAPI(body) {
+  const { data: { session } } = await sb.auth.getSession();
+  const jwt = session?.access_token || '';
+  const r = await fetch('/api/portal-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
 const KG_TO_LBS = 2.20462;
 const fCRC  = n => '₡ ' + Math.round(n).toLocaleString('es-CR');
 const fLbs  = n => (+n).toFixed(2) + ' lbs';
@@ -729,7 +740,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('portalEmail').textContent    = session.user.email;
     document.getElementById('userAvatar').textContent     = session.user.email.charAt(0).toUpperCase();
     loadDashboard(session.user.email);
-    loadTrackings(session.user.email);
   } else {
     currentUserEmail = null;
     _clientRow = null;
@@ -750,12 +760,19 @@ function switchTab(name) {
 
 /* ── Dashboard ── */
 async function loadDashboard(userEmail) {
-  const { data: cr } = await sb.from('saved_clients')
-    .select('id, name, phone, notes')
-    .eq('email', userEmail)
-    .limit(1)
-    .maybeSingle();
+  const resp = await portalAPI({ action: 'load' });
 
+  if (!resp.ok) {
+    console.error('loadDashboard error:', resp.error);
+    document.getElementById('ordersContent').innerHTML = `
+      <div class="empty-box">
+        <div class="ico">⚠️</div>
+        <p style="color:#e53e3e">Error cargando tus datos.<br><small>${resp.error || 'Intentá cerrar sesión y volver a entrar.'}</small></p>
+      </div>`;
+    return;
+  }
+
+  const cr = resp.client;
   _clientRow = cr;
 
   if (!cr) {
@@ -774,6 +791,7 @@ async function loadDashboard(userEmail) {
         </a></p>
       </div>`;
     populateProfile(null, userEmail);
+    renderTrackings(resp.trackings || []);
     return;
   }
 
@@ -781,12 +799,7 @@ async function loadDashboard(userEmail) {
   populateProfile(cr, userEmail);
   populateBodegas(cr.name);
 
-  const { data: lines } = await sb.from('carga_clients')
-    .select('*, cargas(reference, date, status), packages(*)')
-    .ilike('client_name', cr.name)
-    .order('created_at', { ascending: false });
-
-  _myLines = lines || [];
+  _myLines = resp.lines || [];
 
   const totalLbs     = _myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
   const totalCobrado = _myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
@@ -796,6 +809,7 @@ async function loadDashboard(userEmail) {
   document.getElementById('statCobrado').textContent = fCRC(totalCobrado);
 
   renderCargasList();
+  renderTrackings(resp.trackings || []);
 }
 
 /* ── Populate bodegas with client name ── */
@@ -977,18 +991,10 @@ function trackBadge(status) {
   return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;background:${bg};color:${color};white-space:nowrap">${label}</span>`;
 }
 
-/* ── Load trackings ── */
-async function loadTrackings(userEmail) {
+/* ── Render trackings (called with data already fetched) ── */
+function renderTrackings(items) {
   const cont = document.getElementById('trackingsContent');
   if (!cont) return;
-
-  const { data, error } = await sb.from('package_alerts')
-    .select('*')
-    .eq('user_email', userEmail)
-    .order('created_at', { ascending: false });
-
-  if (error) console.error('trackings error:', error);
-  const items = data || [];
 
   if (!items.length) {
     cont.innerHTML = `
@@ -1031,6 +1037,12 @@ async function loadTrackings(userEmail) {
     </div>`;
 }
 
+/* ── Load trackings (standalone refresh) ── */
+async function loadTrackings() {
+  const resp = await portalAPI({ action: 'load-trackings' });
+  renderTrackings(resp.ok ? (resp.trackings || []) : []);
+}
+
 /* ── Add tracking ── */
 async function addTracking() {
   const btn      = document.getElementById('btnAddTracking');
@@ -1058,7 +1070,7 @@ async function addTracking() {
     document.getElementById('alertDesc').value     = '';
     msgEl.className  = 'track-msg ok';
     msgEl.textContent = '✅ Paquete agregado. El estado se actualiza una vez al día.';
-    loadTrackings(currentUserEmail);
+    loadTrackings();
     setTimeout(() => { msgEl.className = 'track-msg'; }, 6000);
   } catch(e) {
     msgEl.className  = 'track-msg err';
@@ -1071,8 +1083,9 @@ async function addTracking() {
 /* ── Delete tracking ── */
 async function deleteTracking(id) {
   if (!confirm('¿Eliminar este paquete del seguimiento?')) return;
-  await sb.from('package_alerts').delete().eq('id', id).eq('user_email', currentUserEmail);
-  loadTrackings(currentUserEmail);
+  const resp = await portalAPI({ action: 'delete-tracking', tracking_id: id });
+  if (!resp.ok) { alert('Error al eliminar: ' + (resp.error || 'desconocido')); return; }
+  loadTrackings();
 }
 
 /* ── Profile ── */
@@ -1097,15 +1110,9 @@ async function saveProfile() {
   btn.disabled = true; btn.textContent = 'Guardando...';
 
   try {
-    if (!_clientRow) throw new Error('No se encontró tu perfil. Contactá al soporte.');
-
-    const { error } = await sb.from('saved_clients')
-      .update({ phone, notes: address })
-      .eq('id', _clientRow.id);
-
-    if (error) throw new Error('No se pudo guardar. ' + (error.message || ''));
-
-    _clientRow = { ..._clientRow, phone, notes: address };
+    const resp = await portalAPI({ action: 'save-profile', phone, address });
+    if (!resp.ok) throw new Error(resp.error || 'No se pudo guardar.');
+    if (_clientRow) _clientRow = { ..._clientRow, phone, notes: address };
     msgEl.className  = 'profile-msg ok';
     msgEl.textContent = '✅ Perfil actualizado correctamente.';
     setTimeout(() => { msgEl.className = 'profile-msg'; }, 5000);
