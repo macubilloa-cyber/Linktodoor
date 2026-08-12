@@ -273,9 +273,16 @@
     .calc-result{margin-top:1.2rem;padding:1rem 1.4rem;background:rgba(91,91,214,.2);
       border-radius:12px;display:none;animation:slideUp .4s ease}
     @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .calc-result.show{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
-    .cr-label{font-size:.82rem;color:rgba(245,240,228,.6)}
-    .cr-amount{font-size:1.6rem;font-weight:900;color:var(--cream)}
+    .calc-result.show{display:block}
+    .cr-label{font-size:.82rem;color:rgba(245,240,228,.6);margin-bottom:.75rem}
+    .calc-bodegas{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .calc-bodega{background:rgba(255,255,255,.07);border-radius:10px;padding:.9rem 1rem}
+    .cb-flash{border:1px solid rgba(251,191,36,.25);background:rgba(251,191,36,.06)}
+    .cb-name{font-size:.78rem;font-weight:700;color:rgba(245,240,228,.7);margin-bottom:.2rem}
+    .cb-detail{font-size:.72rem;color:rgba(245,240,228,.4);margin-bottom:.5rem}
+    .cb-price{font-size:1.4rem;font-weight:900;color:var(--cream)}
+    .cb-flash .cb-price{color:#fbbf24}
+    @media(max-width:480px){.calc-bodegas{grid-template-columns:1fr}}
 
     /* ── ENTREGAS ── */
     #entregas{background:var(--cream);padding:5rem 2rem}
@@ -822,15 +829,24 @@
       <div class="calc-row">
         <div class="calc-field">
           <label>Peso en libras</label>
-          <input type="number" class="calc-input" id="calcLbs" placeholder="Ej: 2.5" min="0.1" step="0.1" oninput="calcCosto()" />
+          <input type="number" class="calc-input" id="calcLbs" placeholder="Ej: 2.5" min="0.1" step="0.05" oninput="calcCosto()" />
         </div>
         <button class="btn-calc" onclick="calcCosto()">Calcular ₡</button>
       </div>
       <div class="calc-result" id="calcResult">
-        <div>
-          <div class="cr-label">Tu paquete de <span id="crLbs">—</span> lbs costaría</div>
+        <div class="cr-label">Tu paquete de <span id="crLbs">—</span> lbs</div>
+        <div class="calc-bodegas">
+          <div class="calc-bodega">
+            <div class="cb-name">📦 Consolidada (2071)</div>
+            <div class="cb-detail">Cobra <span id="cr2071lbs">—</span> lbs · ~5 días</div>
+            <div class="cb-price" id="cr2071">₡ —</div>
+          </div>
+          <div class="calc-bodega cb-flash">
+            <div class="cb-name">⚡ Flash (5414)</div>
+            <div class="cb-detail">Cobra <span id="crFlashlbs">—</span> lbs · 3 días</div>
+            <div class="cb-price" id="crFlash">₡ —</div>
+          </div>
         </div>
-        <div class="cr-amount" id="crAmount">₡ 0</div>
       </div>
     </div>
   </div>
@@ -1189,9 +1205,15 @@ function calcCosto() {
   const lbs = parseFloat(document.getElementById('calcLbs').value);
   const result = document.getElementById('calcResult');
   if (!lbs || lbs <= 0) { result.classList.remove('show'); return; }
-  const total = Math.round(lbs * 3950);
-  document.getElementById('crLbs').textContent = lbs;
-  document.getElementById('crAmount').textContent = '₡ ' + total.toLocaleString('es-CR');
+
+  const lbs2071  = Math.ceil(lbs * 2) / 2;   // media libra más cercana hacia arriba
+  const lbsFlash = Math.ceil(lbs);            // libra completa siempre
+
+  document.getElementById('crLbs').textContent     = lbs;
+  document.getElementById('cr2071lbs').textContent  = lbs2071;
+  document.getElementById('crFlashlbs').textContent = lbsFlash;
+  document.getElementById('cr2071').textContent     = '₡ ' + Math.round(lbs2071  * 3950).toLocaleString('es-CR');
+  document.getElementById('crFlash').textContent    = '₡ ' + Math.round(lbsFlash * 3950).toLocaleString('es-CR');
   result.classList.add('show');
 }
 document.getElementById('calcLbs').addEventListener('keydown', e => { if (e.key === 'Enter') calcCosto(); });
