@@ -1,19 +1,26 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
-
-  const { email, password } = req.body || {};
-  if (!email || !password) {
-    return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos.' });
-  }
 
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
   if (!serviceKey) {
     return res.status(500).json({ ok: false, error: 'SUPABASE_SERVICE_KEY no configurado en Vercel.' });
+  }
+
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  const meRes = token && await fetch('https://opqyskmpdnijhvcbewkf.supabase.co/auth/v1/user', {
+    headers: { 'Authorization': `Bearer ${token}`, 'apikey': serviceKey }
+  });
+  const me = meRes && meRes.ok ? await meRes.json() : null;
+  if (me?.app_metadata?.role !== 'admin') {
+    return res.status(401).json({ ok: false, error: 'Sesión vencida. Salí y volvé a entrar al panel.' });
+  }
+
+  const { email, password } = req.body || {};
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos.' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ ok: false, error: 'La contraseña debe tener al menos 6 caracteres.' });
   }
 
   const BASE = 'https://opqyskmpdnijhvcbewkf.supabase.co/auth/v1/admin';
@@ -51,6 +58,9 @@ export default async function handler(req, res) {
 
     if (!user) {
       return res.status(400).json({ ok: false, error: 'Usuario no encontrado. Intentá de nuevo.' });
+    }
+    if (user.app_metadata?.role === 'admin') {
+      return res.status(403).json({ ok: false, error: 'Ese email es de una cuenta de administrador.' });
     }
 
     const upRes  = await fetch(`${BASE}/users/${user.id}`, {

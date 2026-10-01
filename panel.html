@@ -189,6 +189,38 @@
       line-height: 1;
     }
 
+    /* ───── MOBILE ───── */
+    @media (max-width: 900px) {
+      input, select, textarea { font-size: 16px; }
+    }
+    @media (max-width: 700px) {
+      header { flex-wrap: wrap; height: auto; padding: .55rem 1rem 0; gap: .5rem; }
+      header > .logo-wrap { order: 1; }
+      .header-actions { order: 2; margin-left: auto; }
+      nav { order: 3; flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; padding-bottom: .45rem; }
+      nav::-webkit-scrollbar { display: none; }
+      .nav-btn { white-space: nowrap; flex-shrink: 0; }
+      .btn-sm { padding: .5rem .8rem; font-size: .85rem; min-height: 38px; }
+      .card { padding: 1rem; }
+
+      table.stack thead { display: none; }
+      table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+      table.stack tr { padding: .7rem .1rem; border-bottom: 1px solid var(--border); }
+      table.stack tbody tr:hover { background: none; }
+      table.stack td { border: none; padding: .18rem 0; text-align: right; }
+      table.stack td[data-label]::before {
+        content: attr(data-label); float: left; margin-right: 1rem;
+        font-size: .72rem; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: .3px; line-height: 1.6;
+      }
+      table.stack td.m-hide, table.stack td:empty { display: none; }
+      table.stack td.m-title { text-align: left; font-size: 1rem; padding-bottom: .35rem; }
+      table.stack td.m-actions { padding-top: .5rem; }
+      table.stack td.m-actions > div { flex-wrap: wrap; }
+      table.stack tr.pkg-sub { padding-left: .75rem; border-left: 3px solid var(--purple); }
+      table.stack tr.pkg-sub td { padding: .15rem .5rem; }
+      table.stack tr.pkg-sub td.m-title { padding-left: .5rem !important; font-size: .88rem; }
+    }
+
     /* ───── RESPONSIVE ───── */
     @media (max-width: 600px) {
       main { padding: 1.25rem 1rem; }
@@ -208,13 +240,18 @@
       <div class="logo-wrap"><span class="logo-l">LINK</span><span class="logo-r">DOOR</span></div>
       <span class="login-sub">Panel Interno</span>
     </div>
-    <div class="fg">
-      <label>Contraseña</label>
-      <input type="password" id="login-pw" placeholder="Ingresá tu contraseña"
-             onkeydown="if(event.key==='Enter')doLogin()" autofocus />
-    </div>
-    <p id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none">Contraseña incorrecta</p>
-    <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
+    <form onsubmit="event.preventDefault();doLogin()">
+      <div class="fg">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="username" required />
+      </div>
+      <div class="fg">
+        <label for="login-pw">Contraseña</label>
+        <input type="password" id="login-pw" placeholder="Ingresá tu contraseña" autocomplete="current-password" required />
+      </div>
+      <p id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none"></p>
+      <button type="submit" id="login-btn" class="btn btn-primary btn-full">Entrar</button>
+    </form>
   </div>
 </div>
 
@@ -266,7 +303,7 @@
       <div id="cargas-stats" class="stats"></div>
       <div class="card">
         <div class="table-wrap">
-          <table>
+          <table class="stack">
             <thead><tr><th>Referencia</th><th>Fecha</th><th>Peso total</th><th>Costo pagado</th><th>Cobrado</th><th>Clientes</th><th>Estado</th><th></th></tr></thead>
             <tbody id="cargas-tbody"></tbody>
           </table>
@@ -292,7 +329,7 @@
           <button class="btn btn-primary btn-sm no-print" id="btn-add-client" onclick="openAddClient()">+ Agregar cliente</button>
         </div>
         <div class="table-wrap">
-          <table>
+          <table class="stack">
             <thead><tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th><th class="no-print"></th></tr></thead>
             <tbody id="detail-tbody"></tbody>
           </table>
@@ -328,7 +365,7 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table>
+          <table class="stack">
             <thead>
               <tr>
                 <th>Cliente</th>
@@ -372,7 +409,7 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table>
+          <table class="stack">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -615,36 +652,47 @@ const DB = {
     return !error;
   },
 
-  getPassword: () => localStorage.getItem('ltd_pw') || 'linktodoor',
-  setPassword: p  => localStorage.setItem('ltd_pw', p),
-  isLoggedIn:  () => sessionStorage.getItem('ltd_auth') === '1',
-  login:       () => sessionStorage.setItem('ltd_auth', '1'),
-  logout:      () => sessionStorage.removeItem('ltd_auth'),
 };
 
 /* ─── STATE ─── */
 let _allCargas = [];
 
 /* ─── AUTH ─── */
-function doLogin() {
-  const pw  = document.getElementById('login-pw').value;
-  const err = document.getElementById('login-err');
-  if (pw === DB.getPassword()) {
-    err.style.display = 'none';
-    DB.login();
-    document.getElementById('screen-login').style.display = 'none';
-    document.getElementById('screen-app').hidden = false;
-    showView('cargas');
-    updateAlertsBadge();
-    updateNotifyBadge();
-  } else {
-    err.style.display = 'block';
-    document.getElementById('login-pw').select();
-  }
+const isAdmin = session => session?.user?.app_metadata?.role === 'admin';
+
+function enterApp() {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').hidden = false;
+  showView('cargas');
+  updateAlertsBadge();
+  updateNotifyBadge();
 }
 
-function doLogout() {
-  DB.logout();
+function showLoginError(msg) {
+  const err = document.getElementById('login-err');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+  const btn   = document.getElementById('login-btn');
+  document.getElementById('login-err').style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) { showLoginError('Email o contraseña incorrectos.'); return; }
+  if (!isAdmin(data.session)) {
+    await sb.auth.signOut();
+    showLoginError('Esta cuenta no tiene acceso al panel.');
+    return;
+  }
+  enterApp();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
   document.getElementById('screen-app').hidden = true;
   document.getElementById('screen-login').style.display = 'flex';
   document.getElementById('login-pw').value = '';
@@ -791,14 +839,14 @@ function renderCargasTable(cargas) {
     const cobrado = c.clients.reduce((s,cl) => s + cl.chargedCRC, 0);
     return `
       <tr>
-        <td><strong>${esc(c.reference)}</strong></td>
-        <td>${fDate(c.date)}</td>
-        <td>${fLbs(c.totalWeightLbs)} / ${fKg(c.totalWeightLbs)}</td>
-        <td style="color:var(--red);font-weight:700">${fCRC(c.totalCostCRC)}</td>
-        <td style="font-weight:700">${fCRC(cobrado)}</td>
-        <td class="td-center">${c.clients.length}</td>
-        <td><span class="badge badge-${c.status}">${c.status==='open'?'Abierta':'Cerrada'}</span></td>
-        <td>
+        <td class="m-title"><strong>${esc(c.reference)}</strong></td>
+        <td data-label="Fecha">${fDate(c.date)}</td>
+        <td data-label="Peso">${fLbs(c.totalWeightLbs)} / ${fKg(c.totalWeightLbs)}</td>
+        <td style="color:var(--red);font-weight:700" data-label="Costo pagado">${fCRC(c.totalCostCRC)}</td>
+        <td style="font-weight:700" data-label="Cobrado">${fCRC(cobrado)}</td>
+        <td class="td-center" data-label="Clientes">${c.clients.length}</td>
+        <td data-label="Estado"><span class="badge badge-${c.status}">${c.status==='open'?'Abierta':'Cerrada'}</span></td>
+        <td class="m-actions">
           <div style="display:flex;gap:.35rem">
             <button class="btn btn-sm btn-secondary" onclick="showDetail('${c.id}')">Ver</button>
             <button class="btn btn-sm btn-secondary" onclick="showCierre('${c.id}')">Cierre</button>
@@ -894,27 +942,27 @@ async function renderDetail(cargaId) {
       const pkgSubRows = hasPkgs ? cl.packages.map((p, pi) => `
         <tr class="pkg-sub pkg-group-${cl.id}" style="display:none">
           <td></td>
-          <td style="padding-left:2rem;color:var(--gray)">
+          <td style="padding-left:2rem;color:var(--gray)" class="m-title">
             📦 <strong style="color:var(--dark)">${esc(p.guia || `Paquete ${pi+1}`)}</strong>
           </td>
-          <td>${fLbs(p.weightLbs)}</td>
-          <td style="color:var(--gray)">${fKg(p.weightLbs)}</td>
-          <td>${pkgStatusBadge(p.status)}</td>
-          <td style="font-weight:700;color:var(--purple)">${fCRC(p.chargedCRC)}</td>
-          <td style="color:var(--gray)">${esc(p.notes||'')}</td>
+          <td data-label="Peso">${fLbs(p.weightLbs)}</td>
+          <td style="color:var(--gray)" class="m-hide">${fKg(p.weightLbs)}</td>
+          <td data-label="Estado">${pkgStatusBadge(p.status)}</td>
+          <td style="font-weight:700;color:var(--purple)" data-label="Cobrado">${fCRC(p.chargedCRC)}</td>
+          <td style="color:var(--gray)" data-label="Notas">${esc(p.notes||'')}</td>
           <td></td>
         </tr>`).join('') : '';
 
       return `
         <tr>
-          <td class="td-center" style="color:var(--gray);font-size:.78rem">${i+1}</td>
-          <td><strong>${esc(cl.clientName)}</strong>${pkgToggle}</td>
-          <td>${fLbs(cl.weightLbs)}</td>
-          <td style="color:var(--gray)">${fKg(cl.weightLbs)}</td>
-          <td>${fPct(pct)}</td>
-          <td style="font-weight:700;color:var(--purple)">${fCRC(cl.chargedCRC)}</td>
-          <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes||'')}</td>
-          <td class="no-print"><div style="display:flex;gap:.3rem">
+          <td class="m-hide td-center" style="color:var(--gray);font-size:.78rem">${i+1}</td>
+          <td class="m-title"><strong>${esc(cl.clientName)}</strong>${pkgToggle}</td>
+          <td data-label="Peso">${fLbs(cl.weightLbs)}</td>
+          <td style="color:var(--gray)" class="m-hide">${fKg(cl.weightLbs)}</td>
+          <td class="m-hide">${fPct(pct)}</td>
+          <td style="font-weight:700;color:var(--purple)" data-label="Cobrado">${fCRC(cl.chargedCRC)}</td>
+          <td style="color:var(--gray);font-size:.82rem" data-label="Notas">${esc(cl.notes||'')}</td>
+          <td class="m-actions no-print"><div style="display:flex;gap:.3rem">
             ${deliverBtn(cargaId, cl)}
             <button class="btn btn-sm btn-success" title="Cobrar" onclick="openCobro('${cargaId}','${cl.id}')">💬</button>
             ${editBtns}
@@ -926,12 +974,12 @@ async function renderDetail(cargaId) {
     const totalsRow = `
       <tr style="background:var(--light);border-top:2px solid var(--border)">
         <td></td>
-        <td style="font-weight:800;font-size:.82rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px">TOTAL</td>
-        <td style="font-weight:900">${fLbs(assignedLbs)}</td>
-        <td style="font-weight:700;color:var(--gray)">${fKg(assignedLbs)}</td>
-        <td style="font-weight:700">100%</td>
-        <td style="font-weight:900;color:var(--purple)">${fCRC(totalCobrado)}</td>
-        <td style="font-size:.8rem;font-weight:700;color:${diffColor}">${diffLabel}</td>
+        <td style="font-weight:800;font-size:.82rem;color:var(--gray);text-transform:uppercase;letter-spacing:.3px" class="m-title">TOTAL</td>
+        <td style="font-weight:900" data-label="Peso">${fLbs(assignedLbs)}</td>
+        <td style="font-weight:700;color:var(--gray)" class="m-hide">${fKg(assignedLbs)}</td>
+        <td style="font-weight:700" class="m-hide">100%</td>
+        <td style="font-weight:900;color:var(--purple)" data-label="Cobrado">${fCRC(totalCobrado)}</td>
+        <td style="font-size:.8rem;font-weight:700;color:${diffColor}" data-label="Cuadre">${diffLabel}</td>
         <td></td>
       </tr>`;
 
@@ -1152,14 +1200,14 @@ async function renderClientes() {
       : `<span style="font-size:.78rem;color:var(--gray)">Sin acceso</span>`;
     return `
       <tr>
-        <td><strong>${esc(c.name)}</strong></td>
-        <td>${esc(c.phone || '—')}</td>
-        <td>${emailBadge}</td>
-        <td>${lbsStr}</td>
-        <td style="color:var(--gray)">${kgStr}</td>
-        <td style="text-align:center;color:var(--purple);font-weight:700">${countStr}</td>
-        <td style="color:var(--gray);font-size:.82rem">${esc(c.notes || '—')}</td>
-        <td>
+        <td class="m-title"><strong>${esc(c.name)}</strong></td>
+        <td data-label="Teléfono">${esc(c.phone || '—')}</td>
+        <td data-label="Portal">${emailBadge}</td>
+        <td data-label="Total lbs">${lbsStr}</td>
+        <td style="color:var(--gray)" class="m-hide">${kgStr}</td>
+        <td style="text-align:center;color:var(--purple);font-weight:700" data-label="Cargas">${countStr}</td>
+        <td style="color:var(--gray);font-size:.82rem" data-label="Notas">${esc(c.notes || '—')}</td>
+        <td class="m-actions">
           <div style="display:flex;gap:.35rem">
             <button class="btn btn-sm btn-success"   onclick="openActivarPortal('${c.id}','${esc(c.name)}','${esc(c.email || '')}')">🔑 Portal</button>
             <button class="btn btn-sm btn-secondary" onclick="openEditCliente('${c.id}')">✎</button>
@@ -1603,9 +1651,10 @@ async function doActivarPortal(clientId, name) {
   res.style.display = 'none';
 
   try {
+    const { data: { session } } = await sb.auth.getSession();
     const r = await fetch('/api/create-client', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
       body: JSON.stringify({ email, password: pw })
     });
     const data = await r.json();
@@ -1618,7 +1667,8 @@ async function doActivarPortal(clientId, name) {
     }
 
     /* Guardar email en saved_clients si no lo tenía */
-    await DB.updateSavedClient(clientId, name, '', email, '');
+    const { error: emailErr } = await sb.from('saved_clients').update({ email }).eq('id', clientId);
+    if (emailErr) console.error(emailErr);
 
     /* Mostrar éxito con plantilla WhatsApp */
     const waMsg = encodeURIComponent(
@@ -1653,7 +1703,6 @@ function openChangePw() {
       <span class="modal-title">Cambiar Contraseña</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <div class="fg"><label>Contraseña actual</label><input type="password" id="m-pw-old" placeholder="Contraseña actual" /></div>
     <div class="fg"><label>Nueva contraseña</label><input type="password" id="m-pw-new" placeholder="Nueva contraseña" /></div>
     <div class="fg"><label>Confirmar nueva contraseña</label><input type="password" id="m-pw-confirm" placeholder="Repetir contraseña" /></div>
     <p id="m-pw-err" style="color:var(--red);font-size:.82rem;margin-bottom:.75rem;display:none"></p>
@@ -1664,15 +1713,15 @@ function openChangePw() {
   `);
 }
 
-function doChangePw() {
-  const old  = document.getElementById('m-pw-old').value;
+async function doChangePw() {
   const nw   = document.getElementById('m-pw-new').value;
   const conf = document.getElementById('m-pw-confirm').value;
   const err  = document.getElementById('m-pw-err');
-  if (old !== DB.getPassword()) { err.textContent = 'Contraseña actual incorrecta.'; err.style.display = ''; return; }
-  if (!nw)                      { err.textContent = 'Ingresá una nueva contraseña.'; err.style.display = ''; return; }
-  if (nw !== conf)              { err.textContent = 'Las contraseñas no coinciden.';  err.style.display = ''; return; }
-  DB.setPassword(nw); closeModal(); alert('Contraseña cambiada exitosamente.');
+  if (nw.length < 8) { err.textContent = 'La contraseña debe tener al menos 8 caracteres.'; err.style.display = ''; return; }
+  if (nw !== conf)   { err.textContent = 'Las contraseñas no coinciden.'; err.style.display = ''; return; }
+  const { error } = await sb.auth.updateUser({ password: nw });
+  if (error) { err.textContent = 'No se pudo cambiar la contraseña. Intentá de nuevo.'; err.style.display = ''; return; }
+  closeModal(); alert('Contraseña cambiada exitosamente.');
 }
 
 /* ─── EXPORT CSV ─── */
@@ -1789,27 +1838,27 @@ async function renderAlertas() {
 
     return `
       <tr style="${needsNotify ? 'background:var(--yellow-light)' : ''}">
-        <td>
+        <td class="m-title">
           <strong>${esc(client.name)}</strong>
           ${phone ? `<br><span style="font-size:.74rem;color:var(--gray)">${esc(phone)}</span>` : ''}
         </td>
-        <td>
+        <td data-label="Tracking">
           <strong style="font-family:monospace;font-size:.83rem">${esc(alert.tracking_number)}</strong>
           ${alert.description ? `<br><span style="font-size:.73rem;color:var(--gray)">${esc(alert.description)}</span>` : ''}
         </td>
-        <td>
+        <td data-label="Estado">
           <span class="badge" style="background:${sInfo.bg};color:${sInfo.color}">${sInfo.label}</span>
         </td>
-        <td style="font-size:.8rem;color:var(--gray);max-width:190px">
+        <td style="font-size:.8rem;color:var(--gray);max-width:190px" data-label="Último evento">
           ${alert.last_event ? esc(alert.last_event) : '—'}
           ${alert.carrier ? `<br><span style="font-size:.72rem">${esc(alert.carrier)}</span>` : ''}
         </td>
-        <td style="font-size:.77rem;color:var(--gray);white-space:nowrap">
+        <td style="font-size:.77rem;color:var(--gray);white-space:nowrap" data-label="Revisado">
           ${alert.last_checked_at
             ? new Date(alert.last_checked_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})
             : '—'}
         </td>
-        <td>${notifyBtn}</td>
+        <td class="m-actions">${notifyBtn}</td>
       </tr>`;
   }).join('');
 }
@@ -1933,14 +1982,14 @@ async function renderNotificar() {
           <button class="btn btn-sm btn-secondary" onclick="markGroupNotified(${i})">Marcar como avisado</button>
         </div>
       </div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap"><table class="stack">
         <thead><tr><th>Guía</th><th>Carga</th><th>Peso</th><th>Nuevo estado</th></tr></thead>
         <tbody>${g.items.map(({pkg, cargaRef}) => `
           <tr>
-            <td style="font-family:monospace">${esc(pkg.guia || '—')}</td>
-            <td style="color:var(--gray)">${esc(cargaRef)}</td>
-            <td>${fLbs(pkg.weightLbs)}</td>
-            <td><span class="badge" style="${pkgStatusStyle(pkg.status)};cursor:default">${PKG_STATUS[pkg.status]?.label || pkg.status}</span></td>
+            <td style="font-family:monospace" data-label="Guía">${esc(pkg.guia || '—')}</td>
+            <td style="color:var(--gray)" data-label="Carga">${esc(cargaRef)}</td>
+            <td data-label="Peso">${fLbs(pkg.weightLbs)}</td>
+            <td data-label="Estado"><span class="badge" style="${pkgStatusStyle(pkg.status)};cursor:default">${PKG_STATUS[pkg.status]?.label || pkg.status}</span></td>
           </tr>`).join('')}
         </tbody>
       </table></div>
@@ -1990,22 +2039,10 @@ async function markGroupNotified(idx) {
 }
 
 /* ─── INIT ─── */
-if (DB.isLoggedIn()) {
-  document.getElementById('screen-login').style.display = 'none';
-  document.getElementById('screen-app').hidden = false;
-  showView('cargas');
-  updateAlertsBadge();
-  updateNotifyBadge();
-}
-
-if (!localStorage.getItem('ltd_pw')) {
-  const info = document.createElement('div');
-  info.className = 'alert alert-warn';
-  info.style.cssText = 'position:fixed;bottom:1rem;right:1rem;z-index:300;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.15)';
-  info.innerHTML = '🔑 Contraseña inicial: <strong>linktodoor</strong> — Cambiala desde ⚙';
-  document.body.appendChild(info);
-  setTimeout(() => info.remove(), 7000);
-}
+localStorage.removeItem('ltd_pw');
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (isAdmin(session)) enterApp();
+});
 </script>
 </body>
 </html>

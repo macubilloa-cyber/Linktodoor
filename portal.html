@@ -256,6 +256,24 @@
       .ofertas-grid { grid-template-columns:1fr; }
       .stores-grid { grid-template-columns:repeat(2,1fr); }
     }
+    @media (max-width:900px) {
+      input, select, textarea { font-size:16px !important; }
+    }
+    @media (max-width:700px) {
+      table.stack thead { display:none; }
+      table.stack, table.stack tbody, table.stack tr, table.stack td { display:block; width:100%; }
+      table.stack tr { padding:.85rem 1.1rem; border-bottom:1px solid var(--border); }
+      table.stack tr:last-child { border-bottom:none; }
+      table.stack td { border:none; padding:.2rem 0; text-align:right; }
+      table.stack td[data-label]::before {
+        content:attr(data-label); float:left; margin-right:1rem;
+        font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; line-height:1.8;
+      }
+      table.stack td:empty { display:none; }
+      table.stack td.m-title { text-align:left; padding-bottom:.4rem; }
+      table.stack td.m-actions { text-align:right; }
+      table.stack td[style*="max-width"] { max-width:none !important; }
+    }
   </style>
 </head>
 <body>
@@ -930,26 +948,26 @@ function showCargaDetail(idx) {
   if (pkgs.length) {
     pkgRows = pkgs.map(p => `
       <tr>
-        <td><span style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(p.guia || '—')}</span></td>
-        <td>
+        <td class="m-title"><span style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(p.guia || '—')}</span></td>
+        <td data-label="Peso">
           <span style="font-weight:700">${fLbs(p.weight_lbs)}</span><br>
           <span style="font-size:.74rem;color:var(--faint)">${fKg(p.weight_lbs)}</span>
         </td>
-        <td>${pkgBadge(p.status)}</td>
-        <td style="font-weight:800;color:var(--pri)">${fCRC(p.charged_crc)}</td>
-        <td style="font-size:.82rem;color:var(--muted)">${esc(p.notes || '—')}</td>
+        <td data-label="Estado">${pkgBadge(p.status)}</td>
+        <td style="font-weight:800;color:var(--pri)" data-label="Cobrado">${fCRC(p.charged_crc)}</td>
+        <td style="font-size:.82rem;color:var(--muted)" data-label="Notas">${esc(p.notes || '')}</td>
       </tr>`).join('');
     const totalLbs = pkgs.reduce((s, p) => s + (p.weight_lbs || 0), 0);
     const totalCRC = pkgs.reduce((s, p) => s + (p.charged_crc || 0), 0);
     pkgRows += `
       <tr class="total-row">
-        <td style="font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Total</td>
-        <td>
+        <td style="font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)" class="m-title">Total</td>
+        <td data-label="Peso">
           <span style="font-weight:900">${fLbs(totalLbs)}</span><br>
           <span style="font-size:.74rem;color:var(--faint)">${fKg(totalLbs)}</span>
         </td>
         <td></td>
-        <td style="color:var(--pri);font-size:1rem;font-weight:900">${fCRC(totalCRC)}</td>
+        <td style="color:var(--pri);font-size:1rem;font-weight:900" data-label="Total a cobrar">${fCRC(totalCRC)}</td>
         <td></td>
       </tr>`;
   } else {
@@ -967,7 +985,7 @@ function showCargaDetail(idx) {
       </div>
     </div>
     <div class="tbl-wrap">
-      <table>
+      <table class="stack">
         <thead>
           <tr>
             <th>Guía / Tracking</th>
@@ -1025,28 +1043,28 @@ async function loadTrackings(userEmail) {
 
   const rows = items.map(item => `
     <tr>
-      <td>
+      <td class="m-title">
         <strong style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(item.tracking_number)}</strong>
         ${item.description ? `<br><span style="font-size:.74rem;color:var(--muted)">${esc(item.description)}</span>` : ''}
       </td>
-      <td>${trackBadge(item.status)}</td>
-      <td style="font-size:.81rem;color:var(--muted);max-width:200px">
+      <td data-label="Estado">${trackBadge(item.status)}</td>
+      <td style="font-size:.81rem;color:var(--muted);max-width:200px" data-label="Último evento">
         ${item.last_event ? esc(item.last_event) : '—'}
         ${item.carrier ? `<br><span style="font-size:.73rem;color:var(--faint)">${esc(item.carrier)}</span>` : ''}
       </td>
-      <td style="font-size:.76rem;color:var(--faint);white-space:nowrap">
+      <td style="font-size:.76rem;color:var(--faint);white-space:nowrap" data-label="Actualizado">
         ${item.last_checked_at
           ? new Date(item.last_checked_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})
           : new Date(item.created_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})}
       </td>
-      <td>
+      <td class="m-actions">
         <button class="btn-del-track" onclick="deleteTracking('${item.id}')" title="Eliminar">✕</button>
       </td>
     </tr>`).join('');
 
   cont.innerHTML = `
     <div class="tbl-wrap">
-      <table>
+      <table class="stack">
         <thead>
           <tr><th>Tracking</th><th>Estado</th><th>Último evento</th><th>Actualizado</th><th></th></tr>
         </thead>

@@ -584,6 +584,7 @@
       .entrega-icons{grid-template-columns:repeat(2,1fr)}
       .foot-top{flex-direction:column}
     }
+    @media(max-width:900px){input,select,textarea{font-size:16px!important}}
   </style>
 </head>
 <body>
@@ -881,9 +882,8 @@
     <div class="track-addr-card" tabindex="0">
       <div class="tac-icon" onclick="seleccionarBodega('b2b')">📦</div>
       <div class="tac-label" onclick="seleccionarBodega('b2b')">Bodega Consolidado</div>
-      <div class="tac-addr">2071 NW 112th Ave</div>
-      <div class="tac-addr">8800 NW 102nd ST</div>
-      <div class="tac-city">Miami, FL</div>
+      <div class="tac-addr">2071 NW 112th Ave Ste 107</div>
+      <div class="tac-city">Miami, FL 33172</div>
       <button class="copy-addr-btn" onclick="copiarDireccion(this,'2071')">📋 Copiar dirección 2071</button>
       <div style="font-size:.7rem;color:rgba(245,240,228,.3);margin-top:.5rem;cursor:pointer" onclick="seleccionarBodega('b2b')">Toca para rastrear →</div>
     </div>
@@ -1074,7 +1074,6 @@
   <span>¿Dudas? Escribinos</span>
 </a>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script>
@@ -1376,13 +1375,7 @@ ScrollTrigger.create({
 });
 
 /* ── REGISTRO ── */
-/* ── Supabase (solo para registro) ── */
-const _sb = window.supabase.createClient(
-  'https://opqyskmpdnijhvcbewkf.supabase.co',
-  'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL'
-);
-
-document.getElementById('regForm').addEventListener('submit', async function(e) {
+document.getElementById('regForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const nombre   = document.getElementById('regNombre').value.trim();
   const telefono = document.getElementById('regTel').value.trim();
@@ -1391,41 +1384,27 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   if (!nombre || !telefono || !email || !modalidad) return;
 
-  const btn = document.getElementById('btnReg');
-  const txt = document.getElementById('btnRegText');
-  btn.disabled = true;
-  txt.textContent = 'Enviando...';
+  fetch('/api/register', {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre, telefono, email, modalidad })
+  }).catch(() => {});
 
-  /* Supabase — guardar en saved_clients (upsert por email) */
-  try {
-    const { data: existing } = await _sb.from('saved_clients')
-      .select('id').eq('email', email).maybeSingle();
-    if (existing) {
-      await _sb.from('saved_clients')
-        .update({ name: nombre, phone: telefono, notes: modalidad })
-        .eq('email', email);
-    } else {
-      await _sb.from('saved_clients')
-        .insert({ name: nombre, phone: telefono, email, notes: modalidad });
-    }
-  } catch {}
+  fetch('https://formspree.io/f/mgoqqznp', {
+    method: 'POST',
+    keepalive: true,
+    headers: { Accept: 'application/json' },
+    body: new FormData(this)
+  }).catch(() => {});
 
-  /* WhatsApp */
+  /* Sin await antes: iOS bloquea window.open fuera del gesto del usuario */
   const msg = `¡Hola! Me quiero registrar en Linktodoor 📦\n\n` +
     `👤 Nombre: ${nombre}\n📱 Teléfono: ${telefono}\n` +
     `📧 Email: ${email}\n🛍️ Modalidad: ${modalidad}`;
-  window.open(`https://wa.me/50685173813?text=${encodeURIComponent(msg)}`, '_blank');
+  const waUrl = `https://wa.me/50685173813?text=${encodeURIComponent(msg)}`;
+  if (!window.open(waUrl, '_blank')) location.href = waUrl;
 
-  /* Email vía Formspree */
-  try {
-    await fetch('https://formspree.io/f/mgoqqznp', {
-      method: 'POST',
-      headers: { Accept: 'application/json' },
-      body: new FormData(this)
-    });
-  } catch {}
-
-  /* Mostrar éxito */
   this.style.display = 'none';
   document.getElementById('regSuccess').classList.add('show');
 });
