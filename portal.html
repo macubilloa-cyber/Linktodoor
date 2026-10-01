@@ -800,11 +800,17 @@ async function loadDashboard(userEmail) {
   populateBodegas(cr.name);
 
   const { data: lines } = await sb.from('carga_clients')
-    .select('*, cargas(reference, date, status), packages(*)')
+    .select('*, packages(*)')
     .ilike('client_name', cr.name)
     .order('created_at', { ascending: false });
 
-  _myLines = lines || [];
+  const cargaIds = [...new Set((lines || []).map(l => l.carga_id))];
+  const { data: cargaInfo } = cargaIds.length
+    ? await sb.from('client_cargas').select('id, reference, date, status').in('id', cargaIds)
+    : { data: [] };
+  const cargaById = Object.fromEntries((cargaInfo || []).map(c => [c.id, c]));
+
+  _myLines = (lines || []).map(l => ({ ...l, cargas: cargaById[l.carga_id] || {} }));
 
   const totalLbs     = _myLines.reduce((s, l) => s + (l.weight_lbs || 0), 0);
   const totalCobrado = _myLines.reduce((s, l) => s + (l.charged_crc || 0), 0);
