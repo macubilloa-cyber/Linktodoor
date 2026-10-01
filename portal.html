@@ -859,15 +859,12 @@ function copyBodega(type) {
 
 /* ── Orders ── */
 const PKG_STATUS = {
-  miami:     ['🏬 Recibido en Miami',  '#374151', '#F3F4F6'],
-  en_camino: ['✈️ En camino a CR',     '#2563EB', '#EFF6FF'],
   listo:     ['📍 Listo para entrega', '#D97706', '#FFFBEB'],
   entregado: ['✅ Entregado',           '#059669', '#ECFDF5'],
 };
-const PKG_ORDER = Object.keys(PKG_STATUS);
 
 function pkgBadge(status) {
-  const [label, color, bg] = PKG_STATUS[status] || PKG_STATUS.miami;
+  const [label, color, bg] = PKG_STATUS[status] || PKG_STATUS.listo;
   return `<span class="badge" style="background:${bg};color:${color}">${label}</span>`;
 }
 
@@ -878,9 +875,7 @@ function cargaBadge(line) {
       ? '<span class="badge badge-delivered">✅ Entregado</span>'
       : '<span class="badge badge-transit">🚚 En camino</span>';
   }
-  const least = pkgs.reduce((min, p) =>
-    Math.min(min, Math.max(0, PKG_ORDER.indexOf(p.status || 'miami'))), PKG_ORDER.length - 1);
-  return pkgBadge(PKG_ORDER[least]);
+  return pkgBadge(pkgs.every(p => p.status === 'entregado') ? 'entregado' : 'listo');
 }
 
 function renderCargasList() {

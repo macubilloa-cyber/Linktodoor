@@ -454,7 +454,7 @@ function mapPackage(row) {
     weightLbs:  row.weight_lbs,
     chargedCRC: row.charged_crc,
     notes:      row.notes || '',
-    status:     row.status || 'miami',
+    status:     row.status || 'listo',
     notifiedStatus: row.notified_status || null,
   };
 }
@@ -575,7 +575,7 @@ const DB = {
       return {
         carga_client_id: cargaClientId, guia: p.guia||'', weight_lbs: wLbs,
         charged_crc: parseFloat(p.charged)||0, notes: p.notes||'',
-        status: p.status || 'miami', notified_status: p.notifiedStatus || null,
+        status: p.status || 'listo', notified_status: p.notifiedStatus || null,
       };
     });
     const { error } = await sb.from('packages').insert(rows);
@@ -899,7 +899,7 @@ async function renderDetail(cargaId) {
           </td>
           <td>${fLbs(p.weightLbs)}</td>
           <td style="color:var(--gray)">${fKg(p.weightLbs)}</td>
-          <td>${pkgStatusSelect(p.id, p.status)}</td>
+          <td>${pkgStatusBadge(p.status)}</td>
           <td style="font-weight:700;color:var(--purple)">${fCRC(p.chargedCRC)}</td>
           <td style="color:var(--gray)">${esc(p.notes||'')}</td>
           <td></td>
@@ -915,6 +915,7 @@ async function renderDetail(cargaId) {
           <td style="font-weight:700;color:var(--purple)">${fCRC(cl.chargedCRC)}</td>
           <td style="color:var(--gray);font-size:.82rem">${esc(cl.notes||'')}</td>
           <td class="no-print"><div style="display:flex;gap:.3rem">
+            ${deliverBtn(cargaId, cl)}
             <button class="btn btn-sm btn-success" title="Cobrar" onclick="openCobro('${cargaId}','${cl.id}')">💬</button>
             ${editBtns}
           </div></td>
@@ -1838,31 +1839,33 @@ async function markAlertNotified(alertId, statusEs) {
 
 /* ─── PACKAGE STATUS ─── */
 const PKG_STATUS = {
-  miami:     { label: '🏬 Recibido en Miami',  color: '#374151', bg: '#F3F4F6' },
-  en_camino: { label: '✈️ En camino a CR',     color: '#1d4ed8', bg: '#DBEAFE' },
   listo:     { label: '📍 Listo para entrega', color: '#92400e', bg: '#FEF3C7' },
   entregado: { label: '✅ Entregado',           color: '#065f46', bg: '#D1FAE5' },
 };
 
 function pkgStatusStyle(status) {
-  const s = PKG_STATUS[status] || PKG_STATUS.miami;
-  return `background:${s.bg};color:${s.color};border:none;border-radius:20px;padding:3px 8px;font-size:.74rem;font-weight:800;width:auto;cursor:pointer`;
+  const s = PKG_STATUS[status] || PKG_STATUS.listo;
+  return `background:${s.bg};color:${s.color};border:none;border-radius:20px;padding:3px 8px;font-size:.74rem;font-weight:800;width:auto`;
 }
 
-function pkgStatusSelect(pkgId, status) {
-  return `<select class="no-print" style="${pkgStatusStyle(status)}"
-            onchange="setPkgStatus('${pkgId}', this.value, this)">
-    ${Object.entries(PKG_STATUS).map(([k,s]) =>
-      `<option value="${k}" ${k===status?'selected':''}>${s.label}</option>`).join('')}
-  </select>`;
+function pkgStatusBadge(status) {
+  return `<span class="badge" style="${pkgStatusStyle(status)}">${(PKG_STATUS[status] || PKG_STATUS.listo).label}</span>`;
 }
 
-async function setPkgStatus(pkgId, status, sel) {
-  sel.disabled = true;
-  const { error } = await sb.from('packages').update({ status }).eq('id', pkgId);
-  sel.disabled = false;
-  if (error) { console.error(error); alert('No se pudo cambiar el estado.'); return; }
-  sel.style.cssText = pkgStatusStyle(status);
+function deliverBtn(cargaId, cl) {
+  if (!cl.packages.length) return '';
+  const delivered = cl.packages.every(p => p.status === 'entregado');
+  return delivered
+    ? `<button class="btn btn-sm btn-secondary" title="Deshacer entrega" onclick="setClientDelivered('${cargaId}','${cl.id}',false)">✓ Entregado</button>`
+    : `<button class="btn btn-sm btn-primary" onclick="setClientDelivered('${cargaId}','${cl.id}',true)">✅ Entregar</button>`;
+}
+
+async function setClientDelivered(cargaId, clientId, delivered) {
+  if (!delivered && !confirm('¿Deshacer la entrega? Los paquetes vuelven a "Listo para entrega".')) return;
+  const status = delivered ? 'entregado' : 'listo';
+  const { error } = await sb.from('packages').update({ status }).eq('carga_client_id', clientId);
+  if (error) { console.error(error); alert('No se pudo actualizar.'); return; }
+  renderDetail(cargaId);
   updateNotifyBadge();
 }
 
@@ -1946,13 +1949,21 @@ async function renderNotificar() {
 
 function buildDayMessage(g) {
   const firstName = g.name.trim().split(/\s+/)[0];
-  let msg = `¡Hola ${firstName}! 👋\n\nTe dejamos el resumen de tus paquetes:\n`;
-  Object.entries(PKG_STATUS).forEach(([key, s]) => {
-    const items = g.items.filter(it => it.pkg.status === key);
-    if (!items.length) return;
-    msg += `\n*${s.label}*\n`;
-    items.forEach(({pkg}) => { msg += `• ${pkg.guia || 'Paquete'} — ${fLbs(pkg.weightLbs)}\n`; });
-  });
+  const line = ({pkg}) => `• ${pkg.guia || 'Paquete'} — ${fLbs(pkg.weightLbs)}\n`;
+  const ready     = g.items.filter(it => it.pkg.status !== 'entregado');
+  const delivered = g.items.filter(it => it.pkg.status === 'entregado');
+
+  let msg = `¡Hola ${firstName}! 👋\n`;
+  if (ready.length) {
+    const total = ready.reduce((s, it) => s + (it.pkg.chargedCRC || 0), 0);
+    msg += `\n📍 *Llegaron tus paquetes y están listos para entrega:*\n`;
+    ready.forEach(it => { msg += line(it); });
+    msg += `\n💰 *Total a pagar: ${fCRC(total)}*\n`;
+  }
+  if (delivered.length) {
+    msg += `\n✅ *Confirmamos la entrega de:*\n`;
+    delivered.forEach(it => { msg += line(it); });
+  }
   msg += `\nPodés ver el detalle en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
   return msg;
 }
