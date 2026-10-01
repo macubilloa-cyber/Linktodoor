@@ -830,7 +830,7 @@ function populateBodegas(fullName) {
 
   document.getElementById('addr2071-nombre').textContent  = `UNILTD ${firstName}`;
   document.getElementById('addr2071-apellido').textContent = lastName;
-  document.getElementById('addrFlash-nombre').textContent  = firstName;
+  document.getElementById('addrFlash-nombre').textContent  = parts.join(' ');
 }
 
 /* ── Copy bodega address ── */
