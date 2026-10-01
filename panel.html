@@ -166,7 +166,7 @@
       body { background: white; }
       header, .no-print { display: none !important; }
       main { padding: 0; max-width: 100%; }
-      #view-cargas, #view-carga-detail, #view-clientes { display: none !important; }
+      #view-cargas, #view-carga-detail, #view-clientes, #view-alertas, #view-notificar { display: none !important; }
       #view-cierre { display: block !important; }
       .card { box-shadow: none; border: 1px solid #ccc; }
     }
@@ -227,6 +227,7 @@
       <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
       <button class="nav-btn" id="nav-clientes" onclick="showView('clientes')">Clientes</button>
       <button class="nav-btn" id="nav-alertas"  onclick="showView('alertas')">📡 Pre-alertas<span id="alertas-badge" class="nav-badge" style="display:none"></span></button>
+      <button class="nav-btn" id="nav-notificar" onclick="showView('notificar')">📲 Notificar<span id="notificar-badge" class="nav-badge" style="display:none"></span></button>
     </nav>
     <div class="header-actions">
       <button class="btn btn-sm btn-secondary" onclick="openChangePw()" title="Cambiar contraseña">⚙</button>
@@ -349,6 +350,20 @@
       </div>
     </div>
 
+    <!-- VIEW: NOTIFICAR -->
+    <div id="view-notificar" class="view">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Notificar clientes</div>
+          <div class="ph-sub">Clientes con paquetes que cambiaron de estado desde su último aviso</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-secondary btn-sm" onclick="renderNotificar()">↻ Actualizar</button>
+        </div>
+      </div>
+      <div id="notificar-list"></div>
+    </div>
+
     <!-- VIEW: CLIENTES -->
     <div id="view-clientes" class="view">
       <div class="ph">
@@ -439,6 +454,8 @@ function mapPackage(row) {
     weightLbs:  row.weight_lbs,
     chargedCRC: row.charged_crc,
     notes:      row.notes || '',
+    status:     row.status || 'miami',
+    notifiedStatus: row.notified_status || null,
   };
 }
 
@@ -555,7 +572,11 @@ const DB = {
     const rows = pkgs.map(p => {
       const w = parseFloat(p.weight) || 0;
       const wLbs = p.unit === 'kg' ? w * KG_TO_LBS : w;
-      return { carga_client_id: cargaClientId, guia: p.guia||'', weight_lbs: wLbs, charged_crc: parseFloat(p.charged)||0, notes: p.notes||'' };
+      return {
+        carga_client_id: cargaClientId, guia: p.guia||'', weight_lbs: wLbs,
+        charged_crc: parseFloat(p.charged)||0, notes: p.notes||'',
+        status: p.status || 'miami', notified_status: p.notifiedStatus || null,
+      };
     });
     const { error } = await sb.from('packages').insert(rows);
     if (error) { console.error(error); return false; }
@@ -614,6 +635,8 @@ function doLogin() {
     document.getElementById('screen-login').style.display = 'none';
     document.getElementById('screen-app').hidden = false;
     showView('cargas');
+    updateAlertsBadge();
+    updateNotifyBadge();
   } else {
     err.style.display = 'block';
     document.getElementById('login-pw').select();
@@ -641,6 +664,7 @@ function showView(name) {
   if (name === 'cargas')   renderCargas();
   if (name === 'clientes') renderClientes();
   if (name === 'alertas')  renderAlertas();
+  if (name === 'notificar') renderNotificar();
 }
 
 function showDetail(cargaId) {
@@ -818,6 +842,15 @@ async function renderDetail(cargaId) {
       <button class="btn btn-primary"   onclick="showCierre('${carga.id}')">Ver cierre</button>`;
   }
 
+  if (carga.clients.some(cl => cl.packages.length)) {
+    actionsEl.insertAdjacentHTML('beforeend', `
+      <select class="no-print" style="width:auto;padding:.5rem .7rem;font-size:.85rem;font-weight:700"
+              onchange="bulkSetStatus('${carga.id}', this.value); this.value=''">
+        <option value="">📦 Marcar todos como…</option>
+        ${Object.entries(PKG_STATUS).map(([k,s]) => `<option value="${k}">${s.label}</option>`).join('')}
+      </select>`);
+  }
+
   document.getElementById('btn-add-client').disabled = carga.status === 'closed';
 
   document.getElementById('detail-stats').innerHTML = `
@@ -866,7 +899,7 @@ async function renderDetail(cargaId) {
           </td>
           <td>${fLbs(p.weightLbs)}</td>
           <td style="color:var(--gray)">${fKg(p.weightLbs)}</td>
-          <td></td>
+          <td>${pkgStatusSelect(p.id, p.status)}</td>
           <td style="font-weight:700;color:var(--purple)">${fCRC(p.chargedCRC)}</td>
           <td style="color:var(--gray)">${esc(p.notes||'')}</td>
           <td></td>
@@ -1363,7 +1396,8 @@ async function openEditClient(cargaId, clientId) {
   if (client.packages && client.packages.length > 0) {
     _pkgs = client.packages.map(p => ({
       guia: p.guia, weight: p.weightLbs.toFixed(3), unit: 'lbs',
-      charged: p.chargedCRC, notes: p.notes, _manualCharge: true
+      charged: p.chargedCRC, notes: p.notes, _manualCharge: true,
+      status: p.status, notifiedStatus: p.notifiedStatus
     }));
   } else {
     _pkgs = [{ guia: '', weight: client.weightLbs.toFixed(3), unit: 'lbs', charged: client.chargedCRC, notes: '', _manualCharge: true }];
@@ -1802,12 +1836,155 @@ async function markAlertNotified(alertId, statusEs) {
   renderAlertas();
 }
 
+/* ─── PACKAGE STATUS ─── */
+const PKG_STATUS = {
+  miami:     { label: '🏬 Recibido en Miami',  color: '#374151', bg: '#F3F4F6' },
+  en_camino: { label: '✈️ En camino a CR',     color: '#1d4ed8', bg: '#DBEAFE' },
+  listo:     { label: '📍 Listo para entrega', color: '#92400e', bg: '#FEF3C7' },
+  entregado: { label: '✅ Entregado',           color: '#065f46', bg: '#D1FAE5' },
+};
+
+function pkgStatusStyle(status) {
+  const s = PKG_STATUS[status] || PKG_STATUS.miami;
+  return `background:${s.bg};color:${s.color};border:none;border-radius:20px;padding:3px 8px;font-size:.74rem;font-weight:800;width:auto;cursor:pointer`;
+}
+
+function pkgStatusSelect(pkgId, status) {
+  return `<select class="no-print" style="${pkgStatusStyle(status)}"
+            onchange="setPkgStatus('${pkgId}', this.value, this)">
+    ${Object.entries(PKG_STATUS).map(([k,s]) =>
+      `<option value="${k}" ${k===status?'selected':''}>${s.label}</option>`).join('')}
+  </select>`;
+}
+
+async function setPkgStatus(pkgId, status, sel) {
+  sel.disabled = true;
+  const { error } = await sb.from('packages').update({ status }).eq('id', pkgId);
+  sel.disabled = false;
+  if (error) { console.error(error); alert('No se pudo cambiar el estado.'); return; }
+  sel.style.cssText = pkgStatusStyle(status);
+  updateNotifyBadge();
+}
+
+async function bulkSetStatus(cargaId, status) {
+  if (!status) return;
+  const carga = await DB.getCarga(cargaId);
+  const ids = carga.clients.flatMap(cl => cl.packages.map(p => p.id));
+  if (!ids.length) return;
+  if (!confirm(`¿Marcar los ${ids.length} paquetes de esta carga como "${PKG_STATUS[status].label}"?`)) return;
+  const { error } = await sb.from('packages').update({ status }).in('id', ids);
+  if (error) { console.error(error); alert('No se pudo actualizar.'); return; }
+  renderDetail(cargaId);
+  updateNotifyBadge();
+}
+
+/* ─── NOTIFICAR (cierre del día) ─── */
+let _notifyGroups = [];
+
+async function loadPendingNotifications() {
+  const [cargas, saved] = await Promise.all([DB.getCargas(), DB.getClients()]);
+  const phoneByName = {};
+  saved.forEach(c => { phoneByName[c.name.trim().toLowerCase()] = c.phone; });
+
+  const groups = {};
+  cargas.forEach(carga => carga.clients.forEach(cl => cl.packages.forEach(p => {
+    if (p.status === p.notifiedStatus) return;
+    const key = cl.clientName.trim().toLowerCase();
+    if (!groups[key]) groups[key] = { name: cl.clientName, phone: phoneByName[key] || '', items: [] };
+    groups[key].items.push({ pkg: p, cargaRef: carga.reference });
+  })));
+  return Object.values(groups).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+async function updateNotifyBadge() {
+  const groups = await loadPendingNotifications();
+  const badge = document.getElementById('notificar-badge');
+  badge.textContent = groups.length;
+  badge.style.display = groups.length ? '' : 'none';
+}
+
+async function renderNotificar() {
+  const cont = document.getElementById('notificar-list');
+  cont.innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--gray)">Cargando...</div>';
+  _notifyGroups = await loadPendingNotifications();
+
+  const badge = document.getElementById('notificar-badge');
+  badge.textContent = _notifyGroups.length;
+  badge.style.display = _notifyGroups.length ? '' : 'none';
+
+  if (!_notifyGroups.length) {
+    cont.innerHTML = `<div class="card"><div class="empty"><div class="ico">✅</div>
+      <p>Todos los clientes están al día.<br>Cuando cambies el estado de un paquete, va a aparecer aquí.</p></div></div>`;
+    return;
+  }
+
+  cont.innerHTML = _notifyGroups.map((g, i) => `
+    <div class="card" style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem">
+        <div>
+          <strong style="font-size:1rem">${esc(g.name)}</strong>
+          <div style="font-size:.8rem;color:var(--gray)">${g.phone ? esc(g.phone) : '⚠ Sin teléfono — agregalo en Clientes'}</div>
+        </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          ${g.phone ? `<button class="btn btn-sm btn-success" onclick="sendDayWhatsApp(${i})">📲 Enviar WhatsApp</button>` : ''}
+          <button class="btn btn-sm btn-secondary" onclick="markGroupNotified(${i})">Marcar como avisado</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Guía</th><th>Carga</th><th>Peso</th><th>Nuevo estado</th></tr></thead>
+        <tbody>${g.items.map(({pkg, cargaRef}) => `
+          <tr>
+            <td style="font-family:monospace">${esc(pkg.guia || '—')}</td>
+            <td style="color:var(--gray)">${esc(cargaRef)}</td>
+            <td>${fLbs(pkg.weightLbs)}</td>
+            <td><span class="badge" style="${pkgStatusStyle(pkg.status)};cursor:default">${PKG_STATUS[pkg.status]?.label || pkg.status}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>`).join('');
+}
+
+function buildDayMessage(g) {
+  const firstName = g.name.trim().split(/\s+/)[0];
+  let msg = `¡Hola ${firstName}! 👋\n\nTe dejamos el resumen de tus paquetes:\n`;
+  Object.entries(PKG_STATUS).forEach(([key, s]) => {
+    const items = g.items.filter(it => it.pkg.status === key);
+    if (!items.length) return;
+    msg += `\n*${s.label}*\n`;
+    items.forEach(({pkg}) => { msg += `• ${pkg.guia || 'Paquete'} — ${fLbs(pkg.weightLbs)}\n`; });
+  });
+  msg += `\nPodés ver el detalle en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
+  return msg;
+}
+
+function sendDayWhatsApp(idx) {
+  const g = _notifyGroups[idx];
+  if (!g) return;
+  const clean = g.phone.replace(/\D/g, '');
+  const fullPhone = clean.startsWith('506') ? clean : '506' + clean;
+  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(buildDayMessage(g))}`, '_blank');
+  markGroupNotified(idx);
+}
+
+async function markGroupNotified(idx) {
+  const g = _notifyGroups[idx];
+  if (!g) return;
+  const byStatus = {};
+  g.items.forEach(({pkg}) => (byStatus[pkg.status] ||= []).push(pkg.id));
+  for (const [status, ids] of Object.entries(byStatus)) {
+    const { error } = await sb.from('packages').update({ notified_status: status }).in('id', ids);
+    if (error) { console.error(error); alert('No se pudo marcar como avisado.'); return; }
+  }
+  renderNotificar();
+}
+
 /* ─── INIT ─── */
 if (DB.isLoggedIn()) {
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').hidden = false;
   showView('cargas');
   updateAlertsBadge();
+  updateNotifyBadge();
 }
 
 if (!localStorage.getItem('ltd_pw')) {

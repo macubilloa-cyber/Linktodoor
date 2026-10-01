@@ -858,6 +858,31 @@ function copyBodega(type) {
 }
 
 /* ── Orders ── */
+const PKG_STATUS = {
+  miami:     ['🏬 Recibido en Miami',  '#374151', '#F3F4F6'],
+  en_camino: ['✈️ En camino a CR',     '#2563EB', '#EFF6FF'],
+  listo:     ['📍 Listo para entrega', '#D97706', '#FFFBEB'],
+  entregado: ['✅ Entregado',           '#059669', '#ECFDF5'],
+};
+const PKG_ORDER = Object.keys(PKG_STATUS);
+
+function pkgBadge(status) {
+  const [label, color, bg] = PKG_STATUS[status] || PKG_STATUS.miami;
+  return `<span class="badge" style="background:${bg};color:${color}">${label}</span>`;
+}
+
+function cargaBadge(line) {
+  const pkgs = line.packages || [];
+  if (!pkgs.length) {
+    return (line.cargas || {}).status === 'closed'
+      ? '<span class="badge badge-delivered">✅ Entregado</span>'
+      : '<span class="badge badge-transit">🚚 En camino</span>';
+  }
+  const least = pkgs.reduce((min, p) =>
+    Math.min(min, Math.max(0, PKG_ORDER.indexOf(p.status || 'miami'))), PKG_ORDER.length - 1);
+  return pkgBadge(PKG_ORDER[least]);
+}
+
 function renderCargasList() {
   const cont = document.getElementById('ordersContent');
   if (!_myLines.length) {
@@ -872,9 +897,7 @@ function renderCargasList() {
   const cards = _myLines.map((l, idx) => {
     const c = l.cargas || {};
     const pkgs = l.packages || [];
-    const statusBadge = c.status === 'closed'
-      ? '<span class="badge badge-delivered">✅ Entregado</span>'
-      : '<span class="badge badge-transit">🚚 En camino</span>';
+    const statusBadge = cargaBadge(l);
     const pkgLabel = pkgs.length === 1 ? '1 paquete' : `${pkgs.length} paquetes`;
     return `
       <div class="carga-card" onclick="showCargaDetail(${idx})">
@@ -917,6 +940,7 @@ function showCargaDetail(idx) {
           <span style="font-weight:700">${fLbs(p.weight_lbs)}</span><br>
           <span style="font-size:.74rem;color:var(--faint)">${fKg(p.weight_lbs)}</span>
         </td>
+        <td>${pkgBadge(p.status)}</td>
         <td style="font-weight:800;color:var(--pri)">${fCRC(p.charged_crc)}</td>
         <td style="font-size:.82rem;color:var(--muted)">${esc(p.notes || '—')}</td>
       </tr>`).join('');
@@ -929,16 +953,15 @@ function showCargaDetail(idx) {
           <span style="font-weight:900">${fLbs(totalLbs)}</span><br>
           <span style="font-size:.74rem;color:var(--faint)">${fKg(totalLbs)}</span>
         </td>
+        <td></td>
         <td style="color:var(--pri);font-size:1rem;font-weight:900">${fCRC(totalCRC)}</td>
         <td></td>
       </tr>`;
   } else {
-    pkgRows = `<tr><td colspan="4"><div class="empty-box" style="padding:2rem"><div class="ico">📭</div><p>Sin paquetes registrados aún.</p></div></td></tr>`;
+    pkgRows = `<tr><td colspan="5"><div class="empty-box" style="padding:2rem"><div class="ico">📭</div><p>Sin paquetes registrados aún.</p></div></td></tr>`;
   }
 
-  const statusBadge = c.status === 'closed'
-    ? '<span class="badge badge-delivered">✅ Entregado</span>'
-    : '<span class="badge badge-transit">🚚 En camino</span>';
+  const statusBadge = cargaBadge(l);
 
   document.getElementById('ordersContent').innerHTML = `
     <div class="detail-header">
@@ -951,7 +974,13 @@ function showCargaDetail(idx) {
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr><th>Guía / Tracking</th><th>Peso</th><th>Cobrado</th><th>Notas</th></tr>
+          <tr>
+            <th>Guía / Tracking</th>
+            <th>Peso</th>
+            <th>Estado</th>
+            <th>Cobrado</th>
+            <th>Notas</th>
+          </tr>
         </thead>
         <tbody>${pkgRows}</tbody>
       </table>
