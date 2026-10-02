@@ -22,9 +22,9 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: false, note: 'TRACK17_API_KEY no configurado. Nada que revisar.' });
   }
 
-  /* Fetch all non-delivered trackings */
+  /* Fetch all non-delivered trackings whose status wasn't set by hand in the panel */
   const listRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.entregado&select=id,tracking_number,status`,
+    `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.entregado&status_manual=not.is.true&select=id,tracking_number,status`,
     { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }
   );
   const trackings = await listRes.json();

@@ -1846,9 +1846,7 @@ async function renderAlertas() {
           <strong style="font-family:monospace;font-size:.83rem">${esc(alert.tracking_number)}</strong>
           ${alert.description ? `<br><span style="font-size:.73rem;color:var(--gray)">${esc(alert.description)}</span>` : ''}
         </td>
-        <td data-label="Estado">
-          <span class="badge" style="background:${sInfo.bg};color:${sInfo.color}">${sInfo.label}</span>
-        </td>
+        <td data-label="Estado">${alertStatusSelect(alert, sInfo)}</td>
         <td style="font-size:.8rem;color:var(--gray);max-width:190px" data-label="Último evento">
           ${alert.last_event ? esc(alert.last_event) : '—'}
           ${alert.carrier ? `<br><span style="font-size:.72rem">${esc(alert.carrier)}</span>` : ''}
@@ -1861,6 +1859,34 @@ async function renderAlertas() {
         <td class="m-actions">${notifyBtn}</td>
       </tr>`;
   }).join('');
+}
+
+function alertStatusSelect(alert, sInfo) {
+  const opts = Object.entries(ALERT_STATUS).map(([k, s]) =>
+    `<option value="${k}" ${k === alert.status ? 'selected' : ''}>${s.label}</option>`).join('');
+  const backToAuto = alert.status_manual ? `<option value="__auto">🔄 Volver a automático</option>` : '';
+  return `<select class="no-print" title="Cambiar estado manualmente"
+            style="background:${sInfo.bg};color:${sInfo.color};border:none;border-radius:20px;padding:4px 8px;font-size:.75rem;font-weight:800;width:auto;cursor:pointer"
+            onchange="setAlertStatus('${alert.id}', this.value, this)">${opts}${backToAuto}</select>
+          ${alert.status_manual ? '<div style="font-size:.68rem;color:var(--gray);margin-top:3px">✋ Manual</div>' : ''}`;
+}
+
+async function setAlertStatus(alertId, key, sel) {
+  sel.disabled = true;
+  const now = new Date().toISOString();
+  const patch = key === '__auto'
+    ? { status_manual: false }
+    : {
+        status: key,
+        status_es: ALERT_STATUS[key].label.replace(/^[^\p{L}]+/u, ''),
+        status_manual: true,
+        needs_notify: true,
+        last_checked_at: now,
+        ...(key === 'entregado' ? { delivered_at: now } : {}),
+      };
+  const { error } = await sb.from('package_alerts').update(patch).eq('id', alertId);
+  if (error) { console.error(error); alert('No se pudo cambiar el estado.'); }
+  renderAlertas();
 }
 
 function sendAlertWhatsApp(alertId, phone, clientName, trackingNum, description, statusEs, lastEvent) {
