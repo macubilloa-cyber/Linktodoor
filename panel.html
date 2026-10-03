@@ -213,6 +213,7 @@
         font-size: .72rem; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: .3px; line-height: 1.6;
       }
       table.stack td.m-hide, table.stack td:empty { display: none; }
+      table.stack td.td-center { text-align: right; }
       table.stack td.m-title { text-align: left; font-size: 1rem; padding-bottom: .35rem; }
       table.stack td.m-actions { padding-top: .5rem; }
       table.stack td.m-actions > div { flex-wrap: wrap; }
@@ -408,6 +409,14 @@
         <div class="ph-actions"><button class="btn btn-primary" onclick="openNuevoCliente()">+ Nuevo Cliente</button></div>
       </div>
       <div class="card">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <input type="search" id="clientes-search" placeholder="🔍 Buscar por nombre, teléfono o email…"
+                 oninput="filterClientes()" autocomplete="off" style="flex:1;min-width:220px" />
+          <span id="clientes-count" style="font-size:.8rem;color:var(--gray);white-space:nowrap"></span>
+        </div>
+        <div id="clientes-noresults" class="empty" style="display:none;padding:1.5rem 1rem">
+          <p>No hay clientes que coincidan con la búsqueda.</p>
+        </div>
         <div class="table-wrap">
           <table class="stack">
             <thead>
@@ -1191,7 +1200,8 @@ async function renderClientes() {
 
   const sorted = [...clients].sort((a,b) => totals[b.id].lbs - totals[a.id].lbs);
   tbody.innerHTML = sorted.map(c => {
-    const { lbs, count } = totals[c.id];
+    const { lbs, cargaCount: count } = totals[c.id];
+    const searchText = normalizeSearch([c.name, c.phone, c.phone.replace(/\D/g, ''), c.email].join(' '));
     const lbsStr   = lbs > 0 ? `<strong>${fLbs(lbs)}</strong>` : '<span style="color:var(--gray)">—</span>';
     const kgStr    = lbs > 0 ? fKg(lbs) : '—';
     const countStr = count > 0 ? count : '—';
@@ -1199,13 +1209,13 @@ async function renderClientes() {
       ? `<span style="font-size:.78rem;color:var(--green);font-weight:700">✔ ${esc(c.email)}</span>`
       : `<span style="font-size:.78rem;color:var(--gray)">Sin acceso</span>`;
     return `
-      <tr>
+      <tr data-search="${esc(searchText)}">
         <td class="m-title"><strong>${esc(c.name)}</strong></td>
         <td data-label="Teléfono">${esc(c.phone || '—')}</td>
         <td data-label="Portal">${emailBadge}</td>
         <td data-label="Total lbs">${lbsStr}</td>
         <td style="color:var(--gray)" class="m-hide">${kgStr}</td>
-        <td style="text-align:center;color:var(--purple);font-weight:700" data-label="Cargas">${countStr}</td>
+        <td class="td-center" style="color:var(--purple);font-weight:700" data-label="Cargas">${countStr}</td>
         <td style="color:var(--gray);font-size:.82rem" data-label="Notas">${esc(c.notes || '—')}</td>
         <td class="m-actions">
           <div style="display:flex;gap:.35rem">
@@ -1216,6 +1226,24 @@ async function renderClientes() {
         </td>
       </tr>`;
   }).join('');
+  filterClientes();
+}
+
+const normalizeSearch = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+
+function filterClientes() {
+  const q    = normalizeSearch(document.getElementById('clientes-search').value);
+  const rows = [...document.querySelectorAll('#clientes-tbody tr[data-search]')];
+  const words = q.split(/\s+/).filter(Boolean);
+  let shown = 0;
+  rows.forEach(r => {
+    const match = words.every(w => r.dataset.search.includes(w));
+    r.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  document.getElementById('clientes-count').textContent =
+    q ? `${shown} de ${rows.length}` : `${rows.length} cliente${rows.length !== 1 ? 's' : ''}`;
+  document.getElementById('clientes-noresults').style.display = rows.length && !shown ? '' : 'none';
 }
 
 /* ─── MODAL ─── */
