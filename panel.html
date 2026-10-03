@@ -2034,6 +2034,8 @@ async function renderNotificar() {
         </div>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap">
           ${g.phone ? `<button class="btn btn-sm btn-success" onclick="sendDayWhatsApp(${i})">📲 Enviar WhatsApp</button>` : ''}
+          ${g.items.some(it => it.pkg.status !== 'entregado')
+            ? `<button class="btn btn-sm btn-primary" onclick="markGroupDelivered(${i})">✅ Ya se entregó</button>` : ''}
           <button class="btn btn-sm btn-secondary" onclick="markGroupNotified(${i})">Marcar como avisado</button>
         </div>
       </div>
@@ -2079,6 +2081,18 @@ function sendDayWhatsApp(idx) {
   const fullPhone = clean.startsWith('506') ? clean : '506' + clean;
   window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(buildDayMessage(g))}`, '_blank');
   markGroupNotified(idx);
+}
+
+async function markGroupDelivered(idx) {
+  const g = _notifyGroups[idx];
+  if (!g) return;
+  if (!confirm(`¿Marcar los paquetes de ${g.name} como entregados? No se le envía mensaje.`)) return;
+  const ids = g.items.map(it => it.pkg.id);
+  const { error } = await sb.from('packages')
+    .update({ status: 'entregado', notified_status: 'entregado' })
+    .in('id', ids);
+  if (error) { console.error(error); alert('No se pudo marcar como entregado.'); return; }
+  renderNotificar();
 }
 
 async function markGroupNotified(idx) {
