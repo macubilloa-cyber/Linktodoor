@@ -166,7 +166,7 @@
       body { background: white; }
       header, .no-print { display: none !important; }
       main { padding: 0; max-width: 100%; }
-      #view-cargas, #view-carga-detail, #view-clientes, #view-alertas, #view-notificar { display: none !important; }
+      #view-cargas, #view-carga-detail, #view-clientes, #view-alertas { display: none !important; }
       #view-cierre { display: block !important; }
       .card { box-shadow: none; border: 1px solid #ccc; }
     }
@@ -265,7 +265,6 @@
       <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
       <button class="nav-btn" id="nav-clientes" onclick="showView('clientes')">Clientes</button>
       <button class="nav-btn" id="nav-alertas"  onclick="showView('alertas')">📡 Pre-alertas<span id="alertas-badge" class="nav-badge" style="display:none"></span></button>
-      <button class="nav-btn" id="nav-notificar" onclick="showView('notificar')">📲 Notificar<span id="notificar-badge" class="nav-badge" style="display:none"></span></button>
     </nav>
     <div class="header-actions">
       <button class="btn btn-sm btn-secondary" onclick="openChangePw()" title="Cambiar contraseña">⚙</button>
@@ -388,20 +387,6 @@
       </div>
     </div>
 
-    <!-- VIEW: NOTIFICAR -->
-    <div id="view-notificar" class="view">
-      <div class="ph">
-        <div>
-          <div class="ph-title">Notificar clientes</div>
-          <div class="ph-sub">Clientes con paquetes que cambiaron de estado desde su último aviso</div>
-        </div>
-        <div class="ph-actions">
-          <button class="btn btn-secondary btn-sm" onclick="renderNotificar()">↻ Actualizar</button>
-        </div>
-      </div>
-      <div id="notificar-list"></div>
-    </div>
-
     <!-- VIEW: CLIENTES -->
     <div id="view-clientes" class="view">
       <div class="ph">
@@ -501,7 +486,6 @@ function mapPackage(row) {
     chargedCRC: row.charged_crc,
     notes:      row.notes || '',
     status:     row.status || 'listo',
-    notifiedStatus: row.notified_status || null,
   };
 }
 
@@ -621,7 +605,7 @@ const DB = {
       return {
         carga_client_id: cargaClientId, guia: p.guia||'', weight_lbs: wLbs,
         charged_crc: parseFloat(p.charged)||0, notes: p.notes||'',
-        status: p.status || 'listo', notified_status: p.notifiedStatus || null,
+        status: p.status || 'listo',
       };
     });
     const { error } = await sb.from('packages').insert(rows);
@@ -674,7 +658,6 @@ function enterApp() {
   document.getElementById('screen-app').hidden = false;
   showView('cargas');
   updateAlertsBadge();
-  updateNotifyBadge();
 }
 
 function showLoginError(msg) {
@@ -721,7 +704,6 @@ function showView(name) {
   if (name === 'cargas')   renderCargas();
   if (name === 'clientes') renderClientes();
   if (name === 'alertas')  renderAlertas();
-  if (name === 'notificar') renderNotificar();
 }
 
 function showDetail(cargaId) {
@@ -1474,7 +1456,7 @@ async function openEditClient(cargaId, clientId) {
     _pkgs = client.packages.map(p => ({
       guia: p.guia, weight: p.weightLbs.toFixed(3), unit: 'lbs',
       charged: p.chargedCRC, notes: p.notes, _manualCharge: true,
-      status: p.status, notifiedStatus: p.notifiedStatus
+      status: p.status
     }));
   } else {
     _pkgs = [{ guia: '', weight: client.weightLbs.toFixed(3), unit: 'lbs', charged: client.chargedCRC, notes: '', _manualCharge: true }];
@@ -1970,7 +1952,6 @@ async function setClientDelivered(cargaId, clientId, delivered) {
   const { error } = await sb.from('packages').update({ status }).eq('carga_client_id', clientId);
   if (error) { console.error(error); alert('No se pudo actualizar.'); return; }
   renderDetail(cargaId);
-  updateNotifyBadge();
 }
 
 async function bulkSetStatus(cargaId, status) {
@@ -1982,129 +1963,6 @@ async function bulkSetStatus(cargaId, status) {
   const { error } = await sb.from('packages').update({ status }).in('id', ids);
   if (error) { console.error(error); alert('No se pudo actualizar.'); return; }
   renderDetail(cargaId);
-  updateNotifyBadge();
-}
-
-/* ─── NOTIFICAR (cierre del día) ─── */
-let _notifyGroups = [];
-
-async function loadPendingNotifications() {
-  const [cargas, saved] = await Promise.all([DB.getCargas(), DB.getClients()]);
-  const phoneByName = {};
-  saved.forEach(c => { phoneByName[c.name.trim().toLowerCase()] = c.phone; });
-
-  const groups = {};
-  cargas.forEach(carga => carga.clients.forEach(cl => cl.packages.forEach(p => {
-    if (p.status === p.notifiedStatus) return;
-    const key = cl.clientName.trim().toLowerCase();
-    if (!groups[key]) groups[key] = { name: cl.clientName, phone: phoneByName[key] || '', items: [] };
-    groups[key].items.push({ pkg: p, cargaRef: carga.reference });
-  })));
-  return Object.values(groups).sort((a,b) => a.name.localeCompare(b.name));
-}
-
-async function updateNotifyBadge() {
-  const groups = await loadPendingNotifications();
-  const badge = document.getElementById('notificar-badge');
-  badge.textContent = groups.length;
-  badge.style.display = groups.length ? '' : 'none';
-}
-
-async function renderNotificar() {
-  const cont = document.getElementById('notificar-list');
-  cont.innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--gray)">Cargando...</div>';
-  _notifyGroups = await loadPendingNotifications();
-
-  const badge = document.getElementById('notificar-badge');
-  badge.textContent = _notifyGroups.length;
-  badge.style.display = _notifyGroups.length ? '' : 'none';
-
-  if (!_notifyGroups.length) {
-    cont.innerHTML = `<div class="card"><div class="empty"><div class="ico">✅</div>
-      <p>Todos los clientes están al día.<br>Cuando cambies el estado de un paquete, va a aparecer aquí.</p></div></div>`;
-    return;
-  }
-
-  cont.innerHTML = _notifyGroups.map((g, i) => `
-    <div class="card" style="margin-bottom:1rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem">
-        <div>
-          <strong style="font-size:1rem">${esc(g.name)}</strong>
-          <div style="font-size:.8rem;color:var(--gray)">${g.phone ? esc(g.phone) : '⚠ Sin teléfono — agregalo en Clientes'}</div>
-        </div>
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-          ${g.phone ? `<button class="btn btn-sm btn-success" onclick="sendDayWhatsApp(${i})">📲 Enviar WhatsApp</button>` : ''}
-          ${g.items.some(it => it.pkg.status !== 'entregado')
-            ? `<button class="btn btn-sm btn-primary" onclick="markGroupDelivered(${i})">✅ Ya se entregó</button>` : ''}
-          <button class="btn btn-sm btn-secondary" onclick="markGroupNotified(${i})">Marcar como avisado</button>
-        </div>
-      </div>
-      <div class="table-wrap"><table class="stack">
-        <thead><tr><th>Guía</th><th>Carga</th><th>Peso</th><th>Nuevo estado</th></tr></thead>
-        <tbody>${g.items.map(({pkg, cargaRef}) => `
-          <tr>
-            <td style="font-family:monospace" data-label="Guía">${esc(pkg.guia || '—')}</td>
-            <td style="color:var(--gray)" data-label="Carga">${esc(cargaRef)}</td>
-            <td data-label="Peso">${fLbs(pkg.weightLbs)}</td>
-            <td data-label="Estado"><span class="badge" style="${pkgStatusStyle(pkg.status)};cursor:default">${PKG_STATUS[pkg.status]?.label || pkg.status}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table></div>
-    </div>`).join('');
-}
-
-function buildDayMessage(g) {
-  const firstName = g.name.trim().split(/\s+/)[0];
-  const line = ({pkg}) => `• ${pkg.guia || 'Paquete'} — ${fLbs(pkg.weightLbs)}\n`;
-  const ready     = g.items.filter(it => it.pkg.status !== 'entregado');
-  const delivered = g.items.filter(it => it.pkg.status === 'entregado');
-
-  let msg = `¡Hola ${firstName}! 👋\n`;
-  if (ready.length) {
-    const total = ready.reduce((s, it) => s + (it.pkg.chargedCRC || 0), 0);
-    msg += `\n📍 *Llegaron tus paquetes y están listos para entrega:*\n`;
-    ready.forEach(it => { msg += line(it); });
-    msg += `\n💰 *Total a pagar: ${fCRC(total)}*\n`;
-  }
-  if (delivered.length) {
-    msg += `\n✅ *Confirmamos la entrega de:*\n`;
-    delivered.forEach(it => { msg += line(it); });
-  }
-  msg += `\nPodés ver el detalle en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
-  return msg;
-}
-
-function sendDayWhatsApp(idx) {
-  const g = _notifyGroups[idx];
-  if (!g) return;
-  const clean = g.phone.replace(/\D/g, '');
-  const fullPhone = clean.startsWith('506') ? clean : '506' + clean;
-  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(buildDayMessage(g))}`, '_blank');
-  markGroupNotified(idx);
-}
-
-async function markGroupDelivered(idx) {
-  const g = _notifyGroups[idx];
-  if (!g) return;
-  if (!confirm(`¿Marcar los paquetes de ${g.name} como entregados? No se le envía mensaje.`)) return;
-  const ids = g.items.map(it => it.pkg.id);
-  const { error } = await sb.from('packages')
-    .update({ status: 'entregado', notified_status: 'entregado' })
-    .in('id', ids);
-  if (error) { console.error(error); alert('No se pudo marcar como entregado.'); return; }
-  renderNotificar();
-}
-
-async function markGroupNotified(idx) {
-  const g = _notifyGroups[idx];
-  if (!g) return;
-  const byStatus = {};
-  g.items.forEach(({pkg}) => (byStatus[pkg.status] ||= []).push(pkg.id));
-  for (const [status, ids] of Object.entries(byStatus)) {
-    const { error } = await sb.from('packages').update({ notified_status: status }).in('id', ids);
-    if (error) { console.error(error); alert('No se pudo marcar como avisado.'); return; }
-  }
-  renderNotificar();
 }
 
 /* ─── INIT ─── */
