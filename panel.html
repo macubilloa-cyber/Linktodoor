@@ -82,7 +82,7 @@
     .header-actions { display: flex; gap: .5rem; align-items: center; }
 
     /* LAYOUT */
-    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
     .view { display: none; }
     .view.active { display: block; }
 
@@ -1829,11 +1829,16 @@ async function renderAlertas() {
 
   if (!alertList.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
 
-  const clientMap = {};
-  clientList.forEach(c => { if (c.email) clientMap[c.email] = c; });
+  const norm = v => (v || '').trim().toLowerCase();
+  const byEmail = {}, byName = {};
+  clientList.forEach(c => {
+    if (c.email) byEmail[norm(c.email)] = c;
+    if (c.name)  byName[norm(c.name)]   = c;
+  });
 
   tbody.innerHTML = alertList.map(alert => {
-    const client = clientMap[alert.user_email] || { name: alert.client_name || alert.user_email, phone: '' };
+    const matched = byEmail[norm(alert.user_email)] || byName[norm(alert.client_name)];
+    const client  = matched || { name: alert.client_name || alert.user_email, phone: '' };
     const sInfo  = ALERT_STATUS[alert.status] || ALERT_STATUS.registrado;
     const needsNotify = alert.needs_notify;
     const phone  = client.phone || '';
@@ -1846,12 +1851,17 @@ async function renderAlertas() {
       : needsNotify
         ? `<span title="Agregá el teléfono al cliente" style="font-size:.75rem;color:var(--yellow);font-weight:700;cursor:help">⚠ Sin tel.</span>`
         : `<span style="font-size:.75rem;color:var(--gray)">Al día</span>`;
+    const dismissBtn = needsNotify
+      ? `<button class="btn btn-sm btn-secondary" title="Quitar el aviso pendiente sin mandar mensaje"
+           onclick="markAlertNotified('${alert.id}', ${JSON.stringify(alert.status_es || sInfo.label).replace(/"/g, '&quot;')})">✓ Avisado</button>`
+      : '';
 
     return `
       <tr style="${needsNotify ? 'background:var(--yellow-light)' : ''}">
         <td class="m-title">
           <strong>${esc(client.name)}</strong>
           ${phone ? `<br><span style="font-size:.74rem;color:var(--gray)">${esc(phone)}</span>` : ''}
+          ${matched ? '' : `<br><span style="font-size:.72rem;color:var(--red)" title="Poné este email en la ficha del cliente (Clientes → ✎) para enlazarlo">⚠ Falta este email en Clientes</span>`}
         </td>
         <td data-label="Tracking">
           <strong style="font-family:monospace;font-size:.83rem">${esc(alert.tracking_number)}</strong>
@@ -1867,7 +1877,7 @@ async function renderAlertas() {
             ? new Date(alert.last_checked_at).toLocaleDateString('es-CR',{day:'numeric',month:'short'})
             : '—'}
         </td>
-        <td class="m-actions">${notifyBtn}</td>
+        <td class="m-actions" style="white-space:nowrap"><div style="display:flex;flex-direction:column;gap:.35rem;align-items:flex-start">${notifyBtn}${dismissBtn}</div></td>
       </tr>`;
   }).join('');
 }
@@ -1877,7 +1887,7 @@ function alertStatusSelect(alert, sInfo) {
     `<option value="${k}" ${k === alert.status ? 'selected' : ''}>${s.label}</option>`).join('');
   const backToAuto = alert.status_manual ? `<option value="__auto">🔄 Volver a automático</option>` : '';
   return `<select class="no-print" title="Cambiar estado manualmente"
-            style="background:${sInfo.bg};color:${sInfo.color};border:none;border-radius:20px;padding:4px 8px;font-size:.75rem;font-weight:800;width:auto;cursor:pointer"
+            style="background:${sInfo.bg};color:${sInfo.color};border:none;border-radius:20px;padding:4px 8px;font-size:.75rem;font-weight:800;width:auto;max-width:165px;cursor:pointer"
             onchange="setAlertStatus('${alert.id}', this.value, this)">${opts}${backToAuto}</select>
           ${alert.status_manual ? '<div style="font-size:.68rem;color:var(--gray);margin-top:3px">✋ Manual</div>' : ''}`;
 }
