@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Amazon Prime y Linktodoor</title>
+<style>
+@font-face{font-family:J;font-weight:400;src:url(fonts/plus-jakarta-sans-latin-400-normal.woff2)}
+@font-face{font-family:J;font-weight:600;src:url(fonts/plus-jakarta-sans-latin-600-normal.woff2)}
+@font-face{font-family:J;font-weight:700;src:url(fonts/plus-jakarta-sans-latin-700-normal.woff2)}
+@font-face{font-family:J;font-weight:800;src:url(fonts/plus-jakarta-sans-latin-800-normal.woff2)}
+@font-face{font-family:F;font-style:italic;font-weight:600;src:url(fonts/fraunces-latin-600-italic.woff2)}
+@font-face{font-family:F;font-style:italic;font-weight:700;src:url(fonts/fraunces-latin-700-italic.woff2)}
+:root{
+  --pri:#5B5BD6; --pri-d:#3E3EB0; --lav:#E6E3FA; --cream:#F7F1E6; --blush:#F6D3DC;
+  --rose:#E7849C; --peach:#F9DCC4; --sky:#C4D9F5; --ink:#1B1B30; --mute:#6A6880; --white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--cream)}
+body{font-family:J,system-ui,sans-serif;color:var(--ink)}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--cream)}
+.bg{position:absolute;inset:0}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.75}
+#purpleBg{position:absolute;inset:0;background:radial-gradient(120% 80% at 20% 0%,#7A78E8 0%,#5B5BD6 40%,#3B3BA6 100%);opacity:0}
+.scene{position:absolute;inset:0;opacity:0;will-change:opacity,transform}
+.abs{position:absolute}
+.ser{font-family:F;font-style:italic;font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:14px;padding:16px 30px;border-radius:999px;
+  font-weight:800;font-size:28px;letter-spacing:3px;text-transform:uppercase}
+.card{background:#fff;border-radius:40px;box-shadow:0 24px 60px rgba(60,50,120,.12)}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.center{left:0;right:0;text-align:center}
+
+/* progress bar */
+#bars{position:absolute;top:44px;left:48px;right:48px;display:flex;gap:10px;z-index:50}
+#bars div{flex:1;height:8px;border-radius:8px;background:rgba(27,27,48,.12);overflow:hidden}
+#bars i{display:block;height:100%;width:0;background:var(--pri);border-radius:8px}
+#brand{position:absolute;top:84px;left:48px;display:flex;align-items:center;gap:16px;z-index:50}
+.lm{background:var(--pri);border-radius:14px;padding:8px 12px;display:flex;flex-direction:column;line-height:1;gap:2px}
+.lm b{font-size:17px;font-weight:800;letter-spacing:1px}
+#brand span{font-weight:800;font-size:30px}
+
+/* S1 */
+.prod{position:absolute;width:270px;height:330px;border-radius:44px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;box-shadow:0 26px 60px rgba(60,50,120,.16)}
+.prod p{font-weight:800;font-size:30px}
+/* S3 */
+.ben{position:absolute;width:456px;height:420px;padding:44px 40px}
+.ben .ic{width:110px;height:110px;border-radius:32px;display:flex;align-items:center;justify-content:center;margin-bottom:30px}
+.ben h3{font-size:42px;font-weight:800;line-height:1.1;margin-bottom:14px}
+.ben p{font-size:28px;color:var(--mute);line-height:1.35;font-weight:600}
+/* S5 timeline */
+.step{position:absolute;left:60px;right:60px;height:230px}
+.step .node{position:absolute;left:28px;top:55px;width:120px;height:120px;border-radius:50%;
+  background:#fff;border:5px solid var(--lav);display:flex;align-items:center;justify-content:center;color:var(--pri)}
+.step .body{position:absolute;left:190px;right:0;top:10px;bottom:10px;border-radius:36px;padding:22px 32px}
+.step .tag{display:inline-block;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--pri);background:var(--lav);padding:6px 16px;border-radius:999px;margin-bottom:8px}
+.step h4{font-size:40px;font-weight:800;line-height:1.1;margin-bottom:6px}
+.step p{font-size:26px;color:var(--mute);font-weight:600;line-height:1.3}
+.num{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--rose);color:#fff;
+  font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;z-index:3}
+</style>
+</head>
+<body>
+<style>
+.chip{display:flex;align-items:center;gap:26px;background:#fff;border-radius:34px;padding:26px 34px;box-shadow:0 20px 50px rgba(60,50,120,.12);font-size:42px;font-weight:800}
+.chip .ic{width:92px;height:92px;border-radius:26px;display:flex;align-items:center;justify-content:center;flex:none}
+.step{height:250px}
+.step .node{top:65px}
+.step .body{padding:26px 34px}
+.step h4{font-size:46px}
+.step .tag{font-size:24px}
+</style>
+<div id="stage">
+  <div class="bg">
+    <div class="blob" id="b1" style="width:760px;height:760px;background:var(--blush);left:-240px;top:-160px"></div>
+    <div class="blob" id="b2" style="width:700px;height:700px;background:var(--lav);right:-260px;top:620px"></div>
+    <div class="blob" id="b3" style="width:640px;height:640px;background:var(--peach);left:-200px;bottom:-200px"></div>
+  </div>
+  <div id="purpleBg"></div>
+  <div id="bars"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+  <div id="brand"><div class="lm"><b style="color:var(--cream)">LINK</b><b style="color:var(--sky)">DOOR</b></div><span id="brandTxt">Linktodoor</span></div>
+
+  <!-- S1 HOOK -->
+  <div class="scene" id="s1">
+    <div class="abs center" style="top:450px;font-size:92px;font-weight:800;line-height:1.02;letter-spacing:-2px" data-in=".05">¿Lo viste en</div>
+    <div class="abs center ser" style="top:540px;font-size:190px;color:var(--pri);line-height:1.1" data-in=".2" data-fx="pop">Amazon</div>
+    <div class="abs center" style="top:760px;font-size:92px;font-weight:800;letter-spacing:-2px" data-in="1.0">y lo querés <span class="ser" style="color:var(--rose);font-size:104px">ya?</span></div>
+    <div class="prod" id="p1" style="left:90px;top:1000px;background:#FCE4EA" data-in=".5" data-fx="pop">
+      <svg width="120" height="160" viewBox="0 0 60 80"><rect x="24" y="2" width="12" height="16" rx="5" fill="#2B2B45"/><rect x="21" y="16" width="18" height="6" rx="2" fill="#C9A86A"/><rect x="12" y="22" width="36" height="54" rx="10" fill="#F2B8A2"/><rect x="18" y="38" width="24" height="22" rx="4" fill="#fff" opacity=".85"/><rect x="22" y="44" width="16" height="3" rx="1.5" fill="#E7849C"/><rect x="22" y="50" width="11" height="3" rx="1.5" fill="#C9C3DA"/></svg>
+      <p>Sérum</p></div>
+    <div class="prod" id="p2" style="left:405px;top:1080px;background:#E6E3FA" data-in=".65" data-fx="pop">
+      <svg width="170" height="150" viewBox="0 0 85 75"><path d="M28 24c0-12 6-18 14.5-18S57 12 57 24" fill="none" stroke="#5B5BD6" stroke-width="5"/><path d="M10 26h65l-6 44H16z" fill="#5B5BD6"/><rect x="34" y="36" width="17" height="9" rx="3" fill="#C4D9F5"/></svg>
+      <p>Bolso</p></div>
+    <div class="prod" id="p3" style="left:720px;top:1000px;background:#F9DCC4" data-in=".8" data-fx="pop">
+      <svg width="90" height="170" viewBox="0 0 40 80"><path d="M12 8l14-6v22H12z" fill="#D2456A"/><rect x="10" y="24" width="20" height="12" rx="2" fill="#C9A86A"/><rect x="7" y="36" width="26" height="42" rx="5" fill="#2B2B45"/></svg>
+      <p>Labial</p></div>
+    <div class="prod" id="p4" style="left:250px;top:1410px;background:#DDEBFA" data-in=".95" data-fx="pop">
+      <svg width="150" height="150" viewBox="0 0 80 80"><path d="M24 8h32l18 14-8 12-8-5v45H22V29l-8 5-8-12z" fill="#fff" stroke="#9DBBE6" stroke-width="3" stroke-linejoin="round"/><path d="M32 8c2 6 14 6 16 0" fill="none" stroke="#9DBBE6" stroke-width="3"/><circle cx="40" cy="42" r="3" fill="#E7849C"/><circle cx="40" cy="54" r="3" fill="#E7849C"/></svg>
+      <p>Para los chicos</p></div>
+    <div class="prod" id="p5" style="left:565px;top:1410px;background:#FFF1D6" data-in="1.1" data-fx="pop">
+      <svg width="130" height="160" viewBox="0 0 65 80"><path d="M32 4c6 8 8 13 0 20-8-7-6-12 0-20z" fill="#F2A65A"/><rect x="30" y="22" width="4" height="8" fill="#2B2B45"/><rect x="10" y="30" width="45" height="46" rx="8" fill="#F7E9D7" stroke="#C9A86A" stroke-width="3"/><rect x="18" y="46" width="29" height="14" rx="3" fill="#C9A86A" opacity=".6"/></svg>
+      <p>Para tu casa</p></div>
+  </div>
+
+  <!-- S2 PRIME -->
+  <div class="scene" id="s2">
+    <div class="abs center" style="top:300px" data-in=".05"><span class="pill" style="background:var(--lav);color:var(--pri)">Con Amazon Prime</span></div>
+    <div class="abs center ser" style="top:390px;font-size:124px;color:var(--pri);line-height:1.15" data-in=".2" data-fx="pop">tenés envíos</div>
+    <div class="abs center" style="top:560px;font-size:84px;font-weight:800;letter-spacing:-2px" data-in=".5">gratis y rápidos</div>
+    <div class="abs" style="left:120px;right:120px;top:760px;display:flex;flex-direction:column;gap:30px">
+      <div class="chip" data-in=".8" data-fx="pop"><div class="ic" style="background:#E6E3FA;color:var(--pri)"><svg class="i" width="56" height="56" viewBox="0 0 24 24"><rect x="1" y="6" width="14" height="10" rx="1.5"/><path d="M15 9h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div>Envío gratis en 1–2 días</div>
+      <div class="chip" data-in="1.1" data-fx="pop"><div class="ic" style="background:#FCE4EA;color:var(--rose)"><svg class="i" width="56" height="56" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="15" rx="3"/><path d="M10 8.5l5 3-5 3z" fill="currentColor"/><path d="M8 22h8"/></svg></div>Prime Video, música y más</div>
+      <div class="chip" data-in="1.4" data-fx="pop"><div class="ic" style="background:#FFF1D6;color:#D98A2B"><svg class="i" width="56" height="56" viewBox="0 0 24 24"><path d="M20.5 12.5l-8 8-9-9V3.5h8z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg></div>Ofertas exclusivas</div>
+    </div>
+    <div class="abs center" style="top:1380px" data-in="3.0" data-fx="stamp">
+      <div style="display:inline-block;background:var(--rose);color:#fff;border-radius:36px;padding:34px 50px;box-shadow:0 26px 60px rgba(231,132,156,.45);transform:rotate(-3deg)">
+        <div class="ser" style="font-size:64px;line-height:1">Pero ojo…</div>
+        <div style="font-size:44px;font-weight:800;margin-top:12px">solo a direcciones en EE.UU.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 LINKTODOOR -->
+  <div class="scene" id="s3" style="color:#fff">
+    <div class="abs center" style="top:330px;font-size:60px;font-weight:700;opacity:.9" data-in=".05">Para eso está</div>
+    <div class="abs center" style="top:420px" data-in=".2" data-fx="pop">
+      <span style="display:inline-flex;align-items:center;gap:22px;background:#fff;color:var(--ink);padding:26px 48px;border-radius:999px;box-shadow:0 24px 60px rgba(0,0,0,.25)">
+        <span class="lm" style="padding:10px 14px"><b style="color:var(--cream);font-size:24px">LINK</b><b style="color:var(--sky);font-size:24px">DOOR</b></span>
+        <span style="font-weight:800;font-size:72px">Linktodoor</span></span>
+    </div>
+    <div class="abs center ser" style="top:620px;font-size:96px;color:var(--blush)" data-in=".9">tu casillero en Miami</div>
+    <div class="abs" style="left:80px;right:80px;top:880px;height:420px" data-in=".6" data-fx="fade">
+      <svg class="abs" style="left:0;top:0" width="920" height="420" viewBox="0 0 920 420">
+        <path id="arc" d="M140 300 C 330 40, 590 40, 780 300" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="6" stroke-dasharray="4 18" stroke-linecap="round"/>
+      </svg>
+      <div class="abs" style="left:40px;top:250px;width:200px;text-align:center">
+        <svg width="90" height="110" viewBox="0 0 24 30"><path d="M12 29s10-9.5 10-17A10 10 0 0 0 2 12c0 7.5 10 17 10 17z" fill="#F6D3DC"/><circle cx="12" cy="12" r="4" fill="#3E3EB0"/></svg>
+        <div style="font-size:40px;font-weight:800;margin-top:6px">Miami</div><div style="font-size:26px;opacity:.75;font-weight:600">EE.UU.</div></div>
+      <div class="abs" style="left:680px;top:250px;width:200px;text-align:center">
+        <svg width="90" height="110" viewBox="0 0 24 30"><path d="M12 29s10-9.5 10-17A10 10 0 0 0 2 12c0 7.5 10 17 10 17z" fill="#C4D9F5"/><circle cx="12" cy="12" r="4" fill="#3E3EB0"/></svg>
+        <div style="font-size:40px;font-weight:800;margin-top:6px">San José</div><div style="font-size:26px;opacity:.75;font-weight:600">Costa Rica</div></div>
+      <div class="abs" id="plane" style="left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pri);box-shadow:0 16px 40px rgba(0,0,0,.25)">
+        <svg class="i" width="56" height="56" viewBox="0 0 24 24" style="stroke-width:2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+    </div>
+    <div class="abs center" style="top:1420px;padding:0 120px;font-size:42px;font-weight:600;line-height:1.35;opacity:.92" data-in="1.4">Tus compras Prime, hasta Costa Rica.</div>
+  </div>
+
+  <!-- S4 TIMELINE -->
+  <div class="scene" id="s4">
+    <div class="abs center" style="top:170px;font-size:76px;font-weight:800;letter-spacing:-2px" data-in=".05">De Amazon</div>
+    <div class="abs center ser" style="top:245px;font-size:100px;color:var(--pri)" data-in=".15">a tu puerta</div>
+    <svg class="abs" style="left:0;top:0;pointer-events:none" width="1080" height="1920">
+      <line id="tlBase" x1="148" y1="560" x2="148" y2="1560" stroke="#E6E3FA" stroke-width="10" stroke-linecap="round"/>
+      <line id="tlFill" x1="148" y1="560" x2="148" y2="560" stroke="#5B5BD6" stroke-width="10" stroke-linecap="round"/>
+    </svg>
+    <div id="steps"></div>
+    <div class="abs" id="pkg" style="left:148px;top:560px;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:20px;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(231,132,156,.5);z-index:5;opacity:0">
+      <svg class="i" width="40" height="40" viewBox="0 0 24 24" style="stroke-width:2.1"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div>
+    <div class="abs center" style="top:1760px" id="trackChip">
+      <span class="pill" style="background:var(--pri);color:#fff;letter-spacing:1px;text-transform:none;font-size:32px">
+        <svg class="i" width="36" height="36" viewBox="0 0 24 24" style="stroke-width:2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>
+        Rastreá tu paquete en cada paso</span></div>
+  </div>
+
+  <!-- S5 PRICE -->
+  <div class="scene" id="s5">
+    <div class="abs center" style="top:520px" data-in=".05"><span class="pill" style="background:var(--lav);color:var(--pri)">Una sola tarifa</span></div>
+    <div class="abs center" style="top:640px;font-size:240px;font-weight:800;letter-spacing:-8px;color:var(--pri);line-height:1.1" data-in=".15" data-fx="pop">₡<span id="price">3,950</span></div>
+    <div class="abs center" style="top:910px;font-size:60px;font-weight:700;color:var(--mute)" data-in=".4">por libra</div>
+    <div class="abs center" style="top:1120px;font-size:52px;font-weight:800" data-in="1.0">Sin sorpresas.</div>
+    <div class="abs center ser" style="top:1200px;font-size:72px;color:var(--rose)" data-in="1.4">Sin letras chicas.</div>
+  </div>
+
+  <!-- S6 CTA -->
+  <div class="scene" id="s6" style="color:#fff">
+    <div class="abs center" style="top:400px" data-in=".05" data-fx="pop">
+      <span class="lm" style="display:inline-flex;padding:22px 28px;border-radius:30px;background:#fff"><b style="color:var(--pri);font-size:52px">LINK</b><b style="color:var(--rose);font-size:52px">DOOR</b></span></div>
+    <div class="abs center" style="top:680px;font-size:84px;font-weight:800;letter-spacing:-2px" data-in=".2">Comprá en EE.UU.</div>
+    <div class="abs center ser" style="top:780px;font-size:86px;color:var(--blush);white-space:nowrap" data-in=".35">como si estuvieras allá.</div>
+    <div class="abs center" style="top:1040px" data-in=".5" data-fx="pop">
+      <span id="cta" style="display:inline-block;background:var(--cream);color:var(--pri);font-weight:800;font-size:56px;padding:34px 80px;border-radius:999px;box-shadow:0 26px 60px rgba(0,0,0,.25)">Registrate gratis</span></div>
+    <div class="abs center" style="top:1270px;font-size:54px;font-weight:800" data-in=".7">linktodoor.co</div>
+    <div class="abs center" style="top:1350px;font-size:36px;font-weight:600;opacity:.85" data-in=".9">@linktodoor · WhatsApp · Entregas mar. y vie.</div>
+    <div class="abs center" style="top:1790px;padding:0 90px;font-size:20px;font-weight:600;opacity:.55;line-height:1.4" data-in="1.0" data-fx="fade">
+      Amazon y Prime son marcas de Amazon.com, Inc. Linktodoor es un servicio independiente, no afiliado a Amazon. Beneficios de Prime sujetos a cambios.</div>
+  </div>
+</div>
+
+<script>
+const STEPS=[
+  {at:.3,tag:'Hoy',t:'Comprás con tu dirección de Miami',d:'¿Sin tarjeta? Mandanos el link y compramos por vos.',ic:'<path d="M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>'},
+  {at:2.4,tag:'1–2 días',t:'Prime lo lleva gratis a la bodega',d:'Llega a nuestra bodega en Miami.',ic:'<rect x="1" y="6" width="14" height="10" rx="1.5"/><path d="M15 9h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>'},
+  {at:4.8,tag:'Al llegar',t:'Lo pesamos y te avisamos',d:'Por WhatsApp, con el peso y el costo.',ic:'<path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01" stroke-width="3"/>'},
+  {at:7.2,tag:'Flash 3 · Consolidado ~5 días hábiles',t:'Vuela a Costa Rica',d:'Elegís la velocidad que te conviene.',ic:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'},
+  {at:8.6,tag:'Martes o viernes',t:'¡En tu puerta!',d:'Directo a tu casa en San José.',ic:'<path d="M3 11l9-8 9 8v9.5a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>'}
+];
+const Y0=560, DY=250;
+const stepsEl=document.getElementById('steps');
+STEPS.forEach((s,i)=>{
+  const d=document.createElement('div');d.className='step';d.style.top=(Y0-125+i*DY)+'px';
+  d.innerHTML=`<div class="node"><svg class="i" width="60" height="60" viewBox="0 0 24 24">${s.ic}</svg></div>
+   <div class="num" style="left:22px;top:56px">${i+1}</div>
+   <div class="body"><span class="tag">${s.tag}</span><h4>${s.t}</h4><p>${s.d}</p></div>`;
+  stepsEl.appendChild(d);
+});
+const SC=[['s1',0,3.0],['s2',3.0,9.0],['s3',9.0,12.0],['s4',12.0,24.0],['s5',24.0,27.2],['s6',27.2,30.0]];
+const TOTAL=30;
+const cl=x=>Math.min(1,Math.max(0,x)), P=(t,a,d)=>cl((t-a)/d);
+const eo=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c1=1.5,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const $=id=>document.getElementById(id);
+const sceneEls=SC.map(s=>({el:$(s[0]),a:s[1],b:s[2],kids:[...$(s[0]).querySelectorAll('[data-in]')]}));
+const bars=[...document.querySelectorAll('#bars i')];
+function applyIn(el,lt){
+  const at=parseFloat(el.dataset.in), fx=el.dataset.fx||'up';
+  const raw=P(lt,at,fx==='pop'||fx==='stamp'?.55:.6);
+  let o=eo(P(lt,at,.35)), tr='';
+  if(fx==='up') tr=`translateY(${(1-eo(raw))*50}px)`;
+  else if(fx==='pop') tr=`scale(${.6+.4*back(raw)})`;
+  else if(fx==='stamp') tr=`scale(${1.6-.6*back(raw)}) rotate(${(1-raw)*-8}deg)`;
+  el.style.opacity=o; el.style.transform=tr;
+}
+function render(t){
+  $('b1').style.transform=`translate(${Math.sin(t*.5)*60}px,${Math.cos(t*.4)*50}px)`;
+  $('b2').style.transform=`translate(${Math.cos(t*.38)*70}px,${Math.sin(t*.42)*60}px)`;
+  $('b3').style.transform=`translate(${Math.sin(t*.35+1)*60}px,${Math.cos(t*.37)*40}px)`;
+  const pin=(a,b)=>eo(P(t,a-.25,.4))*(1-eo(P(t,b-.25,.4)));
+  const pur=Math.max(pin(9.0,12.0),pin(27.2,99));
+  $('purpleBg').style.opacity=pur;
+  $('brandTxt').style.color=pur>.5?'#fff':'var(--ink)';
+  document.querySelectorAll('#bars div').forEach(d=>d.style.background=pur>.5?'rgba(255,255,255,.25)':'rgba(27,27,48,.12)');
+  SC.forEach((s,i)=>{bars[i].style.width=(P(t,s[1],s[2]-s[1])*100)+'%';bars[i].style.background=pur>.5?'#fff':'var(--pri)';});
+  sceneEls.forEach((s,i)=>{
+    const last=i===sceneEls.length-1;
+    const op=eo(P(t,s.a-(i?0.25:0),.3))*(last?1:(1-eo(P(t,s.b-.25,.3))));
+    s.el.style.opacity=op; s.el.style.display=op<=0.001?'none':'block';
+    s.el.style.transform=`translateY(${-(last?0:eo(P(t,s.b-.25,.3)))*50}px)`;
+    if(op<=0.001) return;
+    s.kids.forEach(k=>applyIn(k,t-s.a));
+  });
+  ['p1','p2','p3','p4','p5'].forEach((id,i)=>{const el=$(id);
+    el.style.transform=(el.style.transform||'')+` translateY(${Math.sin(t*2+i*1.3)*14}px) rotate(${Math.sin(t*1.4+i)*4+(i%2?3:-3)}deg)`;});
+  { const lt=t-9.0, k=eio(P(lt,.7,2.0));
+    const path=$('arc'), L=path.getTotalLength(), pt=path.getPointAtLength(L*k), pt2=path.getPointAtLength(Math.min(L,L*k+2));
+    const ang=Math.atan2(pt2.y-pt.y,pt2.x-pt.x)*180/Math.PI;
+    const pl=$('plane'); pl.style.left=pt.x+'px'; pl.style.top=pt.y+'px';
+    pl.querySelector('svg').style.transform=`rotate(${ang+45}deg)`; pl.style.opacity=P(lt,.6,.3); }
+  { const lt=t-12.0, steps=[...stepsEl.children];
+    steps.forEach((el,i)=>{
+      const at=STEPS[i].at, nx=i<steps.length-1?STEPS[i+1].at:1e9;
+      const a=eo(P(lt,at,.5)); el.style.opacity=a; el.style.transform=`translateX(${(1-a)*80}px)`;
+      const active=P(lt,at,.35)*(1-P(lt,nx,.35)), done=lt>=nx;
+      const body=el.querySelector('.body'), node=el.querySelector('.node');
+      body.style.background=`rgba(255,255,255,${.35+.65*active})`;
+      body.style.boxShadow=`0 24px 60px rgba(60,50,120,${.14*active})`;
+      body.style.transform=`scale(${1+.03*active})`; body.style.transformOrigin='left center';
+      node.style.background=active>.5||done?'var(--pri)':'#fff';
+      node.style.color=active>.5||done?'#fff':'var(--pri)';
+      node.style.borderColor=active>.5?'#C9C6F5':'var(--lav)';
+      node.style.transform=`scale(${1+active*(.08+.04*Math.sin(t*5))})`;
+      el.querySelector('h4').style.color=active>.5?'var(--pri)':'var(--ink)';
+    });
+    // package travels between nodes in the 0.5s before each next step
+    let pos=0, mv=0;
+    for(let i=1;i<STEPS.length;i++){ const m=eio(P(lt,STEPS[i].at-.5,.5)); if(m>0){pos=i-1+m; mv=m<1?Math.sin(Math.PI*m):0;} }
+    const y=Y0+pos*DY;
+    $('tlFill').setAttribute('y2',y);
+    const pk=$('pkg'); pk.style.top=y+'px'; pk.style.opacity=mv;
+    pk.style.transform=`rotate(${Math.sin(t*4)*8}deg) scale(${.8+.4*mv})`;
+    const ca=eo(P(lt,9.6,.5)), ch=$('trackChip'); ch.style.opacity=ca; ch.style.transform=`translateY(${(1-ca)*40}px)`;
+  }
+  $('price').textContent=Math.round(3950*eo(P(t-24.0,.15,.9))).toLocaleString('en-US');
+  { const lt=t-27.2; if(lt>.9){ $('cta').parentElement.style.transform=`scale(${1+Math.max(0,Math.sin((lt-.9)*4))*.05})`; } }
+}
+window.render=render; window.TOTAL=TOTAL; render(0);
+</script>
+</body>
+</html>
