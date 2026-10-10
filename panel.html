@@ -1000,6 +1000,16 @@ function togglePkgs(clientId, count) {
 /* ─── COBRO (BILLING) ─── */
 let _cobroText = '';
 
+const COBRO_PAGO_Y_ENTREGA =
+  `💳 *Datos para pago* — a nombre de Marco Cubillo\n` +
+  `📱 SINPE Móvil: 8517-3813\n` +
+  `🏦 BAC San José\n` +
+  `   ₡ Colones: CR71010200009661798898 (cuenta 966179889)\n` +
+  `   $ Dólares: CR11010200009640889591 (cuenta 964088959)\n\n` +
+  `📸 *Enviá tu comprobante de pago*\n\n` +
+  `Puedes retirar en San Sebastián ó Santa Ana, Brasil de Mora (si te funciona esta opción, por favor pregunta si los paquetes ya están en la dirección que se te facilite) o si vives dentro de San José envíanos tu ubicación y comprobante de pago para coordinar la entrega gratuita, puede ser Martes o Viernes según la ruta.\n` +
+  `Fuera de San José entregamos con Uberflash y Correos de Costa Rica 🫶\n\n`;
+
 async function openCobro(cargaId, clientId) {
   const carga = await DB.getCarga(cargaId);
   if (!carga) return;
@@ -1025,6 +1035,7 @@ async function openCobro(cargaId, clientId) {
   }
 
   lines += `💰 *Total: ${fCRC(cl.chargedCRC)}*\n\n`;
+  lines += COBRO_PAGO_Y_ENTREGA;
   lines += `Podés ver el detalle en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
 
   _cobroText = lines;
