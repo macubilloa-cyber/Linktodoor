@@ -1049,8 +1049,8 @@ async function openCobro(cargaId, clientId) {
   const clean = raw.replace(/\D/g, '');
   const phone = clean ? (clean.startsWith('506') ? clean : '506' + clean) : '';
   const waUrl = phone
-    ? `https://wa.me/${phone}?text=${encodeURIComponent(lines)}`
-    : `https://wa.me/?text=${encodeURIComponent(lines)}`;
+    ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(lines)}`
+    : `https://api.whatsapp.com/send?text=${encodeURIComponent(lines)}`;
 
   document.getElementById('cobro-wa-btn').href = waUrl;
   document.getElementById('cobro-bg').style.display = 'flex';
@@ -1703,7 +1703,7 @@ async function doActivarPortal(clientId, name) {
       <div class="alert alert-info" style="margin-bottom:.6rem">
         ✅ Acceso ${data.action === 'created' ? 'creado' : 'actualizado'} correctamente.
       </div>
-      <a href="https://wa.me/?text=${waMsg}" target="_blank"
+      <a href="https://api.whatsapp.com/send?text=${waMsg}" target="_blank"
         class="btn btn-success btn-full" style="text-decoration:none;justify-content:center">
         💬 Enviar credenciales por WhatsApp
       </a>`;
@@ -1933,7 +1933,7 @@ function sendAlertWhatsApp(alertId, phone, clientName, trackingNum, description,
     `\n🔍 Tracking: ${trackingNum}\n` +
     `\nPodés ver más detalles en linktodoor.co/mi-cuenta\n\n— Linktodoor 📦`;
 
-  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+  window.open(`https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodeURIComponent(msg)}`, '_blank');
   markAlertNotified(alertId, statusEs);
 }
 
