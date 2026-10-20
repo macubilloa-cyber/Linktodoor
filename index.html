@@ -1201,6 +1201,17 @@ function showTab(id, btn) {
 }
 
 /* Calculadora */
+/* ── Código de referido (?ref=CODIGO) ── */
+(function captureRef() {
+  try {
+    const ref = new URLSearchParams(location.search).get('ref');
+    if (ref && /^[A-Za-z0-9-]{3,20}$/.test(ref)) localStorage.setItem('ltd_ref', ref.toUpperCase());
+  } catch {}
+})();
+function getRefCode() {
+  try { return localStorage.getItem('ltd_ref') || ''; } catch { return ''; }
+}
+
 function calcCosto() {
   const lbs = parseFloat(document.getElementById('calcLbs').value);
   const result = document.getElementById('calcResult');
@@ -1435,7 +1446,8 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   /* WhatsApp */
   const msg = `¡Hola! Me quiero registrar en Linktodoor 📦\n\n` +
     `👤 Nombre: ${nombre}\n📱 Teléfono: ${telefono}\n` +
-    `📧 Email: ${email}\n🛍️ Modalidad: ${modalidad}`;
+    `📧 Email: ${email}\n🛍️ Modalidad: ${modalidad}` +
+    (getRefCode() ? `\n🎁 Código de referido: ${getRefCode()}` : '');
   window.open(`https://wa.me/50685173813?text=${encodeURIComponent(msg)}`, '_blank');
 
   /* Email vía Formspree */

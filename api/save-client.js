@@ -18,6 +18,21 @@ export default async function handler(req, res) {
   };
 
   const { action, id, name, phone, email, notes } = req.body || {};
+  let referred_by = req.body?.referred_by;
+
+  /* Código de referido: debe existir; se guarda normalizado */
+  if (referred_by !== undefined && referred_by !== null && String(referred_by).trim() !== '') {
+    referred_by = String(referred_by).trim().toUpperCase();
+    try {
+      const rr = await fetch(`${SUPABASE_URL}/rest/v1/saved_clients?referral_code=eq.${encodeURIComponent(referred_by)}&select=id&limit=1`, { headers: h });
+      const found = await rr.json();
+      if (!rr.ok || !found.length) return res.status(400).json({ ok: false, error: 'El código de referido no existe: ' + referred_by });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: e.message });
+    }
+  } else {
+    referred_by = undefined;
+  }
 
   try {
     /* ── LIST ── */
@@ -34,7 +49,7 @@ export default async function handler(req, res) {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/saved_clients`, {
         method: 'POST',
         headers: { ...h, 'Prefer': 'return=representation' },
-        body: JSON.stringify({ name, phone: phone || '', email: email || '', notes: notes || '' })
+        body: JSON.stringify({ name, phone: phone || '', email: email || '', notes: notes || '', ...(referred_by ? { referred_by } : {}) })
       });
       const d = await r.json();
       if (!r.ok) return res.status(400).json({ ok: false, error: JSON.stringify(d) });
@@ -49,6 +64,7 @@ export default async function handler(req, res) {
       if (phone !== undefined) body.phone = phone || '';
       if (email !== undefined) body.email = email || '';
       if (notes !== undefined) body.notes = notes || '';
+      if (referred_by) body.referred_by = referred_by;
       const r = await fetch(`${SUPABASE_URL}/rest/v1/saved_clients?id=eq.${id}`, {
         method: 'PATCH',
         headers: { ...h, 'Prefer': 'return=minimal' },

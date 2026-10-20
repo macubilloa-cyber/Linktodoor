@@ -1,3 +1,5 @@
+import { clientByEmail, ensureCode, creditsFor, loyaltyFor, sbSelect, LBS_PER_CREDIT } from './_credits.js';
+
 const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
 const ANON_KEY     = 'sb_publishable_RReNHAvDRWNst2YTSnAttQ_duV1PJzL';
 
@@ -67,6 +69,21 @@ export default async function handler(req, res) {
       );
       const trackData = await trackResp.json();
       return res.status(200).json({ ok: true, trackings: Array.isArray(trackData) ? trackData : [] });
+    }
+
+    /* ── BENEFITS: fidelidad + referidos ── */
+    if (action === 'benefits') {
+      const client = await clientByEmail(userEmail);
+      if (!client) return res.status(200).json({ ok: true, client: null });
+      const code = await ensureCode(client);
+      const loyalty = await loyaltyFor(client, true);
+      const credits = await creditsFor(client.id);
+      const referred = await sbSelect(`referrals?referrer_id=eq.${encodeURIComponent(client.id)}&select=id`);
+      return res.status(200).json({
+        ok: true, code, loyalty, lbsPerCredit: LBS_PER_CREDIT, referrals: referred.length,
+        balance: credits.balance, proxVence: credits.proxVence,
+        history: credits.history.slice(0, 20).map(h => ({ tipo: h.tipo, monto_crc: h.monto_crc, nota: h.nota, created_at: h.created_at, expira_at: h.expira_at }))
+      });
     }
 
     /* ── SAVE PROFILE ── */
