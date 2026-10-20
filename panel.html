@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel — Linktodoor</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="factura-parser.js"></script>
   <style>
     :root {
       --purple:       #5B5BD6;
@@ -264,6 +265,7 @@
     <nav>
       <button class="nav-btn" id="nav-cargas"   onclick="showView('cargas')">Cargas</button>
       <button class="nav-btn" id="nav-clientes" onclick="showView('clientes')">Clientes</button>
+      <button class="nav-btn" id="nav-facturas" onclick="showView('facturas')">🧾 Facturas</button>
       <button class="nav-btn" id="nav-alertas"  onclick="showView('alertas')">📡 Pre-alertas<span id="alertas-badge" class="nav-badge" style="display:none"></span></button>
     </nav>
     <div class="header-actions">
@@ -383,6 +385,57 @@
           <div class="ico">📡</div>
           <p>No hay paquetes en seguimiento aún.<br>
           Los clientes los agregan desde su Mi Cuenta.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: FACTURAS -->
+    <div id="view-facturas" class="view">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Facturas de la bodega</div>
+          <div class="ph-sub">Subí el PDF de la factura, marcá los paquetes y asignalos al cliente</div>
+        </div>
+        <div class="ph-actions">
+          <label class="btn btn-primary" style="cursor:pointer">📄 Subir factura (PDF)
+            <input type="file" id="fact-file" accept="application/pdf,.pdf" multiple style="display:none" onchange="onFacturaFiles(this)" />
+          </label>
+        </div>
+      </div>
+
+      <div id="fact-preview"></div>
+
+      <div class="card">
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.9rem">
+          <select id="fact-filter-estado" onchange="renderFacturaStaging()">
+            <option value="pendientes">Pendientes de asignar</option>
+            <option value="asignados">Ya asignados</option>
+            <option value="todos">Todos</option>
+          </select>
+          <select id="fact-filter-factura" onchange="renderFacturaStaging()"><option value="">Todas las facturas</option></select>
+          <span id="fact-count" style="font-size:.8rem;color:var(--gray);margin-left:auto"></span>
+        </div>
+
+        <div id="fact-bulk" style="display:none;gap:.5rem;flex-wrap:wrap;align-items:center;background:var(--purple-light);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem">
+          <strong id="fact-sel-count" style="font-size:.85rem;color:var(--purple)">0 seleccionados</strong>
+          <input type="text" id="fact-client" list="fact-clients-list" placeholder="Cliente…" autocomplete="off" style="flex:1;min-width:180px" />
+          <datalist id="fact-clients-list"></datalist>
+          <button class="btn btn-primary btn-sm" onclick="assignSelectedLines()">Asignar seleccionados</button>
+          <button class="btn btn-secondary btn-sm" onclick="assignSuggestedLines()" title="Asigna los que coinciden con una pre-alerta del cliente">✨ Asignar sugeridos</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:34px"><input type="checkbox" id="fact-all" onchange="toggleAllLines(this.checked)" /></th>
+              <th>#</th><th>Tracking</th><th>Lbs</th><th>Costo bodega</th><th>Cliente</th><th></th>
+            </tr></thead>
+            <tbody id="fact-tbody"></tbody>
+          </table>
+        </div>
+        <div id="fact-empty" class="empty" style="display:none">
+          <div class="ico">🧾</div>
+          <p>No hay paquetes en esta vista.<br>Subí una factura en PDF para empezar.</p>
         </div>
       </div>
     </div>
@@ -715,6 +768,7 @@ function showView(name) {
   if (name === 'cargas')   renderCargas();
   if (name === 'clientes') renderClientes();
   if (name === 'alertas')  renderAlertas();
+  if (name === 'facturas') renderFacturaStaging();
 }
 
 function showDetail(cargaId) {
@@ -1746,6 +1800,288 @@ async function deleteCliente(clientId) {
   if (!confirm('¿Eliminar este cliente de la lista?')) return;
   await DB.deleteSavedClient(clientId);
   renderClientes();
+}
+
+/* ─── FACTURAS DE LA BODEGA ─── */
+const norm = t => String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+let _factLines = [];
+let _factSuggest = {};   // línea.id → nombre sugerido (por pre-alerta)
+let _factSel = new Set();
+let _factParsed = [];
+
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const v = '3.11.174', base = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${v}/`;
+    const sc = document.createElement('script');
+    sc.src = base + 'pdf.min.js';
+    sc.onload = () => { pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js'; resolve(); };
+    sc.onerror = () => reject(new Error('No se pudo cargar el lector de PDF. Revisá tu conexión.'));
+    document.head.appendChild(sc);
+  });
+}
+
+async function pdfToLines(file) {
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const out = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const tc = await (await pdf.getPage(p)).getTextContent();
+    const items = tc.items.filter(i => i.str.trim())
+      .map(i => ({ s: i.str.trim(), x: i.transform[4], y: i.transform[5] }))
+      .sort((a, b) => b.y - a.y || a.x - b.x);
+    let cur = null, row = [];
+    const flush = () => { if (row.length) out.push(row.sort((a, b) => a.x - b.x).map(r => r.s).join('  ')); row = []; };
+    for (const it of items) {
+      if (cur === null || Math.abs(it.y - cur) > 3) { flush(); cur = it.y; }
+      row.push(it);
+    }
+    flush();
+  }
+  return out;
+}
+
+async function onFacturaFiles(input) {
+  const files = [...input.files];
+  input.value = '';
+  if (!files.length) return;
+  const box = document.getElementById('fact-preview');
+  box.innerHTML = '<div class="card" style="text-align:center;color:var(--gray)">Leyendo factura…</div>';
+  try {
+    await loadPdfJs();
+    const parsed = [];
+    for (const f of files) parsed.push(FacturaAM.parseAmInvoice(await pdfToLines(f)));
+    _factParsed = FacturaAM.mergeInvoices(parsed.filter(p => p.numero && p.lineas.length));
+    if (!_factParsed.length) throw new Error('No se encontraron paquetes en el PDF. ¿Es una factura de la bodega AM?');
+
+    // ¿cuántas líneas ya estaban importadas?
+    for (const inv of _factParsed) {
+      const { data } = await sb.from('factura_lineas').select('linea_id').eq('factura', inv.numero);
+      const have = new Set((data || []).map(r => r.linea_id));
+      inv.nuevas = inv.lineas.filter(l => !have.has(l.id));
+    }
+    renderFacturaPreview();
+  } catch (e) {
+    box.innerHTML = `<div class="card"><p style="color:var(--red);font-weight:600">❌ ${esc(e.message)}</p></div>`;
+  }
+}
+
+function renderFacturaPreview() {
+  const box = document.getElementById('fact-preview');
+  box.innerHTML = _factParsed.map((inv, i) => {
+    const ok = inv.sumaOk;
+    return `<div class="card" style="margin-bottom:1rem;border-left:4px solid ${ok ? 'var(--green)' : 'var(--red)'}">
+      <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">
+        <div>
+          <div style="font-weight:800">Factura …${esc(inv.numero.slice(-6))} · ${esc(inv.fecha || '')}</div>
+          <div style="font-size:.84rem;color:var(--gray);margin-top:.2rem">
+            ${inv.lineas.length} paquetes · ${inv.totalLbs} lbs · total ${fCRC(inv.total || 0)}
+            · <strong>${inv.nuevas.length} nuevos</strong>${inv.nuevas.length < inv.lineas.length ? ` (${inv.lineas.length - inv.nuevas.length} ya importados)` : ''}
+          </div>
+          <div style="font-size:.8rem;margin-top:.3rem;color:${ok ? 'var(--green)' : 'var(--red)'};font-weight:700">
+            ${ok ? '✔ La suma de los paquetes coincide con el total de la factura' : '⚠ La suma de los paquetes NO coincide con el total. Revisá antes de importar.'}
+          </div>
+        </div>
+        <button class="btn btn-primary" id="fact-import-${i}" onclick="importFactura(${i})" ${inv.nuevas.length ? '' : 'disabled'}>
+          ${inv.nuevas.length ? `Importar ${inv.nuevas.length} paquetes` : 'Nada nuevo que importar'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function importFactura(i) {
+  const inv = _factParsed[i];
+  const btn = document.getElementById(`fact-import-${i}`);
+  if (inv.sumaOk === false && !confirm('La suma no coincide con el total de la factura. ¿Importar de todos modos?')) return;
+  btn.disabled = true; btn.textContent = 'Importando…';
+  try {
+    const ref = 'FAC-' + inv.numero.slice(-6);
+    let { data: cargas } = await sb.from('cargas').select('id').eq('reference', ref).limit(1);
+    let cargaId = cargas && cargas[0] ? cargas[0].id : null;
+    if (!cargaId) {
+      const c = await DB.createCarga(ref, inv.fecha || new Date().toISOString().slice(0, 10), inv.totalLbs, inv.total || 0);
+      if (!c) throw new Error('No se pudo crear la carga.');
+      cargaId = c.id;
+    }
+    const rows = inv.nuevas.map(l => ({
+      factura: inv.numero, linea_id: l.id, carga_id: String(cargaId),
+      tracking: l.trackings.join(' / '), trackings: l.trackings,
+      weight_lbs: l.lbs, cost_crc: l.costo
+    }));
+    for (let k = 0; k < rows.length; k += 100) {
+      const { error } = await sb.from('factura_lineas').insert(rows.slice(k, k + 100));
+      if (error) throw new Error(error.message);
+    }
+    document.getElementById('fact-preview').innerHTML =
+      `<div class="card" style="border-left:4px solid var(--green)"><strong>✔ ${rows.length} paquetes importados</strong> en la carga ${esc(ref)}. Ahora asignalos a los clientes abajo.</div>`;
+    await renderFacturaStaging();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Reintentar';
+    alert('❌ ' + e.message + '\n\n¿Ya corriste sql/facturas.sql en Supabase?');
+  }
+}
+
+async function renderFacturaStaging() {
+  const tbody = document.getElementById('fact-tbody');
+  const empty = document.getElementById('fact-empty');
+  tbody.innerHTML = LOADING_ROW(7);
+  empty.style.display = 'none';
+
+  const [{ data: lines, error }, { data: clients }, { data: alerts }] = await Promise.all([
+    sb.from('factura_lineas').select('*').order('factura', { ascending: false }).order('linea_id'),
+    sb.from('saved_clients').select('name,email').order('name'),
+    sb.from('package_alerts').select('tracking_number,client_name,user_email')
+  ]);
+  if (error) {
+    tbody.innerHTML = '';
+    empty.innerHTML = `<div class="ico">⚠️</div><p style="color:var(--red)">${esc(error.message)}<br>¿Ya corriste <code>sql/facturas.sql</code> en Supabase?</p>`;
+    empty.style.display = '';
+    return;
+  }
+  _factLines = lines || [];
+
+  document.getElementById('fact-clients-list').innerHTML = (clients || []).map(c => `<option value="${esc(c.name)}"></option>`).join('');
+
+  // Sugerencias: la guía coincide con una pre-alerta de un cliente
+  const nameByEmail = Object.fromEntries((clients || []).filter(c => c.email).map(c => [c.email.toLowerCase(), c.name]));
+  const al = (alerts || []).map(a => ({ t: norm(a.tracking_number), n: a.client_name || nameByEmail[(a.user_email || '').toLowerCase()] })).filter(a => a.t.length >= 8 && a.n);
+  _factSuggest = {};
+  for (const l of _factLines) {
+    if (l.client_name) continue;
+    const toks = (l.trackings && l.trackings.length ? l.trackings : [l.tracking]).map(norm);
+    const hit = al.find(a => toks.some(t => t === a.t || (a.t.length >= 10 && (t.includes(a.t) || a.t.includes(t)))));
+    if (hit) _factSuggest[l.id] = hit.n;
+  }
+
+  // filtro de facturas
+  const fsel = document.getElementById('fact-filter-factura');
+  const cur = fsel.value;
+  const nums = [...new Set(_factLines.map(l => l.factura))];
+  fsel.innerHTML = '<option value="">Todas las facturas</option>' + nums.map(n => `<option value="${n}">Factura …${n.slice(-6)}</option>`).join('');
+  fsel.value = nums.includes(cur) ? cur : '';
+
+  const estado = document.getElementById('fact-filter-estado').value;
+  const view = _factLines.filter(l =>
+    (!fsel.value || l.factura === fsel.value) &&
+    (estado === 'todos' || (estado === 'pendientes' ? !l.client_name : !!l.client_name)));
+
+  _factSel = new Set([..._factSel].filter(id => view.some(l => l.id === id && !l.client_name)));
+  const pend = _factLines.filter(l => !l.client_name).length;
+  document.getElementById('fact-count').textContent = `${view.length} mostrados · ${pend} pendientes · ${Object.keys(_factSuggest).length} con sugerencia`;
+
+  if (!view.length) { tbody.innerHTML = ''; empty.innerHTML = '<div class="ico">🧾</div><p>No hay paquetes en esta vista.<br>Subí una factura en PDF para empezar.</p>'; empty.style.display = ''; updateBulkBar(); return; }
+
+  tbody.innerHTML = view.map((l, i) => {
+    const sug = _factSuggest[l.id];
+    const cliente = l.client_name
+      ? `<span class="badge" style="background:var(--green-light,#D1FAE5);color:#065F46">${esc(l.client_name)}</span>`
+      : (sug ? `<span style="font-size:.78rem;color:var(--purple);font-weight:700">✨ ${esc(sug)}</span>` : '<span style="color:var(--gray)">—</span>');
+    return `<tr>
+      <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
+      <td style="color:var(--gray)">${i + 1}</td>
+      <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}</td>
+      <td><strong>${l.weight_lbs}</strong></td>
+      <td style="color:var(--gray)">${fCRC(l.cost_crc)}</td>
+      <td>${cliente}</td>
+      <td>${l.client_name ? `<button class="btn btn-sm btn-secondary" onclick="unassignLine('${l.id}')" title="Quitar del cliente">↩</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('fact-all').checked = false;
+  updateBulkBar();
+}
+
+function toggleLine(id, on) { on ? _factSel.add(id) : _factSel.delete(id); updateBulkBar(); }
+function toggleAllLines(on) {
+  const boxes = [...document.querySelectorAll('#fact-tbody input[type=checkbox][data-id]')];
+  boxes.forEach(cb => { cb.checked = on; });
+  _factSel = new Set(on ? boxes.map(cb => cb.dataset.id) : []);
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('fact-bulk');
+  const estado = document.getElementById('fact-filter-estado').value;
+  bar.style.display = estado === 'asignados' ? 'none' : 'flex';
+  document.getElementById('fact-sel-count').textContent = `${_factSel.size} seleccionados`;
+}
+
+/* Asigna líneas a un cliente: crea el cliente en la carga si hace falta y agrega los paquetes */
+async function assignLines(lineIds, clientName) {
+  const lines = _factLines.filter(l => lineIds.includes(l.id) && !l.client_name);
+  const byCarga = {};
+  lines.forEach(l => (byCarga[l.carga_id] = byCarga[l.carga_id] || []).push(l));
+
+  for (const [cargaId, group] of Object.entries(byCarga)) {
+    let { data: cc } = await sb.from('carga_clients').select('id').eq('carga_id', cargaId).ilike('client_name', clientName).limit(1);
+    let ccId = cc && cc[0] ? cc[0].id : null;
+    if (!ccId) {
+      const created = await DB.addClient(cargaId, clientName, 0, 0, '');
+      if (!created) throw new Error('No se pudo agregar el cliente a la carga.');
+      ccId = created.id;
+    }
+    const pkgRows = group.map(l => ({
+      carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
+      charged_crc: Math.round(l.weight_lbs * RATE_PER_LB), notes: '', status: 'listo'
+    }));
+    const { data: pk, error } = await sb.from('packages').insert(pkgRows).select('id');
+    if (error) throw new Error(error.message);
+    await recomputeCargaClient(ccId);
+    for (let k = 0; k < group.length; k++) {
+      await sb.from('factura_lineas').update({ client_name: clientName, carga_client_id: String(ccId), package_id: String(pk[k].id) }).eq('id', group[k].id);
+    }
+  }
+  return lines.length;
+}
+
+async function recomputeCargaClient(ccId) {
+  const { data } = await sb.from('packages').select('weight_lbs,charged_crc').eq('carga_client_id', ccId);
+  const w = (data || []).reduce((s, p) => s + (+p.weight_lbs || 0), 0);
+  const c = (data || []).reduce((s, p) => s + (+p.charged_crc || 0), 0);
+  await sb.from('carga_clients').update({ weight_lbs: w, charged_crc: c }).eq('id', ccId);
+}
+
+async function assignSelectedLines() {
+  const name = document.getElementById('fact-client').value.trim();
+  if (!_factSel.size) { alert('Marcá al menos un paquete.'); return; }
+  if (!name) { alert('Elegí el cliente.'); return; }
+  const { data: found } = await sb.from('saved_clients').select('name').ilike('name', name).limit(1);
+  if (!found || !found.length) {
+    if (!confirm(`"${name}" no está en tu lista de clientes. ¿Crearlo y asignarle los paquetes?`)) return;
+    await DB.upsertSavedClient(name);
+  }
+  const real = found && found[0] ? found[0].name : name;
+  try {
+    const n = await assignLines([..._factSel], real);
+    _factSel.clear();
+    document.getElementById('fact-client').value = '';
+    await renderFacturaStaging();
+    document.getElementById('fact-count').textContent += ` · ✔ ${n} asignados a ${real}`;
+  } catch (e) { alert('❌ ' + e.message); }
+}
+
+async function assignSuggestedLines() {
+  const byClient = {};
+  _factLines.filter(l => !l.client_name && _factSuggest[l.id]).forEach(l => (byClient[_factSuggest[l.id]] = byClient[_factSuggest[l.id]] || []).push(l.id));
+  const names = Object.keys(byClient);
+  if (!names.length) { alert('No hay paquetes que coincidan con pre-alertas de clientes.'); return; }
+  const total = names.reduce((s, n) => s + byClient[n].length, 0);
+  if (!confirm(`Se asignarán ${total} paquetes a ${names.length} cliente(s):\n\n` + names.map(n => `• ${n}: ${byClient[n].length}`).join('\n'))) return;
+  try {
+    for (const n of names) await assignLines(byClient[n], n);
+    await renderFacturaStaging();
+  } catch (e) { alert('❌ ' + e.message); }
+}
+
+async function unassignLine(id) {
+  const l = _factLines.find(x => x.id === id);
+  if (!l || !confirm(`¿Quitar este paquete de ${l.client_name}?`)) return;
+  if (l.package_id) await sb.from('packages').delete().eq('id', l.package_id);
+  if (l.carga_client_id) {
+    const { data } = await sb.from('packages').select('id').eq('carga_client_id', l.carga_client_id).limit(1);
+    if (data && data.length) await recomputeCargaClient(l.carga_client_id);
+    else await sb.from('carga_clients').delete().eq('id', l.carga_client_id);
+  }
+  await sb.from('factura_lineas').update({ client_name: null, carga_client_id: null, package_id: null }).eq('id', id);
+  await renderFacturaStaging();
 }
 
 /* ─── BENEFICIOS DEL CLIENTE ─── */
