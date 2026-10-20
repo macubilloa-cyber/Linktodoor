@@ -12,6 +12,8 @@ export default async function handler(req, res) {
   const notes = clean(req.body?.modalidad, 60);
   if (!name || !phone || !email.includes('@')) return res.status(400).json({ ok: false });
 
+  const ref   = clean(req.body?.ref, 20).toUpperCase();
+
   const headers = { 'Authorization': `Bearer ${KEY}`, 'apikey': KEY, 'Content-Type': 'application/json' };
 
   // Existing clients are never overwritten from the public form.
@@ -21,10 +23,20 @@ export default async function handler(req, res) {
   ).then(r => r.json()).catch(() => null);
   if (Array.isArray(existing) && existing.length) return res.status(200).json({ ok: true });
 
+  // Código de referido: solo se guarda si existe; el descuento lo aprueba el admin en el cobro.
+  let referred_by;
+  if (/^[A-Z0-9-]{3,20}$/.test(ref)) {
+    const found = await fetch(
+      `${SUPABASE_URL}/rest/v1/saved_clients?referral_code=eq.${encodeURIComponent(ref)}&select=id&limit=1`,
+      { headers }
+    ).then(r => r.json()).catch(() => null);
+    if (Array.isArray(found) && found.length) referred_by = ref;
+  }
+
   const ins = await fetch(`${SUPABASE_URL}/rest/v1/saved_clients`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ name, phone, email, notes })
+    body: JSON.stringify({ name, phone, email, notes, ...(referred_by ? { referred_by } : {}) })
   });
   return res.status(ins.ok ? 200 : 500).json({ ok: ins.ok });
 }

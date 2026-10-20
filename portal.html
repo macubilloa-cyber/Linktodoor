@@ -274,6 +274,26 @@
       table.stack td.m-actions { text-align:right; }
       table.stack td[style*="max-width"] { max-width:none !important; }
     }
+
+    /* ── BENEFICIOS ── */
+    .ben-card { background:var(--surface); border-radius:var(--r); border:1px solid rgba(0,0,0,.05); box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04); padding:1.5rem; margin-bottom:1.25rem; }
+    .ben-card h3 { font-size:1rem; font-weight:800; color:var(--dark); margin-bottom:.25rem; }
+    .ben-card .ben-sub { font-size:.82rem; color:var(--muted); line-height:1.6; margin-bottom:1rem; }
+    .ben-balance { display:flex; align-items:baseline; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .ben-balance strong { font-size:1.8rem; font-weight:900; color:var(--pri); }
+    .ben-balance span { font-size:.8rem; color:var(--muted); }
+    .ben-bar { height:10px; background:var(--border); border-radius:99px; overflow:hidden; margin:.5rem 0 .4rem; }
+    .ben-bar > div { height:100%; background:var(--pri); border-radius:99px; transition:width .5s ease; }
+    .ben-bar-txt { display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); }
+    .ben-code { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; background:var(--pri-lt); border-radius:12px; padding:.9rem 1rem; margin-bottom:.9rem; }
+    .ben-code code { font-size:1.15rem; font-weight:900; letter-spacing:1px; color:var(--pri); flex:1; min-width:120px; }
+    .ben-btn { border:none; border-radius:9px; padding:.55rem .9rem; font-weight:800; font-size:.8rem; cursor:pointer; font-family:inherit; }
+    .ben-btn.pri { background:var(--pri); color:white; }
+    .ben-btn.wa { background:#25D366; color:white; }
+    .ben-hist { width:100%; border-collapse:collapse; }
+    .ben-hist td { padding:.55rem 0; border-top:1px solid var(--border); font-size:.82rem; }
+    .ben-hist td:last-child { text-align:right; font-weight:800; }
+    .ben-pos { color:var(--green); } .ben-neg { color:var(--red); }
   </style>
 </head>
 <body>
@@ -348,6 +368,9 @@
       </button>
       <button class="tab-btn" id="tbtn-alertas" onclick="switchTab('alertas')">
         <span class="tab-icon">📡</span><span class="tab-label">Pre-alertas</span>
+      </button>
+      <button class="tab-btn" id="tbtn-beneficios" onclick="switchTab('beneficios')">
+        <span class="tab-icon">⭐</span><span class="tab-label">Beneficios</span>
       </button>
       <button class="tab-btn" id="tbtn-ofertas" onclick="switchTab('ofertas')">
         <span class="tab-icon">🎁</span><span class="tab-label">Ofertas</span>
@@ -551,6 +574,13 @@
     </div><!-- /tab-alertas -->
 
     <!-- ══ TAB: OFERTAS ══ -->
+    <!-- ══ TAB: BENEFICIOS ══ -->
+    <div id="tab-beneficios" class="tab-panel">
+      <div id="beneficiosContent">
+        <div class="empty-box"><div class="ico">⏳</div><p>Cargando tus beneficios...</p></div>
+      </div>
+    </div>
+
     <div id="tab-ofertas" class="tab-panel">
 
       <div class="ofertas-hero">
@@ -758,12 +788,79 @@ sb.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
+/* ── Beneficios: fidelidad + referidos ── */
+let _benLoaded = false;
+async function loadBeneficios() {
+  const cont = document.getElementById('beneficiosContent');
+  const { data: { session } } = await sb.auth.getSession();
+  let r;
+  try {
+    const resp = await fetch('/api/benefits', { method: 'POST', headers: { 'Authorization': `Bearer ${session?.access_token || ''}` } });
+    r = await resp.json();
+  } catch (e) { r = { ok: false, error: e.message }; }
+  if (!r.ok) {
+    cont.innerHTML = `<div class="empty-box"><div class="ico">⚠️</div><p style="color:#e53e3e">No se pudieron cargar tus beneficios.<br><small>${esc(r.error || '')}</small></p></div>`;
+    return;
+  }
+  if (r.client === null) {
+    cont.innerHTML = `<div class="empty-box"><div class="ico">⏳</div><p>Tu cuenta está siendo configurada.<br>Pronto verás tus beneficios aquí.</p></div>`;
+    return;
+  }
+  _benLoaded = true;
+  const l = r.loyalty;
+  const pct = Math.min(100, Math.round(l.into / r.lbsPerCredit * 100));
+  const fecha = d => new Date(d).toLocaleDateString('es-CR', { day:'numeric', month:'short', year:'numeric' });
+  const tipoLbl = { fidelidad:'⭐ Fidelidad', referido_dado:'🎁 Referido', canje:'🧾 Usado en cobro' };
+  const link = `https://linktodoor.co/?ref=${encodeURIComponent(r.code)}`;
+  const waMsg = `¡Hola! Te recomiendo Linktodoor, el casillero en Miami para traer tus compras a Costa Rica. Si te registrás con mi código ${r.code}, tenés 10% de descuento en tu primer envío 📦\n${link}`;
+  const hist = r.history.map(h => `
+    <tr><td>${fecha(h.created_at)}</td><td>${tipoLbl[h.tipo] || esc(h.tipo)}${h.nota ? ' · ' + esc(h.nota) : ''}</td>
+    <td class="${h.monto_crc < 0 ? 'ben-neg' : 'ben-pos'}">${h.monto_crc < 0 ? '-' : '+'}${fCRC(Math.abs(h.monto_crc))}</td></tr>`).join('');
+
+  cont.innerHTML = `
+    <div class="ben-card">
+      <h3>⭐ Tus créditos</h3>
+      <div class="ben-balance"><strong>${fCRC(r.balance)}</strong><span>${r.proxVence ? 'el más próximo vence el ' + fecha(r.proxVence) : 'disponibles'}</span></div>
+      <p class="ben-sub">Los créditos se descuentan de tu próximo cobro (los aprobamos nosotros al cobrarte) y vencen a los 6 meses.</p>
+    </div>
+
+    <div class="ben-card">
+      <h3>📦 Programa de fidelidad</h3>
+      <p class="ben-sub">Por cada ${r.lbsPerCredit} libras que traés con nosotros, te regalamos 1 libra (${fCRC(3950)} de crédito).</p>
+      <div class="ben-bar"><div style="width:${pct}%"></div></div>
+      <div class="ben-bar-txt"><span><strong>${l.into}</strong> / ${r.lbsPerCredit} lbs</span><span>Te faltan ${l.toNext} lbs para tu próximo crédito</span></div>
+      <p class="ben-sub" style="margin:.75rem 0 0">Llevás ${l.totalLbs} lbs en total · ${l.earned} crédito(s) ganado(s).</p>
+    </div>
+
+    <div class="ben-card">
+      <h3>🎁 Referí y ganá 10%</h3>
+      <p class="ben-sub">Compartí tu código. Cuando tu amigo haga su primer envío, él recibe 10% de descuento y vos recibís 10% de ese envío en créditos.</p>
+      <div class="ben-code"><code>${esc(r.code)}</code>
+        <button class="ben-btn pri" onclick="copyRefCode('${esc(r.code)}', this)">Copiar código</button>
+        <a class="ben-btn wa" style="text-decoration:none" target="_blank" href="https://wa.me/?text=${encodeURIComponent(waMsg)}">Compartir por WhatsApp</a>
+      </div>
+      <p class="ben-sub" style="margin:0">${r.referrals} amigo(s) referido(s) con premio aplicado.</p>
+    </div>
+
+    ${hist ? `<div class="ben-card"><h3>Movimientos</h3><table class="ben-hist"><tbody>${hist}</tbody></table></div>` : ''}
+  `;
+}
+
+function copyRefCode(code, btn) {
+  navigator.clipboard?.writeText(code).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copiado';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
+}
+
 /* ── Tabs ── */
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('tbtn-' + name).classList.add('active');
+  if (name === 'beneficios') loadBeneficios();
 }
 
 /* ── Dashboard ── */
