@@ -330,6 +330,11 @@
           <strong style="font-size:.95rem">Clientes en esta carga</strong>
           <button class="btn btn-primary btn-sm no-print" id="btn-add-client" onclick="openAddClient()">+ Agregar cliente</button>
         </div>
+        <div class="no-print" style="display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap">
+          <input type="search" id="detail-search" placeholder="🔍 Buscar guía, tracking o cliente…"
+                 oninput="filterDetail()" autocomplete="off" style="flex:1;min-width:220px" />
+          <span id="detail-search-count" style="font-size:.8rem;color:var(--gray);white-space:nowrap"></span>
+        </div>
         <div class="table-wrap">
           <table class="stack">
             <thead><tr><th>#</th><th>Cliente</th><th>Peso (lbs)</th><th>Peso (kg)</th><th>% del total</th><th>Cobrado</th><th>Notas</th><th class="no-print"></th></tr></thead>
@@ -996,7 +1001,7 @@ async function renderDetail(cargaId) {
         : '';
 
       const pkgSubRows = hasPkgs ? cl.packages.map((p, pi) => `
-        <tr class="pkg-sub pkg-group-${cl.id}" style="display:none">
+        <tr class="pkg-sub pkg-group-${cl.id}" style="display:none" data-s="${normSearch((p.guia||'') + ' ' + (p.notes||''))}">
           <td></td>
           <td style="padding-left:2rem;color:var(--gray)" class="m-title">
             📦 <strong style="color:var(--dark)">${esc(p.guia || `Paquete ${pi+1}`)}</strong>
@@ -1010,7 +1015,7 @@ async function renderDetail(cargaId) {
         </tr>`).join('') : '';
 
       return `
-        <tr>
+        <tr class="cl-row" data-cl="${cl.id}" data-s="${normSearch(cl.clientName)}">
           <td class="m-hide td-center" style="color:var(--gray);font-size:.78rem">${i+1}</td>
           <td class="m-title"><strong>${esc(cl.clientName)}</strong>${pkgToggle}</td>
           <td data-label="Peso">${fLbs(cl.weightLbs)}</td>
@@ -1040,6 +1045,7 @@ async function renderDetail(cargaId) {
       </tr>`;
 
     tbody.innerHTML = clientRows + totalsRow;
+    filterDetail();
   }
 
   const alertEl = document.getElementById('detail-weight-alert');
@@ -1052,6 +1058,44 @@ async function renderDetail(cargaId) {
   } else {
     alertEl.style.display = 'none';
   }
+}
+
+/* Busca por guía (7 dígitos), tracking o nombre del cliente; abre solo los paquetes que coinciden */
+function normSearch(t) { return String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+
+function filterDetail() {
+  const input = document.getElementById('detail-search');
+  const q = normSearch(input ? input.value : '');
+  const countEl = document.getElementById('detail-search-count');
+  let found = 0;
+
+  document.querySelectorAll('#detail-tbody tr.cl-row').forEach(row => {
+    const id = row.dataset.cl;
+    const pkgRows = [...document.querySelectorAll(`#detail-tbody .pkg-group-${id}`)];
+    const btn = document.getElementById(`pkg-btn-${id}`);
+
+    if (!q) {
+      row.style.display = '';
+      pkgRows.forEach(r => { r.style.display = 'none'; r.style.background = ''; });
+      if (btn) btn.textContent = `▶ ${pkgRows.length} paq.`;
+      return;
+    }
+    const nameHit = row.dataset.s.includes(q);
+    let hits = 0;
+    pkgRows.forEach(r => {
+      const hit = r.dataset.s.includes(q);
+      r.style.display = hit ? '' : 'none';
+      r.style.background = hit ? '#FEF9C3' : '';
+      if (hit) hits++;
+    });
+    if (btn) btn.textContent = hits ? `▼ ${pkgRows.length} paq.` : `▶ ${pkgRows.length} paq.`;
+    row.style.display = nameHit || hits ? '' : 'none';
+    found += hits || (nameHit ? 1 : 0);
+  });
+
+  const totals = document.querySelector('#detail-tbody tr:not(.cl-row):not(.pkg-sub)');
+  if (totals) totals.style.display = q ? 'none' : '';
+  if (countEl) countEl.textContent = q ? (found ? `${found} resultado(s)` : 'Sin resultados') : '';
 }
 
 function togglePkgs(clientId, count) {
