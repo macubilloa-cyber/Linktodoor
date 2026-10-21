@@ -418,6 +418,8 @@
             <option value="todos">Todos</option>
           </select>
           <select id="fact-filter-factura" onchange="renderFacturaStaging()"><option value="">Todas las facturas</option></select>
+          <input type="search" id="fact-search" placeholder="🔍 Buscar guía, tracking o cliente…"
+                 oninput="filterFacturaRows()" autocomplete="off" style="flex:1;min-width:220px" />
           <span id="fact-count" style="font-size:.8rem;color:var(--gray);margin-left:auto"></span>
         </div>
 
@@ -2020,7 +2022,7 @@ async function renderFacturaStaging() {
     const cliente = l.client_name
       ? `<span class="badge" style="background:var(--green-light,#D1FAE5);color:#065F46">${esc(l.client_name)}</span>`
       : (sug ? `<span style="font-size:.78rem;color:var(--purple);font-weight:700">✨ ${esc(sug)}</span>` : '<span style="color:var(--gray)">—</span>');
-    return `<tr>
+    return `<tr class="fact-row" data-s="${normSearch(l.linea_id + ' ' + l.tracking + ' ' + (l.client_name || '') + ' ' + (sug || ''))}">
       <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
       <td style="font-family:monospace;font-weight:800;color:var(--purple)">${esc(l.linea_id)}</td>
       <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}</td>
@@ -2032,13 +2034,37 @@ async function renderFacturaStaging() {
   }).join('');
   document.getElementById('fact-all').checked = false;
   updateBulkBar();
+  filterFacturaRows();
+}
+
+/* Filtra las filas ya cargadas por guía (7 dígitos), tracking o cliente */
+function filterFacturaRows() {
+  const q = normSearch(document.getElementById('fact-search')?.value);
+  const rows = [...document.querySelectorAll('#fact-tbody tr.fact-row')];
+  let shown = 0;
+  rows.forEach(r => {
+    const hit = !q || r.dataset.s.includes(q);
+    r.style.display = hit ? '' : 'none';
+    if (hit) shown++;
+    else { const cb = r.querySelector('input[type=checkbox][data-id]'); if (cb && cb.checked) { cb.checked = false; _factSel.delete(cb.dataset.id); } }
+  });
+  const empty = document.getElementById('fact-empty');
+  if (q && rows.length && !shown) {
+    empty.innerHTML = '<div class="ico">🔍</div><p>Ningún paquete coincide con la búsqueda.</p>';
+    empty.style.display = '';
+  } else if (rows.length) {
+    empty.style.display = 'none';
+  }
+  const cnt = document.getElementById('fact-count');
+  if (q && cnt) cnt.textContent = `${shown} de ${rows.length} coinciden`;
+  updateBulkBar();
 }
 
 function toggleLine(id, on) { on ? _factSel.add(id) : _factSel.delete(id); updateBulkBar(); }
 function toggleAllLines(on) {
-  const boxes = [...document.querySelectorAll('#fact-tbody input[type=checkbox][data-id]')];
-  boxes.forEach(cb => { cb.checked = on; });
-  _factSel = new Set(on ? boxes.map(cb => cb.dataset.id) : []);
+  const boxes = [...document.querySelectorAll('#fact-tbody tr.fact-row input[type=checkbox][data-id]')]
+    .filter(cb => cb.closest('tr').style.display !== 'none');
+  boxes.forEach(cb => { cb.checked = on; if (on) _factSel.add(cb.dataset.id); else _factSel.delete(cb.dataset.id); });
   updateBulkBar();
 }
 function updateBulkBar() {
