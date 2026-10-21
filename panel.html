@@ -428,7 +428,7 @@
           <table>
             <thead><tr>
               <th style="width:34px"><input type="checkbox" id="fact-all" onchange="toggleAllLines(this.checked)" /></th>
-              <th>#</th><th>Tracking</th><th>Lbs</th><th>Costo bodega</th><th>Cliente</th><th></th>
+              <th>Guía</th><th>Tracking</th><th>Lbs</th><th>Costo bodega</th><th>Cliente</th><th></th>
             </tr></thead>
             <tbody id="fact-tbody"></tbody>
           </table>
@@ -1971,14 +1971,14 @@ async function renderFacturaStaging() {
 
   if (!view.length) { tbody.innerHTML = ''; empty.innerHTML = '<div class="ico">🧾</div><p>No hay paquetes en esta vista.<br>Subí una factura en PDF para empezar.</p>'; empty.style.display = ''; updateBulkBar(); return; }
 
-  tbody.innerHTML = view.map((l, i) => {
+  tbody.innerHTML = view.map(l => {
     const sug = _factSuggest[l.id];
     const cliente = l.client_name
       ? `<span class="badge" style="background:var(--green-light,#D1FAE5);color:#065F46">${esc(l.client_name)}</span>`
       : (sug ? `<span style="font-size:.78rem;color:var(--purple);font-weight:700">✨ ${esc(sug)}</span>` : '<span style="color:var(--gray)">—</span>');
     return `<tr>
       <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
-      <td style="color:var(--gray)">${i + 1}</td>
+      <td style="font-family:monospace;font-weight:800;color:var(--purple)">${esc(l.linea_id)}</td>
       <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}</td>
       <td><strong>${l.weight_lbs}</strong></td>
       <td style="color:var(--gray)">${fCRC(l.cost_crc)}</td>
@@ -2020,7 +2020,7 @@ async function assignLines(lineIds, clientName) {
     }
     const pkgRows = group.map(l => ({
       carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
-      charged_crc: Math.round(l.weight_lbs * RATE_PER_LB), notes: '', status: 'listo'
+      charged_crc: Math.round(l.weight_lbs * RATE_PER_LB), notes: `Guía AM ${l.linea_id}`, status: 'listo'
     }));
     const { data: pk, error } = await sb.from('packages').insert(pkgRows).select('id');
     if (error) throw new Error(error.message);
