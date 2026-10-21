@@ -425,11 +425,15 @@
 
         <div id="fact-bulk" style="display:none;gap:.5rem;flex-wrap:wrap;align-items:center;background:var(--purple-light);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem">
           <strong id="fact-sel-count" style="font-size:.85rem;color:var(--purple)">0 seleccionados</strong>
-          <input type="text" id="fact-client" list="fact-clients-list" placeholder="Cliente…" autocomplete="off" style="flex:1;min-width:180px" />
+          <input type="text" id="fact-client" list="fact-clients-list" placeholder="Cliente…" autocomplete="off" oninput="onFactClientChange()" style="flex:1;min-width:180px" />
           <datalist id="fact-clients-list"></datalist>
+          <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:800;color:var(--gray)">₡/lb
+            <input type="number" id="fact-rate" min="0" step="1" value="3950" oninput="updateFactTotal()" style="width:92px" />
+          </label>
           <button class="btn btn-primary btn-sm" onclick="assignSelectedLines()">Asignar seleccionados</button>
           <button class="btn btn-secondary btn-sm" onclick="openPasteGuias()" title="Pegá una lista de guías o trackings y se marcan solos">📋 Pegar lista</button>
           <button class="btn btn-secondary btn-sm" onclick="assignSuggestedLines()" title="Asigna los que coinciden con una pre-alerta del cliente">✨ Asignar sugeridos</button>
+          <div id="fact-rate-info" style="flex-basis:100%;font-size:.82rem;color:var(--gray)"></div>
         </div>
 
         <div class="table-wrap">
@@ -579,7 +583,7 @@ function mapCarga(row) {
 }
 
 function mapSavedClient(row) {
-  return { id: row.id, name: row.name, phone: row.phone || '', email: row.email || '', notes: row.notes || '', referralCode: row.referral_code || '', referredBy: row.referred_by || '' };
+  return { id: row.id, name: row.name, phone: row.phone || '', email: row.email || '', notes: row.notes || '', referralCode: row.referral_code || '', referredBy: row.referred_by || '', ratePerLb: row.rate_per_lb ? Number(row.rate_per_lb) : null };
 }
 
 /* ─── DB ─── */
@@ -695,17 +699,19 @@ const DB = {
     return data && data.length ? code : null;
   },
 
-  async createSavedClient(name, phone, email, notes, referredBy) {
+  async createSavedClient(name, phone, email, notes, referredBy, ratePerLb) {
     const row = { name, phone: phone || '', email: email || '', notes: notes || '' };
     if (referredBy) row.referred_by = referredBy;
+    if (ratePerLb !== undefined) row.rate_per_lb = ratePerLb;
     const { error } = await sb.from('saved_clients').insert(row);
     if (error) console.error(error);
     return !error;
   },
 
-  async updateSavedClient(id, name, phone, email, notes, referredBy) {
+  async updateSavedClient(id, name, phone, email, notes, referredBy, ratePerLb) {
     const row = { name, phone: phone || '', email: email || '', notes: notes || '' };
     if (referredBy) row.referred_by = referredBy;
+    if (ratePerLb !== undefined) row.rate_per_lb = ratePerLb;   // null = volver a la tarifa estándar
     const { error } = await sb.from('saved_clients').update(row).eq('id', id);
     if (error) console.error(error);
     return !error;
@@ -1767,6 +1773,11 @@ function openNuevoCliente() {
       <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">Si lo refirió un cliente, 10% de descuento en su primer envío para ambos.</p>
     </div>
     <div class="fg">
+      <label>Precio por libra (₡)</label>
+      <input type="number" id="m-clrate" min="0" step="1" placeholder="3950" />
+      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">Dejalo vacío para la tarifa estándar. Si tiene precio especial, se usa automáticamente al asignarle paquetes desde Facturas.</p>
+    </div>
+    <div class="fg">
       <label>Notas (opcional)</label>
       <textarea id="m-clnotes" placeholder="Dirección, indicaciones, etc."></textarea>
     </div>
@@ -1807,6 +1818,11 @@ async function openEditCliente(clientId) {
       <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">Si lo refirió un cliente, 10% de descuento en su primer envío para ambos.</p>
     </div>
     <div class="fg">
+      <label>Precio por libra (₡)</label>
+      <input type="number" id="m-clrate" min="0" step="1" placeholder="3950" value="${client.ratePerLb || ''}" data-had="${client.ratePerLb ? 1 : 0}" />
+      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">Dejalo vacío para la tarifa estándar. Si tiene precio especial, se usa automáticamente al asignarle paquetes desde Facturas.</p>
+    </div>
+    <div class="fg">
       <label>Notas</label>
       <textarea id="m-clnotes">${esc(client.notes || '')}</textarea>
     </div>
@@ -1824,6 +1840,11 @@ async function saveCliente(editId) {
   const email = document.getElementById('m-clemail').value.trim();
   const notes = document.getElementById('m-clnotes').value.trim();
   const refRaw = document.getElementById('m-clref')?.value.trim() || '';
+  const rateEl = document.getElementById('m-clrate');
+  const rateRaw = rateEl ? rateEl.value.trim() : '';
+  if (rateRaw !== '' && !(Number(rateRaw) >= 0)) { alert('El precio por libra no es válido.'); return; }
+  // undefined = no tocar la columna; null = quitar el precio especial
+  const ratePerLb = rateRaw !== '' ? Number(rateRaw) : (rateEl && rateEl.dataset.had === '1' ? null : undefined);
   if (!name) { alert('Ingresá el nombre del cliente.'); return; }
   const btn = document.getElementById('m-save-btn');
   if (btn) btn.disabled = true;
@@ -1835,9 +1856,9 @@ async function saveCliente(editId) {
     return;
   }
   if (editId) {
-    await DB.updateSavedClient(editId, name, phone, email, notes, referredBy);
+    await DB.updateSavedClient(editId, name, phone, email, notes, referredBy, ratePerLb);
   } else {
-    await DB.createSavedClient(name, phone, email, notes, referredBy);
+    await DB.createSavedClient(name, phone, email, notes, referredBy, ratePerLb);
   }
   closeModal();
   renderClientes();
@@ -1854,6 +1875,7 @@ const norm = t => String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 let _factLines = [];
 let _factSuggest = {};   // línea.id → nombre sugerido (por pre-alerta)
 let _factSel = new Set();
+let _factRates = {};   // nombre (minúsculas) → precio especial por libra, o null
 let _factParsed = [];
 
 function loadPdfJs() {
@@ -1976,7 +1998,7 @@ async function renderFacturaStaging() {
 
   const [{ data: lines, error }, { data: clients }, { data: alerts }] = await Promise.all([
     sb.from('factura_lineas').select('*').order('factura', { ascending: false }).order('linea_id'),
-    sb.from('saved_clients').select('name,email').order('name'),
+    sb.from('saved_clients').select('*').order('name'),
     sb.from('package_alerts').select('tracking_number,client_name,user_email')
   ]);
   if (error) {
@@ -1987,6 +2009,7 @@ async function renderFacturaStaging() {
   }
   _factLines = lines || [];
 
+  _factRates = Object.fromEntries((clients || []).map(c => [c.name.toLowerCase().trim(), c.rate_per_lb ? Number(c.rate_per_lb) : null]));
   document.getElementById('fact-clients-list').innerHTML = (clients || []).map(c => `<option value="${esc(c.name)}"></option>`).join('');
 
   // Sugerencias: la guía coincide con una pre-alerta de un cliente
@@ -2129,15 +2152,52 @@ function toggleAllLines(on) {
   boxes.forEach(cb => { cb.checked = on; if (on) _factSel.add(cb.dataset.id); else _factSel.delete(cb.dataset.id); });
   updateBulkBar();
 }
+/* Precio por libra: el del cliente si tiene precio especial; si no, la tarifa estándar */
+function factRateFor(name) {
+  const r = _factRates[(name || '').toLowerCase().trim()];
+  return r ? r : null;
+}
+
+function onFactClientChange() {
+  const name = document.getElementById('fact-client').value;
+  if ((name || '').toLowerCase().trim() in _factRates) {
+    document.getElementById('fact-rate').value = factRateFor(name) ?? RATE_PER_LB;
+  }
+  updateFactTotal();
+}
+
+function updateFactTotal() {
+  const info = document.getElementById('fact-rate-info');
+  if (!info) return;
+  const name = document.getElementById('fact-client').value.trim();
+  const rate = parseFloat(document.getElementById('fact-rate').value);
+  const known = name.toLowerCase() in _factRates;
+  const saved = factRateFor(name);
+  const lines = _factLines.filter(l => _factSel.has(l.id));
+  const lbs = lines.reduce((s, l) => s + (+l.weight_lbs || 0), 0);
+
+  let tag;
+  if (!name) tag = 'Elegí un cliente y se rellena su precio.';
+  else if (!known) tag = '🆕 Cliente nuevo: se usará el precio que pongas.';
+  else if (saved) tag = `⭐ Precio especial guardado: ${fCRC(saved)}/lb`;
+  else tag = `Tarifa estándar ${fCRC(RATE_PER_LB)}/lb (sin precio especial guardado)`;
+
+  const diff = name && rate > 0 && rate !== (saved ?? RATE_PER_LB) ? ' · <strong style="color:#B45309">distinto al guardado, te preguntaré si lo guardás</strong>' : '';
+  const calc = lines.length && rate >= 0 ? ` · <strong style="color:var(--purple)">${lines.length} paq. · ${lbs} lbs × ${fCRC(rate)} = ${fCRC(Math.round(lbs * rate))}</strong>` : '';
+  info.innerHTML = tag + diff + calc;
+}
+
 function updateBulkBar() {
   const bar = document.getElementById('fact-bulk');
   const estado = document.getElementById('fact-filter-estado').value;
   bar.style.display = estado === 'asignados' ? 'none' : 'flex';
   document.getElementById('fact-sel-count').textContent = `${_factSel.size} seleccionados`;
+  updateFactTotal();
 }
 
 /* Asigna líneas a un cliente: crea el cliente en la carga si hace falta y agrega los paquetes */
-async function assignLines(lineIds, clientName) {
+async function assignLines(lineIds, clientName, rate) {
+  rate = rate ?? factRateFor(clientName) ?? RATE_PER_LB;
   const lines = _factLines.filter(l => lineIds.includes(l.id) && !l.client_name);
   const byCarga = {};
   lines.forEach(l => (byCarga[l.carga_id] = byCarga[l.carga_id] || []).push(l));
@@ -2152,7 +2212,7 @@ async function assignLines(lineIds, clientName) {
     }
     const pkgRows = group.map(l => ({
       carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
-      charged_crc: Math.round(l.weight_lbs * RATE_PER_LB), notes: `Guía AM ${l.linea_id}`, status: 'listo'
+      charged_crc: Math.round(l.weight_lbs * rate), notes: `Guía AM ${l.linea_id}`, status: 'listo'
     }));
     const { data: pk, error } = await sb.from('packages').insert(pkgRows).select('id');
     if (error) throw new Error(error.message);
@@ -2175,6 +2235,9 @@ async function assignSelectedLines() {
   const name = document.getElementById('fact-client').value.trim();
   if (!_factSel.size) { alert('Marcá al menos un paquete.'); return; }
   if (!name) { alert('Elegí el cliente.'); return; }
+  const rate = parseFloat(document.getElementById('fact-rate').value);
+  if (!(rate >= 0)) { alert('Poné el precio por libra de este cliente.'); return; }
+  if (rate === 0 && !confirm('El precio por libra es ₡0: los paquetes quedarán sin cobro. ¿Continuar?')) return;
   const { data: found } = await sb.from('saved_clients').select('name').ilike('name', name).limit(1);
   if (!found || !found.length) {
     if (!confirm(`"${name}" no está en tu lista de clientes. ¿Crearlo y asignarle los paquetes?`)) return;
@@ -2182,11 +2245,18 @@ async function assignSelectedLines() {
   }
   const real = found && found[0] ? found[0].name : name;
   try {
-    const n = await assignLines([..._factSel], real);
+    const n = await assignLines([..._factSel], real, rate);
     _factSel.clear();
+    // ¿Guardar este precio para los próximos envíos de este cliente?
+    const current = factRateFor(real) ?? RATE_PER_LB;
+    if (rate !== current && confirm(`¿Guardar ${fCRC(rate)} por libra como el precio de ${real} para sus próximos envíos?`)) {
+      const { error } = await sb.from('saved_clients').update({ rate_per_lb: rate === RATE_PER_LB ? null : rate }).ilike('name', real);
+      if (error) alert('No se pudo guardar el precio: ' + error.message + '\n\n¿Ya corriste sql/tarifas.sql en Supabase?');
+    }
     document.getElementById('fact-client').value = '';
+    document.getElementById('fact-rate').value = RATE_PER_LB;
     await renderFacturaStaging();
-    document.getElementById('fact-count').textContent += ` · ✔ ${n} asignados a ${real}`;
+    document.getElementById('fact-count').textContent += ` · ✔ ${n} asignados a ${real} a ${fCRC(rate)}/lb`;
   } catch (e) { alert('❌ ' + e.message); }
 }
 
@@ -2196,7 +2266,7 @@ async function assignSuggestedLines() {
   const names = Object.keys(byClient);
   if (!names.length) { alert('No hay paquetes que coincidan con pre-alertas de clientes.'); return; }
   const total = names.reduce((s, n) => s + byClient[n].length, 0);
-  if (!confirm(`Se asignarán ${total} paquetes a ${names.length} cliente(s):\n\n` + names.map(n => `• ${n}: ${byClient[n].length}`).join('\n'))) return;
+  if (!confirm(`Se asignarán ${total} paquetes a ${names.length} cliente(s):\n\n` + names.map(n => `• ${n}: ${byClient[n].length} paq. a ${fCRC(factRateFor(n) ?? RATE_PER_LB)}/lb${factRateFor(n) ? ' (precio especial)' : ''}`).join('\n'))) return;
   try {
     for (const n of names) await assignLines(byClient[n], n);
     await renderFacturaStaging();
