@@ -428,6 +428,7 @@
           <input type="text" id="fact-client" list="fact-clients-list" placeholder="Cliente…" autocomplete="off" style="flex:1;min-width:180px" />
           <datalist id="fact-clients-list"></datalist>
           <button class="btn btn-primary btn-sm" onclick="assignSelectedLines()">Asignar seleccionados</button>
+          <button class="btn btn-secondary btn-sm" onclick="openPasteGuias()" title="Pegá una lista de guías o trackings y se marcan solos">📋 Pegar lista</button>
           <button class="btn btn-secondary btn-sm" onclick="assignSuggestedLines()" title="Asigna los que coinciden con una pre-alerta del cliente">✨ Asignar sugeridos</button>
         </div>
 
@@ -437,7 +438,7 @@
               <th style="width:34px"><input type="checkbox" id="fact-all" onchange="toggleAllLines(this.checked)" /></th>
               <th>Guía</th><th>Tracking</th><th>Lbs</th><th>Costo bodega</th><th>Cliente</th><th></th>
             </tr></thead>
-            <tbody id="fact-tbody"></tbody>
+            <tbody id="fact-tbody" onclick="onFactRowClick(event)"></tbody>
           </table>
         </div>
         <div id="fact-empty" class="empty" style="display:none">
@@ -2022,7 +2023,7 @@ async function renderFacturaStaging() {
     const cliente = l.client_name
       ? `<span class="badge" style="background:var(--green-light,#D1FAE5);color:#065F46">${esc(l.client_name)}</span>`
       : (sug ? `<span style="font-size:.78rem;color:var(--purple);font-weight:700">✨ ${esc(sug)}</span>` : '<span style="color:var(--gray)">—</span>');
-    return `<tr class="fact-row" data-s="${normSearch(l.linea_id + ' ' + l.tracking + ' ' + (l.client_name || '') + ' ' + (sug || ''))}">
+    return `<tr class="fact-row" style="${_factSel.has(l.id) ? 'background:#EEF2FF' : ''};cursor:${l.client_name ? 'default' : 'pointer'}" data-gid="${esc(l.linea_id)}" data-t="${normSearch(l.tracking)}" data-s="${normSearch(l.linea_id + ' ' + l.tracking + ' ' + (l.client_name || '') + ' ' + (sug || ''))}">
       <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
       <td style="font-family:monospace;font-weight:800;color:var(--purple)">${esc(l.linea_id)}</td>
       <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}</td>
@@ -2058,6 +2059,67 @@ function filterFacturaRows() {
   const cnt = document.getElementById('fact-count');
   if (q && cnt) cnt.textContent = `${shown} de ${rows.length} coinciden`;
   updateBulkBar();
+}
+
+
+/* Selección múltiple: clic en la fila, Shift+clic para rango, o pegar una lista */
+let _factLast = null;
+function setFactRow(tr, on) {
+  const cb = tr.querySelector('input[type=checkbox][data-id]');
+  if (!cb) return;
+  cb.checked = on;
+  on ? _factSel.add(cb.dataset.id) : _factSel.delete(cb.dataset.id);
+  tr.style.background = on ? '#EEF2FF' : '';
+}
+
+function onFactRowClick(e) {
+  const tr = e.target.closest('tr.fact-row');
+  if (!tr || e.target.closest('button')) return;
+  const cb = tr.querySelector('input[type=checkbox][data-id]');
+  if (!cb) return;
+  const rows = [...document.querySelectorAll('#fact-tbody tr.fact-row')]
+    .filter(r => r.style.display !== 'none' && r.querySelector('input[data-id]'));
+  const idx = rows.indexOf(tr);
+  const want = e.target === cb ? cb.checked : !cb.checked;
+  if (e.shiftKey && _factLast !== null && rows[_factLast]) {
+    const [a, b] = [Math.min(_factLast, idx), Math.max(_factLast, idx)];
+    rows.slice(a, b + 1).forEach(r => setFactRow(r, want));
+  } else {
+    setFactRow(tr, want);
+  }
+  _factLast = idx;
+  updateBulkBar();
+}
+
+function openPasteGuias() {
+  openModal(`
+    <div class="modal-head"><span class="modal-title">📋 Pegar lista de guías</span><button class="modal-x" onclick="closeModal()">✕</button></div>
+    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá las guías de 7 dígitos o los trackings, separados por espacio, coma o renglón. Se marcan los que existan en la bandeja.</p>
+    <textarea id="paste-guias" rows="7" placeholder="2334769&#10;2334814, 2334852&#10;1zc60g980342233286" style="width:100%;font-family:monospace"></textarea>
+    <p id="paste-result" style="font-size:.82rem;margin-top:.6rem;font-weight:600"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-primary" onclick="applyPasteGuias()">Marcar</button>
+    </div>`);
+  document.getElementById('paste-guias').focus();
+}
+
+function applyPasteGuias() {
+  const tokens = [...new Set(document.getElementById('paste-guias').value.split(/[\s,;]+/).map(normSearch).filter(Boolean))];
+  const search = document.getElementById('fact-search');
+  if (search.value) { search.value = ''; filterFacturaRows(); }   // buscar entre todos, no solo los visibles
+  const rows = [...document.querySelectorAll('#fact-tbody tr.fact-row')].filter(r => r.querySelector('input[data-id]'));
+  const missing = [];
+  let marked = 0;
+  tokens.forEach(t => {
+    const hits = rows.filter(r => /^\d{7}$/.test(t) ? r.dataset.gid === t : (t.length >= 8 && r.dataset.t.includes(t)));
+    if (!hits.length) { missing.push(t); return; }
+    hits.forEach(r => { if (!_factSel.has(r.querySelector('input[data-id]').dataset.id)) marked++; setFactRow(r, true); });
+  });
+  updateBulkBar();
+  const out = document.getElementById('paste-result');
+  out.style.color = missing.length ? '#B45309' : '#059669';
+  out.textContent = `✔ ${marked} marcados (${_factSel.size} en total)` + (missing.length ? ` · No encontrados o ya asignados: ${missing.join(', ')}` : '');
 }
 
 function toggleLine(id, on) { on ? _factSel.add(id) : _factSel.delete(id); updateBulkBar(); }
