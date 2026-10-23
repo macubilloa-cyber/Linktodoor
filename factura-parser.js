@@ -23,9 +23,12 @@
 
     const lineas = [];
     let lastAmount = null;
+    let pendingKind = 'flete';   // 'flete' o 'desconocido' (cargo por dirección mal escrita)
     for (let i = 0; i < lines.length; i++) {
       const fl = lines[i].match(new RegExp('Flete Miami San Jos[eé]\\s+' + AMOUNT));
-      if (fl) { lastAmount = parseMoney(fl[1]); continue; }
+      if (fl) { lastAmount = parseMoney(fl[1]); pendingKind = 'flete'; continue; }
+      const dc = lines[i].match(new RegExp('Desconocidos?\\s+' + AMOUNT, 'i'));
+      if (dc) { lastAmount = parseMoney(dc[1]); pendingKind = 'desconocido'; continue; }
 
       const head = lines[i].match(/^\s*(\d{7})\s+(.*)$/);
       if (!head) continue;
@@ -40,18 +43,27 @@
       if (!m) continue;
 
       const trackings = m[1].split(/\s+/).filter(t => t.length >= 8);
-      lineas.push({
-        id: head[1],
-        trackings,
-        tracking: trackings[0] || '',
-        lbs: parseFloat(m[2].replace(',', '.')),
-        costo: lastAmount
-      });
+      if (pendingKind === 'desconocido') {
+        // El cargo "Desconocidos" repite la guía del paquete: se suma a esa línea, no es otro paquete
+        const prev = lineas.find(l => l.id === head[1]);
+        if (prev) prev.recargo = (prev.recargo || 0) + (lastAmount || 0);
+        else lineas.push({ id: head[1], trackings, tracking: trackings[0] || '', lbs: parseFloat(m[2].replace(',', '.')), costo: 0, recargo: lastAmount || 0 });
+      } else {
+        lineas.push({
+          id: head[1],
+          trackings,
+          tracking: trackings[0] || '',
+          lbs: parseFloat(m[2].replace(',', '.')),
+          costo: lastAmount,
+          recargo: 0
+        });
+      }
       lastAmount = null;
+      pendingKind = 'flete';
       i = j;
     }
 
-    const suma = lineas.reduce((s, l) => s + (l.costo || 0), 0);
+    const suma = lineas.reduce((s, l) => s + (l.costo || 0) + (l.recargo || 0), 0);
     return {
       numero, fecha, cliente, total, lineas,
       totalLbs: lineas.reduce((s, l) => s + l.lbs, 0),
@@ -68,10 +80,11 @@
       const cur = byNum.get(key);
       const seen = new Set(cur.lineas.map(l => l.id));
       inv.lineas.forEach(l => { if (!seen.has(l.id)) cur.lineas.push(l); });
+      cur.lineas.forEach(c => { const o = inv.lineas.find(l => l.id === c.id); if (o && (o.recargo || 0) > (c.recargo || 0)) c.recargo = o.recargo; });
       cur.total = cur.total ?? inv.total;
     }
     return [...byNum.values()].map(inv => {
-      const suma = inv.lineas.reduce((s, l) => s + (l.costo || 0), 0);
+      const suma = inv.lineas.reduce((s, l) => s + (l.costo || 0) + (l.recargo || 0), 0);
       return {
         ...inv,
         totalLbs: inv.lineas.reduce((s, l) => s + l.lbs, 0),
