@@ -1978,7 +1978,7 @@ async function importFactura(i) {
       factura: inv.numero, linea_id: l.id, carga_id: String(cargaId),
       tracking: l.trackings.join(' / '), trackings: l.trackings,
       weight_lbs: l.lbs, cost_crc: l.costo,
-      ...(l.recargo > 0 ? { desconocido_crc: l.recargo } : {})
+      desconocido_crc: l.recargo > 0 ? l.recargo : 0
     }));
     for (let k = 0; k < rows.length; k += 100) {
       const { error } = await sb.from('factura_lineas').insert(rows.slice(k, k + 100));
