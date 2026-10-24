@@ -93,7 +93,32 @@
     });
   }
 
-  const api = { parseAmInvoice, mergeInvoices, parseMoney };
+  /* Mensaje de la bodega consolidada (2071):  "1. TRACKING — 0.16 kg (0.35 lb)"  */
+  function parseConsolidado(text) {
+    const clean = String(text || '').replace(/[\u2060\u200b\u200c\u200d\ufeff\u00a0]/g, ' ');
+    const num = v => parseFloat(String(v).replace(',', '.'));
+    const lineas = [];
+    const seen = new Set();
+    const noLeidas = [];
+    for (const raw of clean.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line) continue;
+      const m = line.match(/^(\d+)\s*[.)\-]\s*([A-Za-z0-9]{6,})\s*[—–\-:]+\s*([\d.,]+)\s*kg\s*(?:\(\s*([\d.,]+)\s*lbs?\s*\))?/i);
+      if (!m) { noLeidas.push(line); continue; }
+      const kg = num(m[3]);
+      const lbs = m[4] ? num(m[4]) : Math.round(kg * 2.20462 * 100) / 100;
+      const key = m[2].toUpperCase();
+      if (seen.has(key)) { noLeidas.push(line + '  (repetido)'); continue; }
+      seen.add(key);
+      lineas.push({ n: parseInt(m[1], 10), tracking: m[2], kg, lbs });
+    }
+    return { lineas, totalLbs: Math.round(lineas.reduce((s, l) => s + l.lbs, 0) * 100) / 100, noLeidas };
+  }
+
+  /* La consolidada cobra en medias libras, redondeando hacia arriba (0.4 → 0.5, 0.6 → 1) */
+  const lbsCobradasConsolidado = lbs => Math.ceil(lbs * 2 - 1e-9) / 2;
+
+  const api = { parseAmInvoice, mergeInvoices, parseMoney, parseConsolidado, lbsCobradasConsolidado };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.FacturaAM = api;
 })(typeof window !== 'undefined' ? window : globalThis);

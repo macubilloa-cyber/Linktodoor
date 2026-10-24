@@ -402,6 +402,7 @@
           <div class="ph-sub">Subí el PDF de la factura, marcá los paquetes y asignalos al cliente</div>
         </div>
         <div class="ph-actions">
+          <button class="btn btn-secondary" onclick="openPegarConsolidado()">💬 Pegar mensaje (consolidada)</button>
           <label class="btn btn-primary" style="cursor:pointer">📄 Subir factura (PDF)
             <input type="file" id="fact-file" accept="application/pdf,.pdf" multiple style="display:none" onchange="onFacturaFiles(this)" />
           </label>
@@ -2049,11 +2050,11 @@ async function renderFacturaStaging() {
     const cliente = l.client_name
       ? `<span class="badge" style="background:var(--green-light,#D1FAE5);color:#065F46">${esc(l.client_name)}</span>`
       : (sug ? `<span style="font-size:.78rem;color:var(--purple);font-weight:700">✨ ${esc(sug)}</span>` : '<span style="color:var(--gray)">—</span>');
-    return `<tr class="fact-row" style="${_factSel.has(l.id) ? 'background:#EEF2FF' : ''};cursor:${l.client_name ? 'default' : 'pointer'}" data-gid="${esc(l.linea_id)}" data-t="${normSearch(l.tracking)}" data-s="${normSearch(l.linea_id + ' ' + l.tracking + ' ' + (l.client_name || '') + ' ' + (sug || ''))}">
+    return `<tr class="fact-row" style="${_factSel.has(l.id) ? 'background:#EEF2FF' : ''};cursor:${l.client_name ? 'default' : 'pointer'}" data-gid="${l.bodega === '2071' ? '' : esc(l.linea_id)}" data-t="${normSearch(l.tracking)}" data-s="${normSearch(l.linea_id + ' ' + l.tracking + ' ' + (l.client_name || '') + ' ' + (sug || ''))}">
       <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
-      <td style="font-family:monospace;font-weight:800;color:var(--purple)">${esc(l.linea_id)}</td>
+      <td style="font-family:monospace;font-weight:800;color:var(--purple)">${l.bodega === '2071' ? '<span class="badge" style="background:#E0E7FF;color:#3730A3;font-family:inherit" title="Bodega consolidada 2071">2071</span>' : esc(l.linea_id)}</td>
       <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}${+l.desconocido_crc > 0 ? `<div style="font-family:inherit"><span class="badge" style="background:#FEF3C7;color:#92400E;margin-top:.2rem" title="La bodega cobró ${fCRC(l.desconocido_crc)} por dirección mal escrita">⚠ Desconocido +${fCRC(CARGO_DESCONOCIDO)}</span></div>` : ''}</td>
-      <td><strong>${l.weight_lbs}</strong></td>
+      <td><strong>${l.weight_lbs}</strong>${l.bodega === '2071' ? `<div style="font-size:.7rem;color:var(--gray)">cobra ${billableLbs(l)}</div>` : ''}</td>
       <td style="color:var(--gray)">${fCRC(l.cost_crc)}</td>
       <td>${cliente}</td>
       <td>${l.client_name ? `<button class="btn btn-sm btn-secondary" onclick="unassignLine('${l.id}')" title="Quitar del cliente">↩</button>` : ''}</td>
@@ -2155,6 +2156,11 @@ function toggleAllLines(on) {
   boxes.forEach(cb => { cb.checked = on; if (on) _factSel.add(cb.dataset.id); else _factSel.delete(cb.dataset.id); });
   updateBulkBar();
 }
+/* Libras que se cobran: la consolidada (2071) redondea a media libra hacia arriba; AM cobra el peso de la factura */
+function billableLbs(l) {
+  return l.bodega === '2071' ? FacturaAM.lbsCobradasConsolidado(+l.weight_lbs) : +l.weight_lbs;
+}
+
 /* Precio por libra: el del cliente si tiene precio especial; si no, la tarifa estándar */
 function factRateFor(name) {
   const r = _factRates[(name || '').toLowerCase().trim()];
@@ -2177,7 +2183,7 @@ function updateFactTotal() {
   const known = name.toLowerCase() in _factRates;
   const saved = factRateFor(name);
   const lines = _factLines.filter(l => _factSel.has(l.id));
-  const lbs = lines.reduce((s, l) => s + (+l.weight_lbs || 0), 0);
+  const lbs = Math.round(lines.reduce((s, l) => s + (billableLbs(l) || 0), 0) * 100) / 100;
 
   let tag;
   if (!name) tag = 'Elegí un cliente y se rellena su precio.';
@@ -2216,8 +2222,8 @@ async function assignLines(lineIds, clientName, rate) {
     }
     const pkgRows = group.map(l => ({
       carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
-      charged_crc: Math.round(l.weight_lbs * rate) + (+l.desconocido_crc > 0 ? CARGO_DESCONOCIDO : 0),
-      notes: `Guía AM ${l.linea_id}` + (+l.desconocido_crc > 0 ? ` · Dirección desconocida +${fCRC(CARGO_DESCONOCIDO)}` : ''), status: 'listo'
+      charged_crc: Math.round(billableLbs(l) * rate) + (+l.desconocido_crc > 0 ? CARGO_DESCONOCIDO : 0),
+      notes: (l.bodega === '2071' ? `Consolidada 2071 · cobra ${billableLbs(l)} lbs` : `Guía AM ${l.linea_id}`) + (+l.desconocido_crc > 0 ? ` · Dirección desconocida +${fCRC(CARGO_DESCONOCIDO)}` : ''), status: 'listo'
     }));
     const { data: pk, error } = await sb.from('packages').insert(pkgRows).select('id');
     if (error) throw new Error(error.message);
@@ -2289,6 +2295,98 @@ async function unassignLine(id) {
   }
   await sb.from('factura_lineas').update({ client_name: null, carga_client_id: null, package_id: null }).eq('id', id);
   await renderFacturaStaging();
+}
+
+/* ─── MENSAJE DE LA BODEGA CONSOLIDADA (2071) ─── */
+let _consParsed = null;
+
+function openPegarConsolidado() {
+  _consParsed = null;
+  const hoy = new Date().toISOString().slice(0, 10);
+  openModal(`
+    <div class="modal-head"><span class="modal-title">💬 Mensaje de la consolidada</span><button class="modal-x" onclick="closeModal()">✕</button></div>
+    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá el mensaje tal cual (<code>1. TRACKING — 0.16 kg (0.35 lb)</code>…). La consolidada cobra en medias libras, redondeando hacia arriba.</p>
+    <textarea id="cons-text" rows="9" style="width:100%;font-family:monospace;font-size:.8rem" placeholder="1. GFUS01077763015939 — 0.16 kg (0.35 lb)&#10;2. TBA335491505186 — 0.70 kg (1.54 lb)"></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-top:.6rem">
+      <div class="fg" style="margin:0"><label>Referencia de la carga</label><input type="text" id="cons-ref" value="CONS-${hoy.replace(/-/g, '')}" /></div>
+      <div class="fg" style="margin:0"><label>Fecha</label><input type="date" id="cons-fecha" value="${hoy}" /></div>
+      <div class="fg" style="margin:0"><label>Costo que te cobran (₡)</label><input type="number" id="cons-costo" min="0" placeholder="opcional" /></div>
+    </div>
+    <div id="cons-result" style="font-size:.82rem;margin-top:.7rem;font-weight:600"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-secondary" onclick="leerConsolidado()">Leer mensaje</button>
+      <button class="btn btn-primary" id="cons-import-btn" onclick="importConsolidado()" disabled>Importar</button>
+    </div>`);
+  document.getElementById('cons-text').focus();
+}
+
+async function leerConsolidado() {
+  const out = document.getElementById('cons-result');
+  const btn = document.getElementById('cons-import-btn');
+  const r = FacturaAM.parseConsolidado(document.getElementById('cons-text').value);
+  btn.disabled = true;
+  if (!r.lineas.length) {
+    out.style.color = '#DC2626';
+    out.textContent = 'No encontré paquetes. El formato debe ser: 1. TRACKING — 0.16 kg (0.35 lb)';
+    return;
+  }
+  // Paquetes que ya están en la bandeja (de cualquier factura o mensaje)
+  const { data: ex, error } = await sb.from('factura_lineas').select('tracking,trackings');
+  if (error) { out.style.color = '#DC2626'; out.textContent = '❌ ' + error.message; return; }
+  const have = new Set((ex || []).flatMap(x => [x.tracking, ...(x.trackings || [])]).map(norm));
+  const nuevas = r.lineas.filter(l => !have.has(norm(l.tracking)));
+  const repetidas = r.lineas.filter(l => have.has(norm(l.tracking)));
+  const cobradas = nuevas.reduce((s, l) => s + FacturaAM.lbsCobradasConsolidado(l.lbs), 0);
+  _consParsed = { ...r, nuevas };
+  out.style.color = repetidas.length || r.noLeidas.length ? '#B45309' : '#059669';
+  out.innerHTML = `✔ ${r.lineas.length} paquetes leídos · <strong>${nuevas.length} nuevos</strong> · ${Math.round(nuevas.reduce((s, l) => s + l.lbs, 0) * 100) / 100} lbs reales → <strong>${cobradas} lbs cobradas</strong>`
+    + (repetidas.length ? `<br>⚠ Ya estaban en la bandeja (se omiten): ${repetidas.map(l => esc(l.tracking)).join(', ')}` : '')
+    + (r.noLeidas.length ? `<br>⚠ Líneas que no entendí: ${r.noLeidas.map(esc).join(' | ')}` : '');
+  btn.disabled = !nuevas.length;
+  btn.textContent = nuevas.length ? `Importar ${nuevas.length} paquetes` : 'Nada nuevo';
+}
+
+async function importConsolidado() {
+  if (!_consParsed || !_consParsed.nuevas.length) return;
+  const ref   = document.getElementById('cons-ref').value.trim();
+  const fecha = document.getElementById('cons-fecha').value || new Date().toISOString().slice(0, 10);
+  const costo = parseFloat(document.getElementById('cons-costo').value) || 0;
+  if (!ref) { alert('Poné una referencia para la carga.'); return; }
+  const btn = document.getElementById('cons-import-btn');
+  btn.disabled = true; btn.textContent = 'Importando…';
+  const out = document.getElementById('cons-result');
+  try {
+    const nuevas = _consParsed.nuevas;
+    const lbsReales = Math.round(nuevas.reduce((s, l) => s + l.lbs, 0) * 100) / 100;
+    let { data: cg } = await sb.from('cargas').select('id,total_weight_lbs,total_cost_crc').eq('reference', ref).limit(1);
+    let cargaId;
+    if (cg && cg[0]) {
+      cargaId = cg[0].id;
+      await DB.updateCarga(cargaId, { totalWeightLbs: (+cg[0].total_weight_lbs || 0) + lbsReales, totalCostCRC: (+cg[0].total_cost_crc || 0) + costo });
+    } else {
+      const c = await DB.createCarga(ref, fecha, lbsReales, costo);
+      if (!c) throw new Error('No se pudo crear la carga.');
+      cargaId = c.id;
+    }
+    const rows = nuevas.map(l => ({
+      factura: ref, linea_id: l.tracking.toUpperCase(), carga_id: String(cargaId),
+      tracking: l.tracking, trackings: [l.tracking],
+      weight_lbs: l.lbs, cost_crc: 0, desconocido_crc: 0, bodega: '2071'
+    }));
+    for (let k = 0; k < rows.length; k += 100) {
+      const { error } = await sb.from('factura_lineas').insert(rows.slice(k, k + 100));
+      if (error) throw new Error(error.message);
+    }
+    closeModal();
+    document.getElementById('fact-preview').innerHTML =
+      `<div class="card" style="border-left:4px solid var(--green)"><strong>✔ ${rows.length} paquetes de la consolidada importados</strong> en la carga ${esc(ref)}. Ahora asignalos a los clientes abajo.</div>`;
+    await renderFacturaStaging();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Reintentar';
+    out.style.color = '#DC2626';
+    out.textContent = '❌ ' + e.message + ' — ¿Ya corriste sql/facturas-consolidado.sql en Supabase?';
+  }
 }
 
 /* ─── BENEFICIOS DEL CLIENTE ─── */
