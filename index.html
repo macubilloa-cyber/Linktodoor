@@ -592,6 +592,69 @@
       .foot-top{flex-direction:column}
     }
     @media(max-width:900px){input,select,textarea{font-size:16px!important}}
+
+    /* ── ✈️ BARRA DE VUELO (progreso de scroll) ── */
+    .flightbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:1002;pointer-events:none;background:rgba(255,255,255,.12)}
+    .flightbar-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--lblue),#fff);border-radius:0 3px 3px 0;
+      box-shadow:0 0 10px rgba(196,217,245,.8)}
+    nav.scrolled ~ .flightbar .flightbar-fill,.flightbar.on-light .flightbar-fill{background:linear-gradient(90deg,var(--pri-lite),var(--pri));box-shadow:0 0 8px rgba(91,91,214,.5)}
+    .flightbar-plane{position:absolute;top:-3px;left:0;width:22px;height:22px;margin-left:-11px;will-change:transform}
+    .flightbar.on-light .flightbar-plane svg{fill:var(--pri);filter:drop-shadow(0 1px 2px rgba(91,91,214,.35))}
+    .flightbar-plane svg{width:100%;height:100%;transform:rotate(90deg);fill:#fff;filter:drop-shadow(0 1px 3px rgba(18,18,31,.55))}
+
+    /* ── ✈️ VIAJE DEL PAQUETE (sección con scroll) ── */
+    #viaje{position:relative;height:340vh;background:linear-gradient(180deg,#0f1030 0%,#1c1c55 55%,#1E1E35 100%)}
+    .jr-stage{position:sticky;top:0;height:100vh;min-height:560px;display:flex;flex-direction:column;overflow:hidden;padding:5rem 1.5rem 5.6rem}
+    .jr-head{text-align:center;max-width:900px;margin:0 auto;flex:none}
+    .jr-head .sec-tag{background:rgba(196,217,245,.15);color:var(--lblue)}
+    .jr-head h2{font-size:clamp(1.45rem,2.9vw,2.3rem);font-weight:900;color:var(--cream);line-height:1.1;margin:.5rem 0 .4rem}
+    .jr-head p{color:rgba(245,240,228,.6);font-size:.95rem}
+    .jr-map{position:relative;flex:1;min-height:0;max-width:1040px;width:100%;margin:.4rem auto 0}
+    .jr-map svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+    .jr-route-bg{fill:none;stroke:rgba(196,217,245,.28);stroke-width:3;stroke-dasharray:3 11;stroke-linecap:round}
+    .jr-route-fill{fill:none;stroke:url(#jrGrad);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(123,123,230,.9))}
+    .jr-cloud{fill:rgba(255,255,255,.07)}
+    .jr-star{fill:rgba(245,240,228,.55)}
+    .jr-stop circle.ring{fill:#1E1E35;stroke:rgba(196,217,245,.5);stroke-width:2.5;transition:all .4s}
+    .jr-stop text.num{fill:rgba(245,240,228,.6);font:800 13px 'Plus Jakarta Sans',system-ui,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s}
+    .jr-stop text.place{fill:rgba(245,240,228,.55);font:700 13px 'Plus Jakarta Sans',system-ui,sans-serif;text-anchor:middle;transition:fill .4s}
+    .jr-stop.on circle.ring{fill:var(--pri);stroke:#fff}
+    .jr-stop.on text.num{fill:#fff}
+    .jr-stop.on text.place{fill:var(--cream)}
+    .jr-plane{will-change:transform}
+    .jr-plane path{fill:#fff;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
+    .jr-done{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-100%) scale(.5);transition:opacity .4s,transform .5s cubic-bezier(.34,1.56,.64,1);
+      background:#fff;color:var(--dark);font-weight:800;font-size:.82rem;padding:.45rem .8rem;border-radius:12px;white-space:nowrap;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .jr-done.show{opacity:1;transform:translate(-50%,-125%) scale(1)}
+    .jr-steps{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:1040px;width:100%;margin:.6rem auto 0}
+    .jr-step{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.85rem 1rem;opacity:.45;transform:translateY(8px);transition:all .5s}
+    .jr-step.on{opacity:1;transform:none;background:rgba(91,91,214,.28);border-color:rgba(196,217,245,.4)}
+    .jr-step b{display:block;color:var(--cream);font-size:.92rem;margin-bottom:.15rem}
+    .jr-step span{display:block;color:rgba(245,240,228,.62);font-size:.78rem;line-height:1.45}
+    @media(max-width:760px){
+      #viaje{height:380vh}
+      .jr-stage{padding:4.4rem 1rem 5rem}
+      .jr-head p{display:none}
+      .jr-steps{grid-template-columns:1fr 1fr;gap:.5rem}
+      .jr-step{padding:.6rem .7rem}
+      .jr-step span{display:none}
+      .jr-stop text.place{display:none}
+    }
+
+    /* ── 🚚 CAMIÓN EN ENTREGAS ── */
+    #entregas{position:relative;overflow:hidden;padding-bottom:8.5rem}
+    .road{position:absolute;left:0;right:0;bottom:0;height:78px;pointer-events:none}
+    .road::before{content:'';position:absolute;left:0;right:0;bottom:0;height:26px;background:#2b2b44}
+    .road::after{content:'';position:absolute;left:0;right:0;bottom:12px;height:3px;
+      background:repeating-linear-gradient(90deg,rgba(245,240,228,.65) 0 26px,transparent 26px 52px)}
+    .truck{position:absolute;bottom:20px;left:0;width:96px;will-change:transform}
+    .truck svg{width:100%;display:block}
+    .road-end{position:absolute;right:5%;bottom:26px;font-size:1.9rem;opacity:.35;transition:opacity .4s,transform .4s}
+    .road-end.on{opacity:1;transform:translateY(-6px)}
+    .road-ok{position:absolute;right:calc(5% - 26px);bottom:70px;background:var(--pri);color:#fff;font-weight:800;font-size:.78rem;padding:.35rem .7rem;border-radius:20px;
+      opacity:0;transform:translateY(8px) scale(.8);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+    .road-ok.on{opacity:1;transform:none}
+    @media(prefers-reduced-motion:reduce){.jr-step,.jr-stop circle.ring{transition:none}}
   </style>
 </head>
 <body>
@@ -615,6 +678,12 @@
     <span></span><span></span><span></span>
   </div>
 </nav>
+
+<!-- BARRA DE VUELO -->
+<div class="flightbar" id="flightbar" aria-hidden="true">
+  <div class="flightbar-fill" id="fbFill"></div>
+  <div class="flightbar-plane" id="fbPlane"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+</div>
 
 <!-- HERO -->
 <section id="hero">
@@ -788,6 +857,43 @@
   </div>
 </section>
 
+<!-- VIAJE DEL PAQUETE -->
+<section id="viaje" aria-label="Así viaja tu paquete de Miami a San José">
+  <div class="jr-stage">
+    <div class="jr-head">
+      <span class="sec-tag">✈️ Tu paquete en ruta</span>
+      <h2>Así viaja tu paquete de Miami a tu puerta</h2>
+      <p>Scrolleá y seguilo en su camino hacia San José.</p>
+    </div>
+    <div class="jr-map" id="jrMap">
+      <svg viewBox="0 0 1000 330" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="jrGrad" x1="0" x2="1"><stop offset="0" stop-color="#C4D9F5"/><stop offset="1" stop-color="#7B7BE6"/></linearGradient>
+        </defs>
+        <g id="jrStars"></g>
+        <g id="jrClouds">
+          <g class="jr-cloud" data-s="0.5"><ellipse cx="150" cy="70" rx="60" ry="14"/><ellipse cx="190" cy="60" rx="40" ry="14"/></g>
+          <g class="jr-cloud" data-s="0.9"><ellipse cx="520" cy="38" rx="70" ry="13"/><ellipse cx="560" cy="30" rx="44" ry="12"/></g>
+          <g class="jr-cloud" data-s="0.7"><ellipse cx="820" cy="95" rx="64" ry="14"/><ellipse cx="780" cy="86" rx="38" ry="12"/></g>
+          <g class="jr-cloud" data-s="1.2"><ellipse cx="330" cy="180" rx="52" ry="11"/><ellipse cx="362" cy="172" rx="32" ry="10"/></g>
+          <g class="jr-cloud" data-s="1.1"><ellipse cx="690" cy="205" rx="58" ry="12"/><ellipse cx="720" cy="196" rx="36" ry="10"/></g>
+        </g>
+        <path id="jrRoute" class="jr-route-bg" d="M80 262 C 270 20, 730 20, 920 240"/>
+        <path id="jrFill" class="jr-route-fill" d="M80 262 C 270 20, 730 20, 920 240"/>
+        <g id="jrStops"></g>
+        <g id="jrPlane" class="jr-plane"><g transform="translate(-22 -22) scale(1.85)"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g></g>
+      </svg>
+      <div class="jr-done" id="jrDone">📦 ¡Entregado en San José!</div>
+    </div>
+    <div class="jr-steps" id="jrSteps">
+      <div class="jr-step"><b>🛍️ 1 · Comprás</b><span>En cualquier tienda de EE.UU., o nos mandás el link y compramos por vos.</span></div>
+      <div class="jr-step"><b>📦 2 · Llega a Miami</b><span>Lo recibimos en tu casillero gratis, lo pesamos y te avisamos.</span></div>
+      <div class="jr-step"><b>✈️ 3 · Viaja a Costa Rica</b><span>Flash en ~3 días hábiles · Consolidado en ~5.</span></div>
+      <div class="jr-step"><b>🏠 4 · Te lo entregamos</b><span>Martes y viernes, hasta la puerta de tu casa en San José.</span></div>
+    </div>
+  </div>
+</section>
+
 <!-- STAT GIANT -->
 <section id="stat-giant">
   <div class="sg-inner">
@@ -881,6 +987,20 @@
         <div class="ei-ico">🏠</div>
         <div class="ei-label">Hasta tu puerta</div>
       </div>
+    </div>
+  </div>
+  <div class="road" id="road" aria-hidden="true">
+    <div class="road-ok" id="roadOk">✓ Entregado</div>
+    <div class="road-end" id="roadEnd">🏠</div>
+    <div class="truck" id="truck">
+      <svg viewBox="0 0 120 64" aria-hidden="true">
+        <rect x="2" y="8" width="70" height="36" rx="5" fill="#5B5BD6"/>
+        <rect x="14" y="16" width="22" height="20" rx="3" fill="#F5F0E4"/><text x="25" y="31" font-size="14" text-anchor="middle">📦</text>
+        <path d="M72 18h22l16 15v11H72z" fill="#7B7BE6"/><path d="M80 23h12l9 9H80z" fill="#C4D9F5"/>
+        <rect x="2" y="42" width="108" height="5" rx="2" fill="#4848b8"/>
+        <g fill="#12121F"><circle cx="26" cy="50" r="9"/><circle cx="92" cy="50" r="9"/></g>
+        <g fill="#F5F0E4"><circle cx="26" cy="50" r="3.5"/><circle cx="92" cy="50" r="3.5"/></g>
+      </svg>
     </div>
   </div>
 </section>
@@ -1576,6 +1696,163 @@ function renderPaquete(pkg) {
   wrap.appendChild(card);
   return wrap;
 }
+</script>
+
+<script>
+/* ✈️ Animaciones de scroll con temática courier: barra de vuelo, viaje del paquete y camión de entregas */
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const $ = id => document.getElementById(id);
+
+  /* 1 · Barra de vuelo: el avión avanza con el scroll de la página */
+  const fbFill = $('fbFill'), fbPlane = $('fbPlane'), fb = $('flightbar');
+
+  /* 2 · Viaje del paquete */
+  const viaje = $('viaje'), route = $('jrRoute'), fill = $('jrFill'), plane = $('jrPlane');
+  const stopsG = $('jrStops'), steps = [...document.querySelectorAll('#jrSteps .jr-step')];
+  const done = $('jrDone'), clouds = [...document.querySelectorAll('#jrClouds .jr-cloud')];
+  let routeLen = 0, stopEls = [], stopPts = [];
+  const STOPS = [{ t: 0, label: 'Tienda' }, { t: 0.3, label: 'Miami' }, { t: 0.66, label: 'En vuelo' }, { t: 1, label: 'San José' }];
+  const NS = 'http://www.w3.org/2000/svg';
+
+  /* Dos trazados: ancho (computadora) y alto (celular) */
+  const LAYOUTS = {
+    wide: { vb: [1000, 330], d: 'M80 262 C 270 20, 730 20, 920 240', clouds: '' },
+    tall: { vb: [400, 430],  d: 'M58 376 C 30 50, 370 50, 342 344', clouds: 'translate(0 60) scale(.4 1)' }
+  };
+  let layoutKey = '', VB = LAYOUTS.wide.vb;
+
+  function buildLayout() {
+    const key = innerWidth <= 760 ? 'tall' : 'wide';
+    if (!route || key === layoutKey) return;
+    layoutKey = key;
+    const L = LAYOUTS[key];
+    VB = L.vb;
+    $('jrMap').querySelector('svg').setAttribute('viewBox', `0 0 ${VB[0]} ${VB[1]}`);
+    route.setAttribute('d', L.d);
+    fill.setAttribute('d', L.d);
+    $('jrClouds').setAttribute('transform', L.clouds);
+    routeLen = route.getTotalLength();
+    fill.style.strokeDasharray = routeLen;
+    fill.style.strokeDashoffset = routeLen;
+
+    stopsG.innerHTML = ''; stopEls = []; stopPts = [];
+    STOPS.forEach((st, i) => {
+      const pt = route.getPointAtLength(routeLen * st.t);
+      stopPts.push(pt);
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'jr-stop');
+      g.innerHTML = `<circle class="ring" cx="${pt.x}" cy="${pt.y}" r="${key === 'tall' ? 17 : 15}"/><text class="num" x="${pt.x}" y="${pt.y}">${i + 1}</text>` +
+        `<text class="place" x="${pt.x}" y="${pt.y + 34}">${st.label}</text>`;
+      stopsG.appendChild(g);
+      stopEls.push(g);
+    });
+
+    const stars = $('jrStars');
+    stars.innerHTML = '';
+    const n = key === 'tall' ? 22 : 26;
+    for (let i = 0; i < n; i++) {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'jr-star');
+      c.setAttribute('cx', (i * 137.5) % VB[0]);
+      c.setAttribute('cy', 8 + ((i * 61) % (VB[1] * 0.5)));
+      c.setAttribute('r', (i % 3 === 0) ? 1.6 : 1);
+      stars.appendChild(c);
+    }
+  }
+  buildLayout();
+
+  /* 3 · Camión de entregas */
+  const entregas = $('entregas'), truck = $('truck'), roadOk = $('roadOk'), roadEnd = $('roadEnd');
+
+  let target = { page: 0, trip: 0, road: 0 };
+  let cur    = { page: 0, trip: 0, road: 0 };
+
+  function measure() {
+    const vh = innerHeight;
+    const maxScroll = document.documentElement.scrollHeight - vh;
+    target.page = maxScroll > 0 ? clamp(scrollY / maxScroll, 0, 1) : 0;
+
+    if (viaje) {
+      const r = viaje.getBoundingClientRect();
+      const total = r.height - vh;
+      target.trip = total > 0 ? clamp(-r.top / total, 0, 1) : 0;
+    }
+    if (entregas) {
+      const r = entregas.getBoundingClientRect();
+      // 0 cuando la sección asoma por abajo → 1 cuando su parte baja llega al fondo de la pantalla
+      target.road = clamp((vh - r.top) / (r.height + vh * 0.15), 0, 1);
+    }
+  }
+
+  function draw() {
+    // barra de vuelo
+    const w = innerWidth;
+    fbFill.style.width = (cur.page * 100) + '%';
+    fbPlane.style.transform = `translate3d(${cur.page * w}px,0,0)`;
+    fb.classList.toggle('on-light', !!document.querySelector('nav.scrolled'));
+
+    // viaje del paquete
+    if (route) {
+      const p = cur.trip;
+      const len = routeLen * p;
+      const pt = route.getPointAtLength(len);
+      const pt2 = route.getPointAtLength(Math.min(routeLen, len + 2));
+      const pt1 = route.getPointAtLength(Math.max(0, len - 2));
+      const ang = Math.atan2(pt2.y - pt1.y, pt2.x - pt1.x) * 180 / Math.PI + 90;
+      const land = clamp((p - 0.93) / 0.05, 0, 1);   // al llegar, el avión se "posa" y queda el pin de San José
+      plane.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${ang}) scale(${1 - land * 0.6})`);
+      plane.style.opacity = 1 - land;
+      fill.style.strokeDashoffset = routeLen - len;
+      STOPS.forEach((st, i) => {
+        const on = p >= st.t - (st.t === 1 ? 0.04 : 0.01);
+        stopEls[i].classList.toggle('on', on);
+        steps[i].classList.toggle('on', on);
+      });
+      if (!reduce) clouds.forEach(c => c.setAttribute('transform', `translate(${(-p * 140 * parseFloat(c.dataset.s)).toFixed(1)} 0)`));
+      // cartel "Entregado" sobre San José
+      const map = $('jrMap'), svgBox = map.getBoundingClientRect();
+      const vb = { w: VB[0], h: VB[1] };
+      const sc = Math.min(svgBox.width / vb.w, svgBox.height / vb.h);
+      const offX = (svgBox.width - vb.w * sc) / 2, offY = (svgBox.height - vb.h * sc) / 2;
+      const end = stopPts[stopPts.length - 1];
+      done.style.left = (offX + end.x * sc) + 'px';
+      done.style.top  = (offY + end.y * sc - 22 * sc) + 'px';
+      done.classList.toggle('show', p > 0.95);
+    }
+
+    // camión
+    if (truck) {
+      const roadW = entregas.clientWidth;
+      const stopX = roadW * 0.95 - 190;              // frena justo antes de la casa
+      const x = -110 + cur.road * (stopX + 110);
+      truck.style.transform = `translate3d(${x}px,0,0)`;
+      const arrived = cur.road > 0.93;
+      roadOk.classList.toggle('on', arrived);
+      roadEnd.classList.toggle('on', arrived);
+    }
+  }
+
+  let raf = 0;
+  function tick() {
+    raf = 0;
+    measure();
+    let moving = false;
+    for (const k of Object.keys(target)) {
+      const d = target[k] - cur[k];
+      if (reduce || Math.abs(d) < 0.0004) cur[k] = target[k];
+      else { cur[k] += d * 0.14; moving = true; }
+    }
+    draw();
+    if (moving) raf = requestAnimationFrame(tick);
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', () => { buildLayout(); kick(); });
+  addEventListener('load', () => { measure(); cur = { ...target }; draw(); });
+  measure(); cur = { ...target }; draw();
+})();
 </script>
 </body>
 </html>
