@@ -810,6 +810,11 @@
       .cta-copy h2,.cta-copy p{text-align:center}
       .cta-copy .cta-btns{justify-content:center}
     }
+
+    /* chips pegados a las esquinas de la foto, sin ruta */
+    .hv-wrap .fc-1{top:14px!important;left:14px!important;right:auto!important;bottom:auto!important}
+    .hv-wrap .fc-2{bottom:14px!important;right:14px!important;left:auto!important;top:auto!important}
+    @media(max-width:860px){.hv-wrap .fc-1,.hv-wrap .fc-2{display:none!important}}
     /* móvil */
     @media(max-width:768px){
       .hero-inner{padding-top:6.2rem;gap:1.5rem}
@@ -873,13 +878,6 @@
       <div class="hv-wrap">
         <div class="hero-photo">
           <img src="img/van-hero.jpg" width="1200" height="800" alt="Furgón de Linktodoor para entregas en San José" fetchpriority="high">
-          <svg class="hp-route" viewBox="0 0 1536 1024" aria-hidden="true">
-            <path d="M120 250 C 420 20, 940 -10, 1320 150" fill="none" stroke="#5B5BD6" stroke-width="7" stroke-dasharray="6 24" stroke-linecap="round" opacity=".8"/>
-            <circle cx="120" cy="250" r="17" fill="#5B5BD6" stroke="#fff" stroke-width="8"/>
-            <circle cx="1320" cy="150" r="17" fill="#FF7A1A" stroke="#fff" stroke-width="8"/>
-            <g class="hero-plane" transform="translate(690 42) rotate(8) scale(5.4) translate(-12 -12)"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#5B5BD6" transform="rotate(90 12 12)"/></g>
-            <g font-family="PJ,Plus Jakarta Sans,sans-serif" font-weight="800" font-size="32" letter-spacing="3" fill="#12121F"><text x="64" y="320">MIAMI</text><text x="1196" y="214">SAN JOSÉ</text></g>
-          </svg>
         </div>
         <div class="fc fc-1"><div class="fc-ico" style="background:#EEF0FF"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></div><div><div class="fc-t">Casillero gratis</div><div class="fc-st">Dirección en Miami</div></div></div>
         <div class="fc fc-2"><div class="fc-ico" style="background:#E8FFF0"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg></div><div><div class="fc-t">Compramos por vos</div><div class="fc-st">Sin costo extra</div></div></div>
