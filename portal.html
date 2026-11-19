@@ -313,8 +313,8 @@
     </div>
     <div class="login-divider"></div>
     <div class="login-heading">
-      <h2>Mi Cuenta</h2>
-      <p>Ingresá para ver tus pedidos y paquetes</p>
+      <h2 id="loginTitle">Mi Cuenta</h2>
+      <p id="loginSub">Ingresá para ver tus pedidos y paquetes</p>
     </div>
     <div class="msg-err" id="msgErr"></div>
     <div class="msg-ok"  id="msgOk"></div>
@@ -333,6 +333,36 @@
       <div class="login-help">
         ¿No tenés acceso aún?
         <a href="https://wa.me/50685173813" target="_blank">Escribinos por WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- Primer ingreso: el cliente crea su propia contraseña con el enlace que le mandamos -->
+    <div id="formInvite" style="display:none">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="invEmail" readonly style="background:var(--light);color:var(--muted)" />
+      </div>
+      <div class="field">
+        <label>Creá tu contraseña</label>
+        <input type="password" id="invPw" placeholder="Mínimo 8 caracteres" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter')document.getElementById('invPw2').focus()" />
+      </div>
+      <div class="field">
+        <label>Repetí tu contraseña</label>
+        <input type="password" id="invPw2" placeholder="••••••••" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter')doAcceptInvite()" />
+      </div>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;cursor:pointer">
+        <input type="checkbox" id="invShow" onchange="toggleInvPw(this.checked)"> Mostrar contraseña
+      </label>
+      <button class="btn-submit" id="btnInvite" onclick="doAcceptInvite()">Crear mi contraseña y entrar →</button>
+    </div>
+    <div id="invBad" style="display:none;text-align:center">
+      <div class="msg-err" id="invBadMsg" style="display:block;text-align:left"></div>
+      <div class="login-help">
+        Pedinos uno nuevo por WhatsApp y te lo mandamos al momento.<br>
+        <a href="https://wa.me/50685173813" target="_blank">Escribinos por WhatsApp</a> ·
+        <a href="/mi-cuenta" id="invGoLogin">Ir a iniciar sesión</a>
       </div>
     </div>
   </div>
@@ -750,6 +780,60 @@ function clearMsgs() {
   document.getElementById('msgErr').style.display = 'none';
   document.getElementById('msgOk').style.display  = 'none';
 }
+
+/* ── Primer ingreso con enlace de invitación (?invite=...) ── */
+const INVITE = new URLSearchParams(location.search).get('invite');
+const $i = id => document.getElementById(id);
+function toggleInvPw(on) { $i('invPw').type = $i('invPw2').type = on ? 'text' : 'password'; }
+
+async function inviteCall(body) {
+  try {
+    const r = await fetch('/api/accept-invite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: INVITE, ...body }) });
+    return await r.json();
+  } catch (e) { return { ok: false, error: 'No se pudo conectar. Revisá tu internet e intentá de nuevo.' }; }
+}
+
+async function initInvite() {
+  if (!INVITE) return;
+  $i('formLogin').style.display = 'none';
+  $i('loginTitle').textContent = 'Activando tu cuenta…';
+  $i('loginSub').textContent = '';
+  try { await sb.auth.signOut(); } catch {}          // por si había otra sesión abierta en este navegador
+  const r = await inviteCall({ action: 'check' });
+  if (!r.ok) {
+    $i('loginTitle').textContent = 'Enlace no disponible';
+    $i('invBadMsg').textContent = r.code === 'used' ? 'Este enlace ya se usó. Si ya creaste tu contraseña, entrá con tu correo.'
+      : r.code === 'expired' ? 'Este enlace venció.' : (r.error || 'Este enlace no es válido.');
+    $i('invBad').style.display = 'block';
+    return;
+  }
+  const first = (r.name || '').trim().split(/\s+/)[0];
+  $i('loginTitle').textContent = first ? `¡Hola, ${first}!` : '¡Bienvenido!';
+  $i('loginSub').textContent = 'Creá tu contraseña para entrar a tu cuenta';
+  $i('invEmail').value = r.email;
+  $i('formInvite').style.display = 'block';
+  setTimeout(() => $i('invPw').focus(), 50);
+}
+
+async function doAcceptInvite() {
+  const pw = $i('invPw').value, pw2 = $i('invPw2').value, btn = $i('btnInvite');
+  clearMsgs();
+  if (pw.length < 8) { showErr('La contraseña debe tener al menos 8 caracteres.'); return; }
+  if (pw !== pw2)    { showErr('Las contraseñas no coinciden.'); return; }
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const r = await inviteCall({ action: 'accept', password: pw });
+  if (!r.ok) { btn.disabled = false; btn.textContent = 'Crear mi contraseña y entrar →'; showErr(r.error || 'No se pudo guardar la contraseña.'); return; }
+  const { error } = await sb.auth.signInWithPassword({ email: r.email, password: pw });
+  if (error) {                                         // la contraseña quedó creada; solo falló el ingreso automático
+    history.replaceState(null, '', '/mi-cuenta');
+    $i('formInvite').style.display = 'none'; $i('formLogin').style.display = 'block';
+    $i('loginTitle').textContent = 'Mi Cuenta'; $i('loginSub').textContent = 'Tu contraseña quedó lista. Ingresá con tu correo.';
+    $i('loginEmail').value = r.email;
+    return;
+  }
+  history.replaceState(null, '', '/mi-cuenta');        // onAuthStateChange abre el portal
+}
+initInvite();
 
 /* ── Auth ── */
 async function doLogin() {

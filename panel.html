@@ -2425,38 +2425,101 @@ async function openBeneficios(clientId) {
 function openActivarPortal(clientId, name, email) {
   openModal(`
     <div class="modal-head">
-      <span class="modal-title">🔑 Activar portal — ${esc(name)}</span>
+      <span class="modal-title">🔑 Acceso al portal — ${esc(name)}</span>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
-    <p style="font-size:.84rem;color:var(--gray);margin-bottom:1.2rem;line-height:1.6">
-      Creá o actualizá el acceso de este cliente al portal <strong>linktodoor.co/mi-cuenta</strong>.
-      No se envía ningún email — vos le mandás las credenciales por WhatsApp.
+    <p style="font-size:.84rem;color:var(--gray);margin-bottom:1.1rem;line-height:1.6">
+      Generá un enlace personal para que el cliente <strong>cree su propia contraseña</strong>.
+      No tenés que pasarle ninguna clave: el enlace sirve una sola vez y vence en 7 días.
     </p>
     <div class="fg">
       <label>Email del cliente</label>
       <input type="email" id="m-portal-email" value="${esc(email)}" placeholder="cliente@email.com" />
     </div>
-    <div class="fg">
-      <label>Contraseña</label>
-      <input type="text" id="m-portal-pw" placeholder="Ej: Linktodoor2024"
-        style="font-family:monospace;letter-spacing:.05em" />
-      <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">
-        Podés usar cualquier contraseña. Se la mandás al cliente por WhatsApp.
-      </p>
-    </div>
     <div id="m-portal-result" style="display:none;margin-bottom:1rem"></div>
-    <div style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="m-portal-btn" onclick="doActivarPortal('${clientId}','${esc(name)}')">Activar acceso</button>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-primary" id="m-portal-btn" onclick="doGenerarAcceso('${clientId}','${esc(name)}')">Generar enlace de acceso</button>
     </div>
+    <details style="border-top:1px solid var(--border);padding-top:.8rem">
+      <summary style="cursor:pointer;font-size:.8rem;font-weight:700;color:var(--gray)">Avanzado: definir la contraseña yo mismo</summary>
+      <div class="fg" style="margin-top:.8rem">
+        <label>Contraseña</label>
+        <input type="text" id="m-portal-pw" placeholder="Ej: Linktodoor2026" style="font-family:monospace;letter-spacing:.05em" />
+        <p style="font-size:.73rem;color:var(--gray);margin-top:.3rem">Solo si el cliente no puede usar el enlace. Se la mandás vos por WhatsApp.</p>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="m-portal-btn-manual" onclick="doActivarPortal('${clientId}','${esc(name)}')">Activar con esta contraseña</button>
+    </details>
   `);
   document.getElementById('m-portal-email').focus();
+}
+
+let _inviteMsg = '';
+async function doGenerarAcceso(clientId, name) {
+  const email = document.getElementById('m-portal-email').value.trim();
+  const btn   = document.getElementById('m-portal-btn');
+  const res   = document.getElementById('m-portal-result');
+  if (!email) { alert('Ingresá el email del cliente.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Generando…';
+  res.style.display = 'none';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch('/api/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+      body: JSON.stringify({ email })
+    });
+    const data = await r.json();
+    btn.disabled = false; btn.textContent = 'Generar enlace nuevo';
+    if (!data.ok) {
+      res.innerHTML = `<div class="alert alert-danger">❌ ${esc(data.error || 'Error desconocido')}</div>`;
+      res.style.display = 'block';
+      return;
+    }
+
+    /* Guardar el email en la ficha si no lo tenía, y traer el teléfono para abrir WhatsApp directo */
+    await sb.from('saved_clients').update({ email }).eq('id', clientId);
+    const { data: row } = await sb.from('saved_clients').select('phone').eq('id', clientId).maybeSingle();
+    const clean = (row?.phone || '').replace(/\D/g, '');
+    const phone = clean ? (clean.startsWith('506') ? clean : '506' + clean) : '';
+
+    const first = (name || '').trim().split(/\s+/)[0];
+    _inviteMsg =
+      `¡Hola ${first}! 👋\n\nYa activamos tu cuenta en Linktodoor. Entrá a este enlace para crear tu contraseña y ver tus paquetes:\n\n` +
+      `${data.url}\n\n(El enlace sirve una sola vez y vence en ${data.days} días.)\n\n— Linktodoor 📦`;
+    const waUrl = `https://api.whatsapp.com/send?${phone ? `phone=${phone}&` : ''}text=${encodeURIComponent(_inviteMsg)}`;
+
+    res.innerHTML = `
+      <div class="alert alert-info" style="margin-bottom:.6rem">
+        ✅ ${data.created ? 'Acceso creado' : 'Enlace nuevo generado'}. ${phone ? '' : 'Este cliente no tiene teléfono guardado: elegí el contacto en WhatsApp.'}
+      </div>
+      <div style="background:var(--light);border:1px solid var(--border);border-radius:8px;padding:.7rem .8rem;font-size:.78rem;white-space:pre-wrap;line-height:1.5;max-height:170px;overflow:auto;margin-bottom:.6rem">${esc(_inviteMsg)}</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <a href="${waUrl}" target="_blank" class="btn btn-success" style="flex:1;text-decoration:none;justify-content:center">💬 Enviar por WhatsApp</a>
+        <button class="btn btn-secondary" id="m-invite-copy" onclick="copyInvite()" style="flex:1;justify-content:center">📋 Copiar mensaje</button>
+      </div>`;
+    res.style.display = 'block';
+    renderClientes();
+  } catch {
+    btn.disabled = false; btn.textContent = 'Generar enlace de acceso';
+    res.innerHTML = `<div class="alert alert-danger">❌ Error de conexión. Intentá de nuevo.</div>`;
+    res.style.display = 'block';
+  }
+}
+
+function copyInvite() {
+  const b = document.getElementById('m-invite-copy');
+  navigator.clipboard?.writeText(_inviteMsg).then(() => {
+    const o = b.textContent; b.textContent = '✅ ¡Copiado!';
+    setTimeout(() => { b.textContent = o; }, 2200);
+  });
 }
 
 async function doActivarPortal(clientId, name) {
   const email = document.getElementById('m-portal-email').value.trim();
   const pw    = document.getElementById('m-portal-pw').value.trim();
-  const btn   = document.getElementById('m-portal-btn');
+  const btn   = document.getElementById('m-portal-btn-manual');
   const res   = document.getElementById('m-portal-result');
 
   if (!email) { alert('Ingresá el email del cliente.'); return; }
@@ -2475,7 +2538,7 @@ async function doActivarPortal(clientId, name) {
     const data = await r.json();
 
     if (!data.ok) {
-      btn.disabled = false; btn.textContent = 'Activar acceso';
+      btn.disabled = false; btn.textContent = 'Activar con esta contraseña';
       res.innerHTML = `<div class="alert alert-danger">❌ ${esc(data.error)}</div>`;
       res.style.display = 'block';
       return;
@@ -2492,7 +2555,7 @@ async function doActivarPortal(clientId, name) {
       `Entrá y vas a ver el historial de tus cargas. Cualquier consulta, escribinos aquí.`
     );
 
-    btn.disabled = false; btn.textContent = 'Activar acceso';
+    btn.disabled = false; btn.textContent = 'Activar con esta contraseña';
     res.innerHTML = `
       <div class="alert alert-info" style="margin-bottom:.6rem">
         ✅ Acceso ${data.action === 'created' ? 'creado' : 'actualizado'} correctamente.
@@ -2505,7 +2568,7 @@ async function doActivarPortal(clientId, name) {
 
     renderClientes();
   } catch {
-    btn.disabled = false; btn.textContent = 'Activar acceso';
+    btn.disabled = false; btn.textContent = 'Activar con esta contraseña';
     res.innerHTML = `<div class="alert alert-danger">❌ Error de conexión. Intentá de nuevo.</div>`;
     res.style.display = 'block';
   }
