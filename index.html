@@ -695,7 +695,7 @@
     .road::before{content:'';position:absolute;left:0;right:0;bottom:0;height:26px;background:#2b2b44}
     .road::after{content:'';position:absolute;left:0;right:0;bottom:12px;height:3px;
       background:repeating-linear-gradient(90deg,rgba(245,240,228,.65) 0 26px,transparent 26px 52px)}
-    .truck{position:absolute;bottom:20px;left:0;width:96px;will-change:transform}
+    .truck{position:absolute;bottom:20px;left:0;width:250px;z-index:2;will-change:transform}
     .truck svg{width:100%;display:block}
     .road-end{position:absolute;right:5%;bottom:26px;font-size:1.9rem;opacity:.35;transition:opacity .4s,transform .4s}
     .road-end.on{opacity:1;transform:translateY(-6px)}
@@ -877,24 +877,9 @@
   <ellipse cx="62" cy="470" rx="62" ry="8" fill="rgba(0,0,0,.35)"/>
   <g><rect x="18" y="400" width="74" height="64" rx="6" fill="#C9A26B"/><rect x="18" y="400" width="74" height="17" rx="5" fill="#DDBB85"/><rect x="48" y="400" width="14" height="64" fill="#F1DDB0"/></g>
   <g><rect x="40" y="352" width="52" height="48" rx="5" fill="#E4C48F"/><rect x="40" y="352" width="52" height="13" rx="4" fill="#F1DDB0"/><rect x="60" y="352" width="10" height="48" fill="#FBF0D6"/></g>
-  <!-- furgón -->
-  <ellipse cx="350" cy="472" rx="236" ry="12" fill="rgba(0,0,0,.4)"/>
-  <g transform="translate(118 258) scale(1.5)">
-    <path d="M8 24 Q8 10 24 10 H192 V108 H8 Z" fill="url(#hVan)"/>
-    <path d="M192 30 H238 Q252 30 262 44 L288 76 Q296 86 296 98 V108 H192 Z" fill="url(#hCab)"/>
-    <path d="M202 40 H234 Q242 40 248 48 L268 76 H202 Z" fill="url(#hGlass)"/>
-    <path d="M214 42 L232 42 L218 76 L202 76 Z" fill="rgba(255,255,255,.4)"/>
-    <rect x="8" y="84" width="288" height="6" fill="rgba(255,255,255,.2)"/>
-    <rect x="30" y="18" width="126" height="50" rx="12" fill="#F5F0E4"/>
-    <text x="93" y="41" font-family="PJ,Plus Jakarta Sans,sans-serif" font-weight="800" font-size="19" letter-spacing="2" text-anchor="middle" fill="#5B5BD6">LINK</text>
-    <text x="93" y="61" font-family="PJ,Plus Jakarta Sans,sans-serif" font-weight="800" font-size="19" letter-spacing="2" text-anchor="middle" fill="#12121F">DOOR</text>
-    <rect x="288" y="84" width="9" height="12" rx="3" fill="#FFE9A8"/><rect x="6" y="86" width="6" height="12" rx="2" fill="#ff5a5a"/>
-    <rect x="6" y="104" width="292" height="10" rx="4" fill="#2b2b6e"/>
-    <circle cx="72" cy="108" r="28" fill="#12121f"/><circle cx="232" cy="108" r="28" fill="#12121f"/>
-    <g transform="translate(72 108)"><circle r="23" fill="#1d1d33"/><circle r="14" fill="#C4D9F5"/><g stroke="#4848b8" stroke-width="4"><line x1="-12" y1="0" x2="12" y2="0"/><line x1="0" y1="-12" x2="0" y2="12"/><line x1="-8.5" y1="-8.5" x2="8.5" y2="8.5"/><line x1="-8.5" y1="8.5" x2="8.5" y2="-8.5"/></g><circle r="4" fill="#12121f"/></g>
-    <g transform="translate(232 108)"><circle r="23" fill="#1d1d33"/><circle r="14" fill="#C4D9F5"/><g stroke="#4848b8" stroke-width="4"><line x1="-12" y1="0" x2="12" y2="0"/><line x1="0" y1="-12" x2="0" y2="12"/><line x1="-8.5" y1="-8.5" x2="8.5" y2="8.5"/><line x1="-8.5" y1="8.5" x2="8.5" y2="-8.5"/></g><circle r="4" fill="#12121f"/></g>
-  </g>
-  <g stroke="rgba(18,18,31,.25)" stroke-width="4" stroke-linecap="round"><line x1="96" y1="300" x2="40" y2="300"/><line x1="104" y1="330" x2="22" y2="330"/></g>
+  <!-- furgón (render 3D) -->
+  <image href="img/van-hero.png" x="64" y="235" width="560" height="253" preserveAspectRatio="xMidYMid meet"/>
+
   </g>
 </svg>
         <div class="fc fc-1"><div class="fc-ico" style="background:#EEF0FF"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></div><div><div class="fc-t">Casillero gratis</div><div class="fc-st">Dirección en Miami</div></div></div>
@@ -1134,16 +1119,7 @@
   <div class="road" id="road" aria-hidden="true">
     <div class="road-ok" id="roadOk"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Entregado</div>
     <div class="road-end" id="roadEnd"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></div>
-    <div class="truck" id="truck">
-      <svg viewBox="0 0 120 64" aria-hidden="true">
-        <rect x="2" y="8" width="70" height="36" rx="5" fill="#5B5BD6"/>
-        <rect x="14" y="16" width="22" height="20" rx="3" fill="#F5F0E4"/><rect x="19" y="21" width="12" height="10" rx="1.5" fill="#C9A26B"/><rect x="24" y="21" width="2" height="10" fill="#E8CFA0"/>
-        <path d="M72 18h22l16 15v11H72z" fill="#7B7BE6"/><path d="M80 23h12l9 9H80z" fill="#C4D9F5"/>
-        <rect x="2" y="42" width="108" height="5" rx="2" fill="#4848b8"/>
-        <g fill="#12121F"><circle cx="26" cy="50" r="9"/><circle cx="92" cy="50" r="9"/></g>
-        <g fill="#F5F0E4"><circle cx="26" cy="50" r="3.5"/><circle cx="92" cy="50" r="3.5"/></g>
-      </svg>
-    </div>
+    <div class="truck" id="truck"><img src="img/van-side.png" alt="" width="250" style="width:250px;height:auto;display:block"></div>
   </div>
 </section>
 
@@ -1968,7 +1944,7 @@ function renderPaquete(pkg) {
     // camión
     if (truck) {
       const roadW = entregas.clientWidth;
-      const stopX = roadW * 0.95 - 190;              // frena justo antes de la casa
+      const stopX = roadW * 0.95 - 340;              // frena justo antes de la casa
       const x = -110 + cur.road * (stopX + 110);
       truck.style.transform = `translate3d(${x}px,0,0)`;
       const arrived = cur.road > 0.93;
