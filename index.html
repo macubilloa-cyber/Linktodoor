@@ -815,6 +815,28 @@
     .hv-wrap .fc-1{top:14px!important;left:14px!important;right:auto!important;bottom:auto!important}
     .hv-wrap .fc-2{bottom:14px!important;right:14px!important;left:auto!important;top:auto!important}
     @media(max-width:860px){.hv-wrap .fc-1,.hv-wrap .fc-2{display:none!important}}
+
+    /* ── Flash destacado, claridad y confianza ── */
+    .flash-pill{display:inline-flex;align-items:center;gap:.6rem;margin:1.1rem 0 .2rem;padding:.55rem 1rem;border-radius:999px;background:#12121F;color:#fff;text-decoration:none;font-size:.9rem;box-shadow:0 10px 24px rgba(18,18,31,.18);transition:transform .2s}
+    .flash-pill:hover{transform:translateY(-2px)}
+    .flash-pill .ic{width:18px;height:18px;color:#FFD23F;flex:none}
+    .flash-pill b{color:#FFD23F}
+    .flash-pill i{font-style:normal;opacity:.65;font-size:.8rem;margin-left:.3rem}
+    .mc-top{display:inline-block;vertical-align:middle;margin-left:.5rem;padding:.15rem .55rem;border-radius:999px;background:#FFD23F;color:#12121F;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .modal-card.flash{box-shadow:0 0 0 2px #FFD23F,0 20px 44px rgba(91,91,214,.28)}
+    .clear-list{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem 1.4rem;margin:1.2rem 0 0;padding:0}
+    .clear-list li{display:flex;align-items:center;gap:.4rem;font-weight:600;font-size:.92rem;color:rgba(255,255,255,.88)}
+    .clear-list .ic{width:18px;height:18px;color:#4ADE80}
+    #nosotros{padding:6rem 2rem;background:#fff}
+    .about-grid{max-width:1100px;margin:3rem auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+    .about-card{background:#F7F6FF;border-radius:24px;padding:2rem;border:1px solid rgba(91,91,214,.12)}
+    .ab-ico{width:48px;height:48px;border-radius:14px;background:#fff;color:#5B5BD6;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;box-shadow:0 6px 16px rgba(91,91,214,.15)}
+    .ab-ico .ic{width:24px;height:24px}
+    .about-card h3{font-size:1.15rem;margin-bottom:.5rem;color:#12121F}
+    .about-card p{color:#4B5563;line-height:1.6;font-size:.95rem}
+    .about-card ul{list-style:none;margin:1rem 0 0;padding:0;display:grid;gap:.8rem;font-size:.9rem;font-weight:600;color:#12121F}
+    .ab-link{display:inline-block;margin-top:1rem;color:#5B5BD6;font-weight:700;text-decoration:none}
+    @media(max-width:860px){.about-grid{grid-template-columns:1fr}#nosotros{padding:4rem 1.25rem}.flash-pill{font-size:.82rem}.flash-pill i{display:none}}
     /* móvil */
     @media(max-width:768px){
       .hero-inner{padding-top:6.2rem;gap:1.5rem}
@@ -868,6 +890,7 @@
         <button class="btn-cta" onclick="goTo('#registro')">REGISTRATE GRATIS <span class="arr"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></button>
         <button class="btn-out" onclick="goTo('#como')">CÓMO FUNCIONA <span class="arr"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span></button>
       </div>
+      <a class="flash-pill" href="#precios"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg><span><b>Flash:</b> en tu puerta en 3 días hábiles</span><i>Ver tarifas →</i></a>
       <ul class="hero-trust">
         <li><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> Casillero gratis</li>
         <li><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg> Entregas mar. y vie.</li>
@@ -1032,12 +1055,17 @@
     <span class="sec-tag">Tarifas claras</span>
     <h2>Precio justo, <em>sin sorpresas</em></h2>
     <p>Un solo precio por libra. Elegís la velocidad que más te conviene.</p>
+    <ul class="clear-list">
+      <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Sin cargos escondidos</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Casillero en Miami gratis</li>
+      <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Sabés el total antes de enviar</li>
+    </ul>
   </div>
   <div class="precio-main">
     <div class="modalidades">
       <div class="modal-card flash reveal d1">
         <div class="mc-icon"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></div>
-        <div class="mc-name">Flash</div>
+        <div class="mc-name">Flash <span class="mc-top">Más rápido</span></div>
         <div class="mc-days">3 <span>días hábiles</span></div>
         <div class="mc-desc">La opción más rápida. Tu paquete vuela en cuanto llega a la bodega de Miami. Ideal cuando lo necesitás ya.</div>
       </div>
@@ -1079,6 +1107,34 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIÉNES SOMOS -->
+<section id="nosotros">
+  <div class="sec-head reveal">
+    <span class="sec-tag">Quiénes somos</span>
+    <h2>Una operación real, <em>con cara y dirección</em></h2>
+    <p>Linktodoor es una empresa de casillero y entregas entre Miami y San José. Esto es lo que podés verificar de nosotros.</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-card reveal d1">
+      <div class="ab-ico"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></div>
+      <h3>Bodegas en Miami</h3>
+      <p>Recibimos tus paquetes en bodegas físicas, no en un apartado postal.</p>
+      <ul><li>2071 NW 112th Ave, Ste 107<br>Miami, FL 33172</li><li>5414 NW 79 Ave<br>Doral, FL 33166</li></ul>
+    </div>
+    <div class="about-card reveal d2">
+      <div class="ab-ico"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></div>
+      <h3>Entregas con calendario fijo</h3>
+      <p>Salimos a ruta todos los martes y viernes en San José, y te avisamos antes de llegar.</p>
+    </div>
+    <div class="about-card reveal d3">
+      <div class="ab-ico"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></div>
+      <h3>Rastreo y trato directo</h3>
+      <p>Seguís tu paquete en línea y hablás con una persona real por WhatsApp, no con un bot.</p>
+      <a class="ab-link" href="https://wa.me/50685173813" target="_blank" rel="noopener">Escribinos por WhatsApp →</a>
     </div>
   </div>
 </section>
@@ -1268,6 +1324,7 @@
         <ul>
           <li><a href="#como">Cómo funciona</a></li>
           <li><a href="#entregas">Zonas de entrega</a></li>
+          <li><a href="#nosotros">Quiénes somos</a></li>
           <li><a href="#precios">Calculadora</a></li>
           <li><a href="#rastrear">Rastrear paquete</a></li>
           <li><a href="#registro">Registrarse</a></li>
