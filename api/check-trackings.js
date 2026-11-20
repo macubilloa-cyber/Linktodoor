@@ -41,7 +41,7 @@ async function box2boxLookup(trackingNumber, apiKey) {
   }
 }
 
-/* Returns the result text if the tracking is registered at the Flash warehouse (Noblex/Cargotrack, bodega 5414), else null.
+/* Returns { summary, receivedAt } if the tracking is registered at the Flash warehouse (Noblex/Cargotrack, bodega 5414), else null.
    Uses the public search at /m/track.asp, which needs no login. */
 async function noblexLookup(trackingNumber) {
   try {
@@ -61,7 +61,20 @@ async function noblexLookup(trackingNumber) {
     const m = text.match(/Searching for\s+\S+\s+(.*?)\s+Login\s+Tracking\s+Settings/i);
     const result = (m ? m[1] : '').trim();
     if (!result || /NOT FOUND/i.test(result)) return null;
-    return result.slice(0, 300);
+
+    /* e.g. "IN TRANSIT Received on 11/20/2026 at 10:43:00 AM 2348099 gfus... 1 piece(s) with 1 lbs Tracking Events Recibido 11/20/2026 10:45:54 AM" */
+    const rec    = result.match(/Received on\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\s+at\s+(\d{1,2}:\d{2})(?::\d{2})?\s*(AM|PM)/i);
+    const wh     = result.match(/(?:AM|PM)\s+(\d{5,})\s/i);
+    const pieces = result.match(/(\d+)\s+piece\(s\)\s+with\s+([\d.]+)\s*lbs/i);
+    const parts = [];
+    if (rec)    parts.push(`recibido ${rec[2]}/${rec[1]}/${rec[3]} ${rec[4]} ${rec[5].toUpperCase()}`);
+    if (wh)     parts.push(`WH ${wh[1]}`);
+    if (pieces) parts.push(`${pieces[1]} pieza(s), ${pieces[2]} lbs`);
+    const summary = parts.length ? parts.join(' · ') : result.slice(0, 200);
+    const receivedAt = rec
+      ? `${rec[3]}-${rec[1].padStart(2, '0')}-${rec[2].padStart(2, '0')} ${rec[4]} ${rec[5].toUpperCase()}`
+      : null;
+    return { summary, receivedAt };
   } catch (e) {
     console.error('[check-trackings] noblex error:', trackingNumber, e.message);
     return null;
@@ -136,7 +149,8 @@ export default async function handler(req, res) {
     await patchAlert(t.id, {
       status:          'en_bodega',
       status_es:       'Recibido en Miami',
-      last_event:      `Bodega Flash: ${info}`,
+      last_event:      `Bodega Flash: ${info.summary}`,
+      last_event_time: info.receivedAt,
       carrier:         'Bodega Flash',
       last_checked_at: now,
       needs_notify:    true
