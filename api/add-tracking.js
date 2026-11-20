@@ -25,9 +25,12 @@ export default async function handler(req, res) {
   const userEmail = userData.email;
   if (!userEmail) return res.status(401).json({ ok: false, error: 'Sesión inválida.' });
 
-  const { tracking_number, description } = req.body || {};
+  const { tracking_number, description, bodega } = req.body || {};
   if (!tracking_number) {
     return res.status(400).json({ ok: false, error: 'Número de tracking requerido.' });
+  }
+  if (!['flash', 'consolidada'].includes(bodega)) {
+    return res.status(400).json({ ok: false, error: 'Elegí la bodega: Flash o Consolidada.' });
   }
 
   const trackingNum = tracking_number.trim().toUpperCase();
@@ -58,7 +61,16 @@ export default async function handler(req, res) {
   }
 
   /* Insert into Supabase */
-  const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/package_alerts`, {
+  const row = {
+    user_email:      userEmail,
+    client_name:     clientName,
+    tracking_number: trackingNum,
+    description:     description?.trim() || null,
+    bodega,
+    status:          'registrado',
+    status_es:       'Registrado'
+  };
+  const insert = body => fetch(`${SUPABASE_URL}/rest/v1/package_alerts`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${SUPABASE_KEY}`,
@@ -66,15 +78,15 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({
-      user_email:      userEmail,
-      client_name:     clientName,
-      tracking_number: trackingNum,
-      description:     description?.trim() || null,
-      status:          'registrado',
-      status_es:       'Registrado'
-    })
+    body: JSON.stringify(body)
   });
+  let sbRes = await insert(row);
+  /* Until supabase/prealertas-bodega.sql is run the column doesn't exist: save without it */
+  if (!sbRes.ok) {
+    console.error('[add-tracking] insert with bodega failed:', sbRes.status, await sbRes.text());
+    const { bodega: _omit, ...rest } = row;
+    sbRes = await insert(rest);
+  }
 
   if (!sbRes.ok) {
     return res.status(400).json({ ok: false, error: 'Error al guardar el tracking.' });

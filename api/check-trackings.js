@@ -41,6 +41,46 @@ async function box2boxLookup(trackingNumber, apiKey) {
   }
 }
 
+/* Returns { summary, receivedAt } if the tracking is registered at the Flash warehouse (Noblex/Cargotrack, bodega 5414), else null.
+   Uses the public search at /m/track.asp, which needs no login. */
+async function noblexLookup(trackingNumber) {
+  try {
+    const r = await fetch('https://noblex.cargotrack.net/m/track.asp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ track: trackingNumber, action2: 'process' }).toString()
+    });
+    if (!r.ok) return null;
+    const html = new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const m = text.match(/Searching for\s+\S+\s+(.*?)\s+Login\s+Tracking\s+Settings/i);
+    const result = (m ? m[1] : '').trim();
+    if (!result || /NOT FOUND/i.test(result)) return null;
+
+    /* e.g. "IN TRANSIT Received on 11/20/2026 at 10:43:00 AM 2348099 gfus... 1 piece(s) with 1 lbs Tracking Events Recibido 11/20/2026 10:45:54 AM" */
+    const rec    = result.match(/Received on\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\s+at\s+(\d{1,2}:\d{2})(?::\d{2})?\s*(AM|PM)/i);
+    const wh     = result.match(/(?:AM|PM)\s+(\d{5,})\s/i);
+    const pieces = result.match(/(\d+)\s+piece\(s\)\s+with\s+([\d.]+)\s*lbs/i);
+    const parts = [];
+    if (rec)    parts.push(`recibido ${rec[2]}/${rec[1]}/${rec[3]} ${rec[4]} ${rec[5].toUpperCase()}`);
+    if (wh)     parts.push(`WH ${wh[1]}`);
+    if (pieces) parts.push(`${pieces[1]} pieza(s), ${pieces[2]} lbs`);
+    const summary = parts.length ? parts.join(' · ') : result.slice(0, 200);
+    const receivedAt = rec
+      ? `${rec[3]}-${rec[1].padStart(2, '0')}-${rec[2].padStart(2, '0')} ${rec[4]} ${rec[5].toUpperCase()}`
+      : null;
+    return { summary, receivedAt };
+  } catch (e) {
+    console.error('[check-trackings] noblex error:', trackingNumber, e.message);
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -59,11 +99,12 @@ export default async function handler(req, res) {
   /* Recent trackings not yet received in Miami and not set by hand in the panel.
      'entregado' stays in the list: the carrier delivered it, but Box2Box may not have registered it yet. */
   const since = new Date(Date.now() - LOOKBACK_DAYS * 864e5).toISOString();
-  const listRes = await fetch(
+  const listUrl = fields =>
     `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.en_bodega&status_manual=not.is.true` +
-    `&created_at=gte.${since}&select=id,tracking_number,status`,
-    { headers: sbHeaders }
-  );
+    `&created_at=gte.${since}&select=${fields}`;
+  let listRes = await fetch(listUrl('id,tracking_number,status,bodega'), { headers: sbHeaders });
+  /* Until supabase/prealertas-bodega.sql is run there is no bodega column */
+  if (!listRes.ok) listRes = await fetch(listUrl('id,tracking_number,status'), { headers: sbHeaders });
   const trackings = await listRes.json();
 
   if (!Array.isArray(trackings) || !trackings.length) {
@@ -76,12 +117,14 @@ export default async function handler(req, res) {
 
   /* 1) Bodega Consolidada (Box2Box): if the warehouse has it, it's received in Miami */
   const inWarehouse = new Set();
+  /* The client picks the bodega when pre-alerting: only search where they sent it (old ones without bodega: both) */
+  const forB2B = trackings.filter(t => t.bodega !== 'flash');
   if (B2B_KEY) {
-    const found = await mapLimit(trackings, 5, t => box2boxLookup(t.tracking_number, B2B_KEY));
-    for (let i = 0; i < trackings.length; i++) {
+    const found = await mapLimit(forB2B, 5, t => box2boxLookup(t.tracking_number, B2B_KEY));
+    for (let i = 0; i < forB2B.length; i++) {
       const pkg = found[i];
       if (!pkg) continue;
-      const t = trackings[i];
+      const t = forB2B[i];
       inWarehouse.add(t.id);
       const label = (pkg.estadoActual && typeof pkg.estadoActual === 'object')
         ? pkg.estadoActual.label : (pkg.estadoActual || '');
@@ -91,11 +134,34 @@ export default async function handler(req, res) {
         last_event:      label ? `Bodega Consolidada: ${label}` : 'Recibido en la bodega Consolidada',
         carrier:         'Bodega Consolidada',
         last_checked_at: now,
-        needs_notify:    true
+        needs_notify:    true,
+        ...(t.bodega === undefined ? {} : { bodega: 'consolidada' })
       });
       updated++;
       receivedInMiami++;
     }
+  }
+
+  /* 1b) Bodega Flash (Noblex, 5414): public search, no key needed */
+  const notInB2B = trackings.filter(t => !inWarehouse.has(t.id) && t.bodega !== 'consolidada');
+  const flashFound = await mapLimit(notInB2B, 3, t => noblexLookup(t.tracking_number));
+  for (let i = 0; i < notInB2B.length; i++) {
+    const info = flashFound[i];
+    if (!info) continue;
+    const t = notInB2B[i];
+    inWarehouse.add(t.id);
+    await patchAlert(t.id, {
+      status:          'en_bodega',
+      status_es:       'Recibido en Miami',
+      last_event:      `Bodega Flash: ${info.summary}`,
+      last_event_time: info.receivedAt,
+      carrier:         'Bodega Flash',
+      last_checked_at: now,
+      needs_notify:    true,
+      ...(t.bodega === undefined ? {} : { bodega: 'flash' })
+    });
+    updated++;
+    receivedInMiami++;
   }
 
   /* 2) The rest: carrier status from 17track (skips ones the carrier already delivered) */
