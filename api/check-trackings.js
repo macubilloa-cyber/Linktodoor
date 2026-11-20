@@ -99,11 +99,12 @@ export default async function handler(req, res) {
   /* Recent trackings not yet received in Miami and not set by hand in the panel.
      'entregado' stays in the list: the carrier delivered it, but Box2Box may not have registered it yet. */
   const since = new Date(Date.now() - LOOKBACK_DAYS * 864e5).toISOString();
-  const listRes = await fetch(
+  const listUrl = fields =>
     `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.en_bodega&status_manual=not.is.true` +
-    `&created_at=gte.${since}&select=id,tracking_number,status`,
-    { headers: sbHeaders }
-  );
+    `&created_at=gte.${since}&select=${fields}`;
+  let listRes = await fetch(listUrl('id,tracking_number,status,bodega'), { headers: sbHeaders });
+  /* Until supabase/prealertas-bodega.sql is run there is no bodega column */
+  if (!listRes.ok) listRes = await fetch(listUrl('id,tracking_number,status'), { headers: sbHeaders });
   const trackings = await listRes.json();
 
   if (!Array.isArray(trackings) || !trackings.length) {
@@ -116,12 +117,14 @@ export default async function handler(req, res) {
 
   /* 1) Bodega Consolidada (Box2Box): if the warehouse has it, it's received in Miami */
   const inWarehouse = new Set();
+  /* The client picks the bodega when pre-alerting: only search where they sent it (old ones without bodega: both) */
+  const forB2B = trackings.filter(t => t.bodega !== 'flash');
   if (B2B_KEY) {
-    const found = await mapLimit(trackings, 5, t => box2boxLookup(t.tracking_number, B2B_KEY));
-    for (let i = 0; i < trackings.length; i++) {
+    const found = await mapLimit(forB2B, 5, t => box2boxLookup(t.tracking_number, B2B_KEY));
+    for (let i = 0; i < forB2B.length; i++) {
       const pkg = found[i];
       if (!pkg) continue;
-      const t = trackings[i];
+      const t = forB2B[i];
       inWarehouse.add(t.id);
       const label = (pkg.estadoActual && typeof pkg.estadoActual === 'object')
         ? pkg.estadoActual.label : (pkg.estadoActual || '');
@@ -131,7 +134,8 @@ export default async function handler(req, res) {
         last_event:      label ? `Bodega Consolidada: ${label}` : 'Recibido en la bodega Consolidada',
         carrier:         'Bodega Consolidada',
         last_checked_at: now,
-        needs_notify:    true
+        needs_notify:    true,
+        ...(t.bodega === undefined ? {} : { bodega: 'consolidada' })
       });
       updated++;
       receivedInMiami++;
@@ -139,7 +143,7 @@ export default async function handler(req, res) {
   }
 
   /* 1b) Bodega Flash (Noblex, 5414): public search, no key needed */
-  const notInB2B = trackings.filter(t => !inWarehouse.has(t.id));
+  const notInB2B = trackings.filter(t => !inWarehouse.has(t.id) && t.bodega !== 'consolidada');
   const flashFound = await mapLimit(notInB2B, 3, t => noblexLookup(t.tracking_number));
   for (let i = 0; i < notInB2B.length; i++) {
     const info = flashFound[i];
@@ -153,7 +157,8 @@ export default async function handler(req, res) {
       last_event_time: info.receivedAt,
       carrier:         'Bodega Flash',
       last_checked_at: now,
-      needs_notify:    true
+      needs_notify:    true,
+      ...(t.bodega === undefined ? {} : { bodega: 'flash' })
     });
     updated++;
     receivedInMiami++;

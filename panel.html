@@ -367,6 +367,13 @@
           <div class="ph-sub">Paquetes en seguimiento de tus clientes · se revisan diariamente</div>
         </div>
         <div class="ph-actions">
+          <select id="alertas-bodega" class="no-print" onchange="renderAlertas()" title="Filtrar por bodega"
+            style="width:auto;padding:6px 10px;border-radius:8px;font-size:.82rem;font-weight:700">
+            <option value="">Todas las bodegas</option>
+            <option value="flash">⚡ Flash (5414)</option>
+            <option value="consolidada">📦 Consolidada (2071)</option>
+            <option value="none">Sin bodega</option>
+          </select>
           <button class="btn btn-secondary btn-sm" onclick="renderAlertas()">↻ Actualizar</button>
         </div>
       </div>
@@ -2686,11 +2693,14 @@ async function renderAlertas() {
     sb.from('saved_clients').select('name, phone, email')
   ]);
 
-  const alertList  = alertsRes.data  || [];
+  const allAlerts  = alertsRes.data  || [];
   const clientList = clientsRes.data || [];
+  const bodegaFilter = document.getElementById('alertas-bodega')?.value || '';
+  const alertList = !bodegaFilter ? allAlerts
+    : allAlerts.filter(a => bodegaFilter === 'none' ? !a.bodega : a.bodega === bodegaFilter);
 
-  /* Update badge */
-  const pendingCount = alertList.filter(a => a.needs_notify).length;
+  /* Update badge (always counts every bodega) */
+  const pendingCount = allAlerts.filter(a => a.needs_notify).length;
   const badge = document.getElementById('alertas-badge');
   if (pendingCount > 0) { badge.textContent = pendingCount; badge.style.display = 'inline-flex'; }
   else { badge.style.display = 'none'; }
@@ -2734,6 +2744,8 @@ async function renderAlertas() {
         <td data-label="Tracking">
           <strong style="font-family:monospace;font-size:.83rem">${esc(alert.tracking_number)}</strong>
           ${alert.description ? `<br><span style="font-size:.73rem;color:var(--gray)">${esc(alert.description)}</span>` : ''}
+          ${alert.bodega === 'flash' ? `<br><span style="display:inline-block;margin-top:3px;padding:1px 8px;border-radius:20px;font-size:.68rem;font-weight:800;background:#ECFDF5;color:#059669">⚡ Flash</span>`
+            : alert.bodega === 'consolidada' ? `<br><span style="display:inline-block;margin-top:3px;padding:1px 8px;border-radius:20px;font-size:.68rem;font-weight:800;background:#EEEEF8;color:#4848b8">📦 Consolidada</span>` : ''}
         </td>
         <td data-label="Estado">${alertStatusSelect(alert, sInfo)}</td>
         <td style="font-size:.8rem;color:var(--gray);max-width:190px" data-label="Último evento">

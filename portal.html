@@ -156,6 +156,14 @@
     .t-input:focus { border-color:var(--pri); background:white; box-shadow:0 0 0 3px rgba(91,91,214,.1); }
     .t-input.t-narrow { flex:1; min-width:170px; }
     .t-input.t-wide   { flex:2; min-width:190px; }
+    .bodega-pick { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; }
+    .bodega-pick label { flex:1; min-width:130px; display:flex; align-items:center; gap:.5rem; padding:.65rem .9rem; border:1.5px solid var(--border); border-radius:10px; background:var(--light); cursor:pointer; font-size:.84rem; font-weight:700; color:var(--dark); transition:border-color .18s,background .18s; }
+    .bodega-pick label small { display:block; font-weight:500; font-size:.72rem; color:var(--muted); }
+    .bodega-pick input { accent-color:var(--pri); }
+    .bodega-pick label:has(input:checked) { border-color:var(--pri); background:white; box-shadow:0 0 0 3px rgba(91,91,214,.1); }
+    .bodega-tag { display:inline-block; margin-top:3px; padding:1px 8px; border-radius:20px; font-size:.68rem; font-weight:800; }
+    .bodega-tag.flash { background:#ECFDF5; color:#059669; }
+    .bodega-tag.consolidada { background:#EEEEF8; color:#4848b8; }
     .btn-add-track { padding:.75rem 1.3rem; background:var(--pri); color:white; border:none; border-radius:10px; font-weight:800; font-size:.87rem; cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; transition:all .18s; }
     .btn-add-track:hover { background:var(--pri-dk); box-shadow:0 4px 16px rgba(91,91,214,.3); transform:translateY(-1px); }
     .btn-add-track:active { transform:none; box-shadow:none; }
@@ -575,9 +583,15 @@
       </div>
       <div class="tracking-form-card">
         <p class="tracking-form-intro">
-          Ingresá el número de rastreo de tu paquete y lo revisamos una vez al día.
+          Elegí a qué bodega mandaste el paquete, ingresá el número de rastreo y lo revisamos una vez al día.
           Te avisamos por WhatsApp cuando cambie el estado.
         </p>
+        <div class="bodega-pick" role="radiogroup" aria-label="Bodega">
+          <label><input type="radio" name="alertBodega" value="flash" />
+            <span>⚡ Flash<small>Bodega 5414 · 3 días hábiles</small></span></label>
+          <label><input type="radio" name="alertBodega" value="consolidada" />
+            <span>📦 Consolidada<small>Bodega 2071</small></span></label>
+        </div>
         <div class="tracking-inputs">
           <input id="alertTracking" type="text" class="t-input t-narrow"
             placeholder="Número de tracking" />
@@ -1234,6 +1248,7 @@ async function loadTrackings(userEmail) {
       <td class="m-title">
         <strong style="font-family:monospace;font-size:.85rem;color:var(--dark)">${esc(item.tracking_number)}</strong>
         ${item.description ? `<br><span style="font-size:.74rem;color:var(--muted)">${esc(item.description)}</span>` : ''}
+        ${item.bodega ? `<br><span class="bodega-tag ${item.bodega}">${item.bodega === 'flash' ? '⚡ Flash' : '📦 Consolidada'}</span>` : ''}
       </td>
       <td data-label="Estado">${trackBadge(item.status)}</td>
       <td style="font-size:.81rem;color:var(--muted);max-width:200px" data-label="Último evento">
@@ -1267,8 +1282,10 @@ async function addTracking() {
   const msgEl    = document.getElementById('alertMsg');
   const tracking = document.getElementById('alertTracking').value.trim().toUpperCase();
   const desc     = document.getElementById('alertDesc').value.trim();
+  const bodega   = document.querySelector('input[name="alertBodega"]:checked')?.value;
 
   msgEl.className = 'track-msg';
+  if (!bodega)   { msgEl.className = 'track-msg err'; msgEl.textContent = 'Elegí la bodega: Flash o Consolidada.'; return; }
   if (!tracking) { msgEl.className = 'track-msg err'; msgEl.textContent = 'Ingresá el número de tracking.'; return; }
 
   btn.disabled = true; btn.textContent = 'Agregando...';
@@ -1279,7 +1296,7 @@ async function addTracking() {
     const res  = await fetch('/api/add-tracking', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ tracking_number: tracking, description: desc })
+      body: JSON.stringify({ tracking_number: tracking, description: desc, bodega })
     });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || 'Error desconocido.');
