@@ -41,6 +41,33 @@ async function box2boxLookup(trackingNumber, apiKey) {
   }
 }
 
+/* Returns the result text if the tracking is registered at the Flash warehouse (Noblex/Cargotrack, bodega 5414), else null.
+   Uses the public search at /m/track.asp, which needs no login. */
+async function noblexLookup(trackingNumber) {
+  try {
+    const r = await fetch('https://noblex.cargotrack.net/m/track.asp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ track: trackingNumber, action2: 'process' }).toString()
+    });
+    if (!r.ok) return null;
+    const html = new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const m = text.match(/Searching for\s+\S+\s+(.*?)\s+Login\s+Tracking\s+Settings/i);
+    const result = (m ? m[1] : '').trim();
+    if (!result || /NOT FOUND/i.test(result)) return null;
+    return result.slice(0, 300);
+  } catch (e) {
+    console.error('[check-trackings] noblex error:', trackingNumber, e.message);
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -96,6 +123,26 @@ export default async function handler(req, res) {
       updated++;
       receivedInMiami++;
     }
+  }
+
+  /* 1b) Bodega Flash (Noblex, 5414): public search, no key needed */
+  const notInB2B = trackings.filter(t => !inWarehouse.has(t.id));
+  const flashFound = await mapLimit(notInB2B, 3, t => noblexLookup(t.tracking_number));
+  for (let i = 0; i < notInB2B.length; i++) {
+    const info = flashFound[i];
+    if (!info) continue;
+    const t = notInB2B[i];
+    inWarehouse.add(t.id);
+    await patchAlert(t.id, {
+      status:          'en_bodega',
+      status_es:       'Recibido en Miami',
+      last_event:      `Bodega Flash: ${info}`,
+      carrier:         'Bodega Flash',
+      last_checked_at: now,
+      needs_notify:    true
+    });
+    updated++;
+    receivedInMiami++;
   }
 
   /* 2) The rest: carrier status from 17track (skips ones the carrier already delivered) */
