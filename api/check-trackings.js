@@ -1,4 +1,4 @@
-import { warehousePatch, warehouseErrors, resetWarehouseRun } from './_warehouses.js';
+import { warehousePatch, warehouseErrors, resetWarehouseRun, FLASH_ON_VERCEL } from './_warehouses.js';
 
 const STATUS_MAP = {
   0:  { key: 'sin_datos',     es: 'Sin datos aún' },
@@ -58,6 +58,27 @@ export default async function handler(req, res) {
   /* Recent trackings not yet received in Miami and not set by hand in the panel.
      'entregado' stays in the list: the carrier delivered it, but Box2Box may not have registered it yet. */
   /* ?tracking=XXX checks just that one (panel "Revisar ahora" on a single row / debugging) */
+  /* Panel button: also start the Flash check on GitHub right away (needs GITHUB_DISPATCH_TOKEN in Vercel) */
+  let flashRun = FLASH_ON_VERCEL ? 'vercel' : 'github-cada-hora';
+  if (!FLASH_ON_VERCEL && req.query?.flash === '1' && process.env.GITHUB_DISPATCH_TOKEN) {
+    try {
+      const gh = await fetch('https://api.github.com/repos/macubilloa-cyber/Linktodoor/actions/workflows/check-flash.yml/dispatches', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_DISPATCH_TOKEN}`,
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'linktodoor-check-trackings'
+        },
+        body: JSON.stringify({ ref: process.env.GITHUB_DISPATCH_REF || 'claude/interactive-linktodoor-page-cUFy2' })
+      });
+      flashRun = gh.ok ? 'github-lanzada' : `github-error-${gh.status}`;
+      if (!gh.ok) console.error('[check-trackings] dispatch failed:', gh.status, await gh.text());
+    } catch (e) {
+      flashRun = 'github-error';
+      console.error('[check-trackings] dispatch error:', e.message);
+    }
+  }
+
   const onlyTracking = String(req.query?.tracking || '').trim().toUpperCase();
   const since = new Date(Date.now() - LOOKBACK_DAYS * 864e5).toISOString();
   /* Works whether or not the optional columns exist yet (supabase/prealertas-manual.sql, prealertas-bodega.sql) */
@@ -84,7 +105,7 @@ export default async function handler(req, res) {
   }
 
   if (!trackings.length) {
-    return res.status(200).json({ ok: true, checked: 0, receivedInMiami: 0, updated: 0, found: [], failed: [], warehouseErrors: [] });
+    return res.status(200).json({ ok: true, checked: 0, receivedInMiami: 0, updated: 0, found: [], failed: [], warehouseErrors: [], flashRun });
   }
 
   const now = new Date().toISOString();
@@ -99,7 +120,7 @@ export default async function handler(req, res) {
   const failed = [];
   const hits = await mapLimit(trackings, 6, t => {
     if (Date.now() > deadline) { skippedIds.add(t.id); return null; }
-    return warehousePatch(t.tracking_number, t.bodega, B2B_KEY);
+    return warehousePatch(t.tracking_number, t.bodega, B2B_KEY, { flash: FLASH_ON_VERCEL });
   });
   for (let i = 0; i < trackings.length; i++) {
     const hit = hits[i];
@@ -184,6 +205,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     ok: true, checked: trackings.length - skippedIds.size, skipped: skippedIds.size, receivedInMiami, updated, found, failed, warehouseErrors,
-    keys: { consolidada: !!B2B_KEY, track17: !!TRACK17_KEY }
+    keys: { consolidada: !!B2B_KEY, track17: !!TRACK17_KEY }, flashRun
   });
 }

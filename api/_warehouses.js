@@ -102,9 +102,13 @@ export async function noblexLookup(trackingNumber) {
   }
 }
 
+/* Flash's server doesn't answer requests from Vercel, so on Vercel Flash is checked by the GitHub
+   Action in .github/workflows/check-flash.yml instead. Set FLASH_FROM_VERCEL=1 if that ever changes. */
+export const FLASH_ON_VERCEL = process.env.FLASH_FROM_VERCEL === '1';
+
 /* Looks the tracking up in both warehouses, the one the client picked first.
    Returns the patch that marks it received in Miami, or null if neither warehouse has it. */
-export async function warehousePatch(trackingNumber, bodega, b2bKey) {
+export async function warehousePatch(trackingNumber, bodega, b2bKey, { flash = true } = {}) {
   const order = bodega === 'flash' ? ['flash', 'consolidada'] : ['consolidada', 'flash'];
   for (const w of order) {
     if (w === 'consolidada' && b2bKey) {
@@ -121,7 +125,7 @@ export async function warehousePatch(trackingNumber, bodega, b2bKey) {
         };
       }
     }
-    if (w === 'flash') {
+    if (w === 'flash' && flash) {
       const info = await noblexLookup(trackingNumber);
       if (info) {
         return {
