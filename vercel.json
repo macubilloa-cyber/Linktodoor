@@ -1,11 +1,28 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/mi-cuenta", "destination": "/portal.html" },
-    { "source": "/panel",     "destination": "/panel.html"  }
+    {
+      "source": "/mi-cuenta",
+      "destination": "/portal.html"
+    },
+    {
+      "source": "/panel",
+      "destination": "/panel.html"
+    }
   ],
   "crons": [
-    { "path": "/api/check-trackings", "schedule": "0 14 * * *" },
-    { "path": "/api/keep-alive",      "schedule": "0 10 */3 * *" }
-  ]
+    {
+      "path": "/api/check-trackings",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 10 */3 * *"
+    }
+  ],
+  "functions": {
+    "api/check-trackings.js": {
+      "maxDuration": 60
+    }
+  }
 }
