@@ -1,5 +1,5 @@
 # Checks pre-alerts against the Flash warehouse. Manual only: Flash's server doesn't answer from GitHub's
-# runners either (tested 2026-11-25), so the hourly schedule is off. Needs the secret SUPABASE_SERVICE_KEY.
+# runners either (tested 2026-11-25), so the hourly schedule is off; the hourly check runs on the office Mac (scripts/mac/instalar-flash.sh). Needs the secret SUPABASE_SERVICE_KEY.
 name: Revisar bodega Flash
 
 on:
