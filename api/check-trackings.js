@@ -1,4 +1,4 @@
-import { warehousePatch } from './_warehouses.js';
+import { warehousePatch, warehouseErrors } from './_warehouses.js';
 
 const STATUS_MAP = {
   0:  { key: 'sin_datos',     es: 'Sin datos aún' },
@@ -37,29 +37,56 @@ export default async function handler(req, res) {
   }
 
   const sbHeaders = { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' };
-  const patchAlert = (id, patch) => fetch(`${SUPABASE_URL}/rest/v1/package_alerts?id=eq.${id}`, {
+  const rawPatch = (id, patch) => fetch(`${SUPABASE_URL}/rest/v1/package_alerts?id=eq.${id}`, {
     method: 'PATCH', headers: sbHeaders, body: JSON.stringify(patch)
   });
+  /* If an optional column (last_event_time, bodega) is missing or rejects the value, save the rest anyway */
+  const patchAlert = async (id, patch) => {
+    let r = await rawPatch(id, patch);
+    for (const col of ['last_event_time', 'bodega']) {
+      if (r.ok || !(col in patch)) continue;
+      console.error(`[check-trackings] patch failed, retrying without ${col}:`, r.status, await r.text());
+      const { [col]: _omit, ...rest } = patch;
+      patch = rest;
+      r = await rawPatch(id, patch);
+    }
+    return r;
+  };
 
   /* Recent trackings not yet received in Miami and not set by hand in the panel.
      'entregado' stays in the list: the carrier delivered it, but Box2Box may not have registered it yet. */
   /* ?tracking=XXX checks just that one (panel "Revisar ahora" on a single row / debugging) */
   const onlyTracking = String(req.query?.tracking || '').trim().toUpperCase();
   const since = new Date(Date.now() - LOOKBACK_DAYS * 864e5).toISOString();
-  const listUrl = fields =>
-    `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.en_bodega&status_manual=not.is.true` +
-    `&created_at=gte.${since}&select=${fields}` +
-    (onlyTracking ? `&tracking_number=eq.${encodeURIComponent(onlyTracking)}` : '');
-  let listRes = await fetch(listUrl('id,tracking_number,status,bodega'), { headers: sbHeaders });
-  /* Until supabase/prealertas-bodega.sql is run there is no bodega column */
-  if (!listRes.ok) listRes = await fetch(listUrl('id,tracking_number,status'), { headers: sbHeaders });
-  const trackings = await listRes.json();
+  /* Works whether or not the optional columns exist yet (supabase/prealertas-manual.sql, prealertas-bodega.sql) */
+  const attempts = [
+    { manual: true,  fields: 'id,tracking_number,status,bodega' },
+    { manual: true,  fields: 'id,tracking_number,status' },
+    { manual: false, fields: 'id,tracking_number,status,bodega' },
+    { manual: false, fields: 'id,tracking_number,status' }
+  ];
+  let trackings = null;
+  let listError = '';
+  for (const a of attempts) {
+    const url = `${SUPABASE_URL}/rest/v1/package_alerts?status=neq.en_bodega` +
+      (a.manual ? '&status_manual=not.is.true' : '') +
+      `&created_at=gte.${since}&select=${a.fields}` +
+      (onlyTracking ? `&tracking_number=eq.${encodeURIComponent(onlyTracking)}` : '');
+    const r = await fetch(url, { headers: sbHeaders });
+    if (r.ok) { trackings = await r.json(); break; }
+    listError = `HTTP ${r.status}: ${(await r.text()).slice(0, 300)}`;
+    console.error('[check-trackings] list failed:', a, listError);
+  }
+  if (!Array.isArray(trackings)) {
+    return res.status(500).json({ ok: false, error: 'No se pudo leer package_alerts en Supabase. ' + listError });
+  }
 
-  if (!Array.isArray(trackings) || !trackings.length) {
-    return res.status(200).json({ ok: true, checked: 0, updated: 0 });
+  if (!trackings.length) {
+    return res.status(200).json({ ok: true, checked: 0, receivedInMiami: 0, updated: 0, found: [], failed: [], warehouseErrors: [] });
   }
 
   const now = new Date().toISOString();
+  warehouseErrors.length = 0;
   let updated = 0;
   let receivedInMiami = 0;
 
@@ -80,13 +107,7 @@ export default async function handler(req, res) {
       needs_notify:    true,
       ...(t.bodega === undefined ? {} : { bodega })
     };
-    let r = await patchAlert(t.id, patch);
-    /* If the warehouse date doesn't fit last_event_time, don't lose the update over it */
-    if (!r.ok && patch.last_event_time) {
-      console.error('[check-trackings] patch failed, retrying without last_event_time:', t.tracking_number, r.status, await r.text());
-      const { last_event_time: _omit, ...noTime } = patch;
-      r = await patchAlert(t.id, noTime);
-    }
+    const r = await patchAlert(t.id, patch);
     if (!r.ok) {
       const err = await r.text();
       console.error('[check-trackings] patch failed:', t.tracking_number, r.status, err);
@@ -146,5 +167,17 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(200).json({ ok: true, checked: trackings.length, receivedInMiami, updated, found, failed });
+  /* Mark every checked one as checked today, so the panel shows it was looked at */
+  const ids = trackings.map(t => t.id).filter(id => !inWarehouse.has(id));
+  for (let i = 0; i < ids.length; i += 100) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/package_alerts?id=in.(${ids.slice(i, i + 100).join(',')})`, {
+      method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ last_checked_at: now })
+    });
+    if (!r.ok) console.error('[check-trackings] last_checked_at failed:', r.status, await r.text());
+  }
+
+  return res.status(200).json({
+    ok: true, checked: trackings.length, receivedInMiami, updated, found, failed, warehouseErrors,
+    keys: { consolidada: !!B2B_KEY, track17: !!TRACK17_KEY }
+  });
 }

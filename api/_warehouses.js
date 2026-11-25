@@ -2,6 +2,13 @@
    Files starting with _ are not exposed as API routes by Vercel. */
 
 const TIMEOUT_MS = 10000;
+
+/* Problems talking to the warehouses during the current run (reported by check-trackings) */
+export const warehouseErrors = [];
+const noteError = (where, tracking, msg) => {
+  console.error(`[warehouses] ${where} error:`, tracking, msg);
+  if (warehouseErrors.length < 20) warehouseErrors.push(`${where} ${tracking}: ${msg}`);
+};
 const norm = v => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 /* The warehouses search by partial match ("123" returns someone else's package), so only accept
@@ -20,7 +27,8 @@ export async function box2boxLookup(trackingNumber, apiKey) {
       headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
-    if (!r.ok) return null;
+    /* 404 = not in the warehouse; anything else is a real problem */
+    if (!r.ok) { if (r.status !== 404) noteError('Consolidada', trackingNumber, `HTTP ${r.status}`); return null; }
     const data = await r.json();
     const pkgs = data?.data?.paquetes || [];
     if (!data?.ok || data?.data?.vacio || !pkgs.length) return null;
@@ -28,7 +36,7 @@ export async function box2boxLookup(trackingNumber, apiKey) {
     const ours = norm(trackingNumber);
     return pkgs.find(p => norm(JSON.stringify(p)).includes(ours)) || null;
   } catch (e) {
-    console.error('[check-trackings] box2box error:', trackingNumber, e.message);
+    noteError('Consolidada', trackingNumber, e.message);
     return null;
   }
 }
@@ -43,7 +51,7 @@ export async function noblexLookup(trackingNumber) {
       body: new URLSearchParams({ track: trackingNumber, action2: 'process' }).toString(),
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
-    if (!r.ok) return null;
+    if (!r.ok) { noteError('Flash', trackingNumber, `HTTP ${r.status}`); return null; }
     const html = new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
     const text = html
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -52,7 +60,8 @@ export async function noblexLookup(trackingNumber) {
       .replace(/\s+/g, ' ')
       .trim();
     const m = text.match(/Searching for\s+\S+\s+(.*?)\s+Login\s+Tracking\s+Settings/i);
-    const result = (m ? m[1] : '').trim();
+    if (!m) { noteError('Flash', trackingNumber, 'respuesta inesperada: ' + text.slice(0, 120)); return null; }
+    const result = m[1].trim();
     if (!result || /NOT FOUND/i.test(result)) return null;
     /* Pre-alerted at the warehouse is not physically received yet */
     if (/^PRE-?ALERTED\b/i.test(result)) return null;
@@ -74,7 +83,7 @@ export async function noblexLookup(trackingNumber) {
       : null;
     return { summary, receivedAt };
   } catch (e) {
-    console.error('[check-trackings] noblex error:', trackingNumber, e.message);
+    noteError('Flash', trackingNumber, e.message);
     return null;
   }
 }
