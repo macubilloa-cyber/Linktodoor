@@ -1,3 +1,5 @@
+import { warehousePatch } from './_warehouses.js';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -60,6 +62,11 @@ export default async function handler(req, res) {
     }
   }
 
+  /* If the package is already in a Miami warehouse, save it as received right away
+     instead of waiting for the daily check */
+  let inWarehouse = null;
+  try { inWarehouse = await warehousePatch(trackingNum, bodega, process.env.BOX2BOX_API_KEY); } catch {}
+
   /* Insert into Supabase */
   const row = {
     user_email:      userEmail,
@@ -68,7 +75,8 @@ export default async function handler(req, res) {
     description:     description?.trim() || null,
     bodega,
     status:          'registrado',
-    status_es:       'Registrado'
+    status_es:       'Registrado',
+    ...(inWarehouse ? { ...inWarehouse, last_checked_at: new Date().toISOString(), needs_notify: true } : {})
   };
   const insert = body => fetch(`${SUPABASE_URL}/rest/v1/package_alerts`, {
     method: 'POST',
@@ -82,6 +90,13 @@ export default async function handler(req, res) {
   });
   let sbRes = await insert(row);
   /* Until supabase/prealertas-bodega.sql is run the column doesn't exist: save without it */
+  /* Retry without the optional columns, one at a time: the warehouse date (column type) and
+     bodega (until supabase/prealertas-bodega.sql is run) */
+  if (!sbRes.ok && row.last_event_time) {
+    console.error('[add-tracking] insert failed, retrying without last_event_time:', sbRes.status, await sbRes.text());
+    delete row.last_event_time;
+    sbRes = await insert(row);
+  }
   if (!sbRes.ok) {
     console.error('[add-tracking] insert with bodega failed:', sbRes.status, await sbRes.text());
     const { bodega: _omit, ...rest } = row;
@@ -92,5 +107,5 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: 'Error al guardar el tracking.' });
   }
 
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, en_bodega: !!inWarehouse });
 }

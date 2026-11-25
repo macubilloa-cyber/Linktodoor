@@ -364,7 +364,7 @@
       <div class="ph">
         <div>
           <div class="ph-title">Pre-alertas</div>
-          <div class="ph-sub">Paquetes en seguimiento de tus clientes · se revisan diariamente</div>
+          <div class="ph-sub">Paquetes en seguimiento de tus clientes · se revisan diariamente y al pre-alertar</div>
         </div>
         <div class="ph-actions">
           <select id="alertas-bodega" class="no-print" onchange="renderAlertas()" title="Filtrar por bodega"
@@ -374,6 +374,7 @@
             <option value="consolidada">📦 Consolidada (2071)</option>
             <option value="none">Sin bodega</option>
           </select>
+          <button class="btn btn-secondary btn-sm" id="alertas-check-btn" onclick="checkTrackingsNow()" title="Busca ya en las bodegas Flash y Consolidada y en 17track">🔍 Revisar bodegas ahora</button>
           <button class="btn btn-secondary btn-sm" onclick="renderAlertas()">↻ Actualizar</button>
         </div>
       </div>
@@ -2677,6 +2678,26 @@ async function updateAlertsBadge() {
     badge.style.display = 'inline-flex';
   } else {
     badge.style.display = 'none';
+  }
+}
+
+/* Runs the same check as the daily cron, right now */
+async function checkTrackingsNow() {
+  const btn = document.getElementById('alertas-check-btn');
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Revisando…';
+  try {
+    const r = await fetch('/api/check-trackings');
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Error al revisar');
+    let msg = `Revisadas ${d.checked} · recibidas en Miami: ${d.receivedInMiami || 0} · actualizadas: ${d.updated}`;
+    if (d.failed?.length) msg += `\n\n⚠ No se pudieron guardar ${d.failed.length}: ` + d.failed.map(f => f.tracking).join(', ');
+    alert(msg);
+    await renderAlertas();
+  } catch (e) {
+    alert('No se pudo revisar: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
   }
 }
 
