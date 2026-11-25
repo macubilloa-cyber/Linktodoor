@@ -67,7 +67,7 @@ export default async function handler(req, res) {
   const inWarehouse = new Set();
   const found = [];
   const failed = [];
-  const hits = await mapLimit(trackings, 4, t => warehousePatch(t.tracking_number, t.bodega, B2B_KEY));
+  const hits = await mapLimit(trackings, 6, t => warehousePatch(t.tracking_number, t.bodega, B2B_KEY));
   for (let i = 0; i < trackings.length; i++) {
     const hit = hits[i];
     if (!hit) continue;

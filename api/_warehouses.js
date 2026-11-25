@@ -1,17 +1,32 @@
 /* Warehouse lookups shared by check-trackings (cron) and add-tracking (at pre-alert time).
    Files starting with _ are not exposed as API routes by Vercel. */
 
+const TIMEOUT_MS = 10000;
+const norm = v => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+/* The warehouses search by partial match ("123" returns someone else's package), so only accept
+   the result if it is the same tracking. Allows a prefix/suffix (e.g. USPS 420+ZIP barcodes). */
+export function sameTracking(ours, theirs) {
+  const a = norm(ours), b = norm(theirs);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  return Math.min(a.length, b.length) >= 10 && (a.endsWith(b) || b.endsWith(a));
+}
+
 /* Returns the Box2Box package if it is registered at the Consolidada warehouse, else null */
 export async function box2boxLookup(trackingNumber, apiKey) {
   try {
     const r = await fetch(`https://box2boxcr.us/api/v1/tracking/${encodeURIComponent(trackingNumber)}`, {
-      headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' }
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(TIMEOUT_MS)
     });
     if (!r.ok) return null;
     const data = await r.json();
     const pkgs = data?.data?.paquetes || [];
     if (!data?.ok || data?.data?.vacio || !pkgs.length) return null;
-    return pkgs[0];
+    /* Only the package that really is this tracking */
+    const ours = norm(trackingNumber);
+    return pkgs.find(p => norm(JSON.stringify(p)).includes(ours)) || null;
   } catch (e) {
     console.error('[check-trackings] box2box error:', trackingNumber, e.message);
     return null;
@@ -25,7 +40,8 @@ export async function noblexLookup(trackingNumber) {
     const r = await fetch('https://noblex.cargotrack.net/m/track.asp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ track: trackingNumber, action2: 'process' }).toString()
+      body: new URLSearchParams({ track: trackingNumber, action2: 'process' }).toString(),
+      signal: AbortSignal.timeout(TIMEOUT_MS)
     });
     if (!r.ok) return null;
     const html = new TextDecoder('iso-8859-1').decode(await r.arrayBuffer());
@@ -38,6 +54,11 @@ export async function noblexLookup(trackingNumber) {
     const m = text.match(/Searching for\s+\S+\s+(.*?)\s+Login\s+Tracking\s+Settings/i);
     const result = (m ? m[1] : '').trim();
     if (!result || /NOT FOUND/i.test(result)) return null;
+    /* Pre-alerted at the warehouse is not physically received yet */
+    if (/^PRE-?ALERTED\b/i.test(result)) return null;
+    /* "... Received on <date> at <time> AM <WH> <tracking> 1 piece(s) ..." — must be our tracking */
+    const shown = result.match(/(?:AM|PM)\s+\d{3,}\s+(\S+)\s+\d+\s+piece\(s\)/i);
+    if (!shown || !sameTracking(trackingNumber, shown[1])) return null;
 
     /* e.g. "IN TRANSIT Received on 11/20/2026 at 10:43:00 AM 2348099 gfus... 1 piece(s) with 1 lbs Tracking Events Recibido 11/20/2026 10:45:54 AM" */
     const rec    = result.match(/Received on\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\s+at\s+(\d{1,2}:\d{2})(?::\d{2})?\s*(AM|PM)/i);

@@ -90,9 +90,16 @@ export default async function handler(req, res) {
   });
   let sbRes = await insert(row);
   /* Until supabase/prealertas-bodega.sql is run the column doesn't exist: save without it */
+  /* Retry without the optional columns, one at a time: the warehouse date (column type) and
+     bodega (until supabase/prealertas-bodega.sql is run) */
+  if (!sbRes.ok && row.last_event_time) {
+    console.error('[add-tracking] insert failed, retrying without last_event_time:', sbRes.status, await sbRes.text());
+    delete row.last_event_time;
+    sbRes = await insert(row);
+  }
   if (!sbRes.ok) {
     console.error('[add-tracking] insert with bodega failed:', sbRes.status, await sbRes.text());
-    const { bodega: _omit, last_event_time: _t, ...rest } = row;
+    const { bodega: _omit, ...rest } = row;
     sbRes = await insert(rest);
   }
 

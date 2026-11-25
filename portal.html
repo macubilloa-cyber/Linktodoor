@@ -1304,7 +1304,9 @@ async function addTracking() {
     document.getElementById('alertTracking').value = '';
     document.getElementById('alertDesc').value     = '';
     msgEl.className  = 'track-msg ok';
-    msgEl.textContent = '✅ Paquete agregado. El estado se actualiza una vez al día.';
+    msgEl.textContent = data.en_bodega
+      ? '✅ Paquete agregado: ¡ya está recibido en nuestra bodega en Miami!'
+      : '✅ Paquete agregado. Te avisamos cuando llegue a la bodega en Miami (revisamos todos los días).';
     loadTrackings(currentUserEmail);
     setTimeout(() => { msgEl.className = 'track-msg'; }, 6000);
   } catch(e) {
