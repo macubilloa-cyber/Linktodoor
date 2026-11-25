@@ -1,11 +1,24 @@
 /* Warehouse lookups shared by check-trackings (cron) and add-tracking (at pre-alert time).
    Files starting with _ are not exposed as API routes by Vercel. */
 
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 8000;
 
 /* Problems talking to the warehouses during the current run (reported by check-trackings) */
 export const warehouseErrors = [];
+/* If Flash keeps failing (down, refusing), stop asking it for the rest of the run so the run doesn't time out */
+export const flashState = { failures: 0, disabled: false };
+const MAX_FLASH_FAILURES = 3;
+export function resetWarehouseRun() {
+  warehouseErrors.length = 0;
+  flashState.failures = 0;
+  flashState.disabled = false;
+}
+
 const noteError = (where, tracking, msg) => {
+  if (where === 'Flash' && ++flashState.failures >= MAX_FLASH_FAILURES && !flashState.disabled) {
+    flashState.disabled = true;
+    warehouseErrors.push(`Flash falló ${MAX_FLASH_FAILURES} veces seguidas: se dejó de consultar en esta revisión`);
+  }
   console.error(`[warehouses] ${where} error:`, tracking, msg);
   if (warehouseErrors.length < 20) warehouseErrors.push(`${where} ${tracking}: ${msg}`);
 };
@@ -44,6 +57,7 @@ export async function box2boxLookup(trackingNumber, apiKey) {
 /* Returns { summary, receivedAt } if the tracking is registered at the Flash warehouse (Noblex/Cargotrack, bodega 5414), else null.
    Uses the public search at /m/track.asp, which needs no login. */
 export async function noblexLookup(trackingNumber) {
+  if (flashState.disabled) return null;
   try {
     const r = await fetch('https://noblex.cargotrack.net/m/track.asp', {
       method: 'POST',
