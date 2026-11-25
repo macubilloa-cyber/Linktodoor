@@ -1,10 +1,8 @@
-# Checks pre-alerts against the Flash warehouse every hour (Flash doesn't answer from Vercel).
-# Needs the repository secret SUPABASE_SERVICE_KEY. The panel's "Revisar bodegas ahora" can also start it.
+# Checks pre-alerts against the Flash warehouse. Manual only: Flash's server doesn't answer from GitHub's
+# runners either (tested 2026-11-25), so the hourly schedule is off. Needs the secret SUPABASE_SERVICE_KEY.
 name: Revisar bodega Flash
 
 on:
-  schedule:
-    - cron: '17 * * * *'
   workflow_dispatch:
 
 concurrency:
