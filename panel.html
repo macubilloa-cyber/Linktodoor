@@ -2694,6 +2694,7 @@ async function checkTrackingsNow() {
     if (d.failed?.length) msg += `\n\n⚠ No se pudieron guardar ${d.failed.length}: ` + d.failed.map(f => f.tracking).join(', ');
     if (d.found?.length) msg += '\n\n✅ En bodega:\n' + d.found.map(f => `${f.tracking} (${f.bodega === 'flash' ? 'Flash' : 'Consolidada'})`).join('\n');
     if (d.failed?.length) msg += '\n\nDetalle: ' + d.failed.map(f => `${f.tracking} → ${f.status} ${f.error}`).join(' | ');
+    if (d.skipped) msg += `\n\n⏱ Quedaron ${d.skipped} sin revisar por tiempo: tocá Revisar otra vez.`;
     if (d.keys && !d.keys.consolidada) msg += '\n\n⚠ Falta BOX2BOX_API_KEY en Vercel: no se revisa la bodega Consolidada.';
     if (d.keys && !d.keys.track17) msg += '\n⚠ Falta TRACK17_API_KEY en Vercel: no se revisa el estado del courier.';
     if (d.warehouseErrors?.length) msg += '\n\n⚠ Problemas consultando bodegas:\n' + d.warehouseErrors.slice(0, 5).join('\n');

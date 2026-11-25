@@ -1,4 +1,4 @@
-import { warehousePatch, warehouseErrors } from './_warehouses.js';
+import { warehousePatch, warehouseErrors, resetWarehouseRun } from './_warehouses.js';
 
 const STATUS_MAP = {
   0:  { key: 'sin_datos',     es: 'Sin datos aún' },
@@ -27,6 +27,8 @@ async function mapLimit(items, limit, fn) {
 }
 
 export default async function handler(req, res) {
+  /* Stop starting new warehouse lookups after this, so the run always answers before Vercel's 60s limit */
+  const deadline = Date.now() + 40000;
   const SUPABASE_URL = 'https://opqyskmpdnijhvcbewkf.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
   const TRACK17_KEY  = process.env.TRACK17_API_KEY;
@@ -86,7 +88,8 @@ export default async function handler(req, res) {
   }
 
   const now = new Date().toISOString();
-  warehouseErrors.length = 0;
+  resetWarehouseRun();
+  const skippedIds = new Set();
   let updated = 0;
   let receivedInMiami = 0;
 
@@ -94,7 +97,10 @@ export default async function handler(req, res) {
   const inWarehouse = new Set();
   const found = [];
   const failed = [];
-  const hits = await mapLimit(trackings, 6, t => warehousePatch(t.tracking_number, t.bodega, B2B_KEY));
+  const hits = await mapLimit(trackings, 6, t => {
+    if (Date.now() > deadline) { skippedIds.add(t.id); return null; }
+    return warehousePatch(t.tracking_number, t.bodega, B2B_KEY);
+  });
   for (let i = 0; i < trackings.length; i++) {
     const hit = hits[i];
     if (!hit) continue;
@@ -168,7 +174,7 @@ export default async function handler(req, res) {
   }
 
   /* Mark every checked one as checked today, so the panel shows it was looked at */
-  const ids = trackings.map(t => t.id).filter(id => !inWarehouse.has(id));
+  const ids = trackings.map(t => t.id).filter(id => !inWarehouse.has(id) && !skippedIds.has(id));
   for (let i = 0; i < ids.length; i += 100) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/package_alerts?id=in.(${ids.slice(i, i + 100).join(',')})`, {
       method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ last_checked_at: now })
@@ -177,7 +183,7 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({
-    ok: true, checked: trackings.length, receivedInMiami, updated, found, failed, warehouseErrors,
+    ok: true, checked: trackings.length - skippedIds.size, skipped: skippedIds.size, receivedInMiami, updated, found, failed, warehouseErrors,
     keys: { consolidada: !!B2B_KEY, track17: !!TRACK17_KEY }
   });
 }
