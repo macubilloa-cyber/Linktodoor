@@ -1,4 +1,4 @@
-import { warehousePatch } from './_warehouses.js';
+import { warehousePatch, FLASH_ON_VERCEL } from './_warehouses.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
   /* If the package is already in a Miami warehouse, save it as received right away
      instead of waiting for the daily check */
   let inWarehouse = null;
-  try { inWarehouse = await warehousePatch(trackingNum, bodega, process.env.BOX2BOX_API_KEY); } catch {}
+  try { inWarehouse = await warehousePatch(trackingNum, bodega, process.env.BOX2BOX_API_KEY, { flash: FLASH_ON_VERCEL }); } catch {}
 
   /* Insert into Supabase */
   const row = {

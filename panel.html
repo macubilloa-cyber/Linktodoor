@@ -2687,13 +2687,16 @@ async function checkTrackingsNow() {
   const label = btn.textContent;
   btn.disabled = true; btn.textContent = '⏳ Revisando…';
   try {
-    const r = await fetch('/api/check-trackings');
+    const r = await fetch('/api/check-trackings?flash=1');
     const d = await r.json().catch(() => ({ ok: false, error: `HTTP ${r.status} (la revisión tardó demasiado o falló)` }));
     if (!d.ok) throw new Error(d.error || 'Error al revisar');
     let msg = `Revisadas ${d.checked} · recibidas en Miami: ${d.receivedInMiami || 0} · actualizadas: ${d.updated}`;
     if (d.failed?.length) msg += `\n\n⚠ No se pudieron guardar ${d.failed.length}: ` + d.failed.map(f => f.tracking).join(', ');
     if (d.found?.length) msg += '\n\n✅ En bodega:\n' + d.found.map(f => `${f.tracking} (${f.bodega === 'flash' ? 'Flash' : 'Consolidada'})`).join('\n');
     if (d.failed?.length) msg += '\n\nDetalle: ' + d.failed.map(f => `${f.tracking} → ${f.status} ${f.error}`).join(' | ');
+    if (d.flashRun === 'github-lanzada') msg += '\n\n⚡ Flash: revisión lanzada, en 1–2 minutos tocá ↻ Actualizar.';
+    else if (d.flashRun === 'github-cada-hora') msg += '\n\n⚡ Flash se revisa automáticamente cada hora.';
+    else if (d.flashRun?.startsWith('github-error')) msg += `\n\n⚠ No se pudo lanzar la revisión de Flash (${d.flashRun}). Se revisa igual cada hora.`;
     if (d.skipped) msg += `\n\n⏱ Quedaron ${d.skipped} sin revisar por tiempo: tocá Revisar otra vez.`;
     if (d.keys && !d.keys.consolidada) msg += '\n\n⚠ Falta BOX2BOX_API_KEY en Vercel: no se revisa la bodega Consolidada.';
     if (d.keys && !d.keys.track17) msg += '\n⚠ Falta TRACK17_API_KEY en Vercel: no se revisa el estado del courier.';
