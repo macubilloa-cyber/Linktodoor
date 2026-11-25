@@ -2695,7 +2695,7 @@ async function checkTrackingsNow() {
     if (d.found?.length) msg += '\n\n✅ En bodega:\n' + d.found.map(f => `${f.tracking} (${f.bodega === 'flash' ? 'Flash' : 'Consolidada'})`).join('\n');
     if (d.failed?.length) msg += '\n\nDetalle: ' + d.failed.map(f => `${f.tracking} → ${f.status} ${f.error}`).join(' | ');
     if (d.flashRun === 'github-lanzada') msg += '\n\n⚡ Flash: revisión lanzada, en 1–2 minutos tocá ↻ Actualizar.';
-    else if (d.flashRun === 'github-cada-hora') msg += '\n\n⚡ Flash se revisa automáticamente cada hora.';
+    else if (d.flashRun === 'github-cada-hora') msg += '\n\n⚠ Flash no se puede revisar desde el servidor (su sistema bloquea las consultas). Revisá los de Flash en Cargotrack y marcalos a mano.';
     else if (d.flashRun?.startsWith('github-error')) msg += `\n\n⚠ No se pudo lanzar la revisión de Flash (${d.flashRun}). Se revisa igual cada hora.`;
     if (d.skipped) msg += `\n\n⏱ Quedaron ${d.skipped} sin revisar por tiempo: tocá Revisar otra vez.`;
     if (d.keys && !d.keys.consolidada) msg += '\n\n⚠ Falta BOX2BOX_API_KEY en Vercel: no se revisa la bodega Consolidada.';
