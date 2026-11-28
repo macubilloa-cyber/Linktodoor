@@ -1174,7 +1174,7 @@ function buildCobroText(carga, cl, adj) {
   if (cons.length) {
     const real = Math.round(cons.reduce((sum, p) => sum + (+p.weightLbs || 0), 0) * 100) / 100;
     const cobr = consolidadaLbsCobradas(real);
-    lines += `⚖️ Peso total: ${real} lbs` + (cobr !== real ? ` · se cobra ${cobr} lbs (redondeado a la décima)` : '') + `\n\n`;
+    lines += `⚖️ Peso total: ${real} lbs` + (cobr !== real ? ` · se cobra ${cobr} lbs (redondeado a la media libra)` : '') + `\n\n`;
   }
 
   if (adj && (adj.referralDiscount || adj.creditUsed)) {
@@ -2177,14 +2177,14 @@ function toggleAllLines(on) {
   updateBulkBar();
 }
 /* Peso real del paquete (consolidada y AM). En la consolidada no se redondea cada paquete: se suma el
-   total del cliente y ese total se redondea a la décima (ver consolidadaLbsCobradas) */
+   total del cliente y ese total se redondea a la media libra (ver consolidadaLbsCobradas) */
 function billableLbs(l) {
   return Math.round((+l.weight_lbs || 0) * 100) / 100;
 }
-/* Total de libras de la consolidada que se le cobra al cliente: la suma real, redondeada hacia arriba
-   a la décima siguiente (0.5 → 0.5, 0.53 → 0.6, 1.01 → 1.1) */
+/* Total de libras de la consolidada que se le cobra al cliente: la suma real de sus paquetes,
+   redondeada hacia arriba a la media libra siguiente (0.48 → 0.5, 0.5 → 0.5, 0.53 → 1, 1.2 → 1.5) */
 function consolidadaLbsCobradas(lbs) {
-  return Math.ceil(Math.round((+lbs || 0) * 100) / 100 * 10 - 1e-9) / 10;
+  return Math.ceil(Math.round((+lbs || 0) * 100) / 100 * 2 - 1e-9) / 2;
 }
 
 /* Precio por libra: el del cliente si tiene precio especial; si no, la tarifa estándar */
@@ -2209,7 +2209,7 @@ function updateFactTotal() {
   const known = name.toLowerCase() in _factRates;
   const saved = factRateFor(name);
   const lines = _factLines.filter(l => _factSel.has(l.id));
-  /* Consolidada: suma del cliente redondeada a la décima; AM: peso de la factura */
+  /* Consolidada: suma del cliente redondeada a la media libra; AM: peso de la factura */
   const consSel = lines.filter(l => l.bodega === '2071').reduce((sum, l) => sum + billableLbs(l), 0);
   const amSel = lines.filter(l => l.bodega !== '2071').reduce((sum, l) => sum + billableLbs(l), 0);
   const lbs = Math.round((consolidadaLbsCobradas(consSel) + amSel) * 100) / 100;
@@ -2249,7 +2249,7 @@ async function assignLines(lineIds, clientName, rate) {
       if (!created) throw new Error('No se pudo agregar el cliente a la carga.');
       ccId = created.id;
     }
-    /* Consolidada: the client's total pounds in this carga are rounded UP to the next tenth (0.53 → 0.6).
+    /* Consolidada: the client's total pounds in this carga are rounded UP to the next half pound (0.53 → 1).
        Colones per package come from the running total, so the packages add up exactly to
        rounded lbs × rate. Packages already assigned to this client in the carga count toward the total. */
     let consLbs = 0;
@@ -2258,14 +2258,19 @@ async function assignLines(lineIds, clientName, rate) {
       consLbs = (prev || []).filter(p => String(p.notes || '').startsWith('Consolidada 2071'))
         .reduce((sum, p) => sum + (+p.weight_lbs || 0), 0);
     }
-    let consCRC = Math.round(consolidadaLbsCobradas(consLbs) * rate);
+    /* What this batch adds to the client's consolidada charge, split among its packages by weight */
+    const consNew = group.filter(l => l.bodega === '2071');
+    const consNewLbs = consNew.reduce((sum, l) => sum + billableLbs(l), 0);
+    const consNewCRC = Math.round(consolidadaLbsCobradas(consLbs + consNewLbs) * rate)
+                     - Math.round(consolidadaLbsCobradas(consLbs) * rate);
+    let cumLbs = 0, cumCRC = 0;
     const pkgRows = group.map(l => {
       let lbsCRC;
       if (l.bodega === '2071') {
-        consLbs += billableLbs(l);
-        const upTo = Math.round(consolidadaLbsCobradas(consLbs) * rate);
-        lbsCRC = upTo - consCRC;
-        consCRC = upTo;
+        cumLbs += billableLbs(l);
+        const upTo = consNewLbs > 0 ? Math.round(consNewCRC * cumLbs / consNewLbs) : 0;
+        lbsCRC = upTo - cumCRC;
+        cumCRC = upTo;
       } else {
         lbsCRC = Math.round(billableLbs(l) * rate);
       }
@@ -2355,7 +2360,7 @@ function openPegarConsolidado() {
   const hoy = new Date().toISOString().slice(0, 10);
   openModal(`
     <div class="modal-head"><span class="modal-title">💬 Mensaje de la consolidada</span><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá el mensaje tal cual (<code>1. TRACKING — 0.16 kg (0.35 lb)</code>…). Al cliente se le cobra la suma real de sus paquetes, redondeada a la décima siguiente.</p>
+    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá el mensaje tal cual (<code>1. TRACKING — 0.16 kg (0.35 lb)</code>…). Al cliente se le cobra la suma real de sus paquetes, redondeada a la media libra siguiente.</p>
     <textarea id="cons-text" rows="9" style="width:100%;font-family:monospace;font-size:.8rem" placeholder="1. GFUS01077763015939 — 0.16 kg (0.35 lb)&#10;2. TBA335491505186 — 0.70 kg (1.54 lb)"></textarea>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-top:.6rem">
       <div class="fg" style="margin:0"><label>Referencia de la carga</label><input type="text" id="cons-ref" value="CONS-${hoy.replace(/-/g, '')}" /></div>
