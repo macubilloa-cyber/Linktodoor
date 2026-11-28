@@ -367,7 +367,9 @@
           <div class="ph-sub">Paquetes en seguimiento de tus clientes · se revisan diariamente y al pre-alertar</div>
         </div>
         <div class="ph-actions">
-          <select id="alertas-bodega" class="no-print" onchange="renderAlertas()" title="Filtrar por bodega"
+          <input type="search" id="alertas-search" class="no-print" oninput="drawAlertas()" placeholder="🔍 Buscar nombre, guía, teléfono…"
+            style="flex:1 1 180px;min-width:160px;max-width:260px;padding:6px 10px;border-radius:8px;font-size:.82rem" />
+          <select id="alertas-bodega" class="no-print" onchange="drawAlertas()" title="Filtrar por bodega"
             style="width:auto;padding:6px 10px;border-radius:8px;font-size:.82rem;font-weight:700">
             <option value="">Todas las bodegas</option>
             <option value="flash">⚡ Flash (5414)</option>
@@ -398,6 +400,10 @@
           <div class="ico">📡</div>
           <p>No hay paquetes en seguimiento aún.<br>
           Los clientes los agregan desde su Mi Cuenta.</p>
+        </div>
+        <div id="alertas-nomatch" class="empty" style="display:none">
+          <div class="ico">🔍</div>
+          <p>Ninguna pre-alerta coincide con la búsqueda.</p>
         </div>
       </div>
     </div>
@@ -2062,7 +2068,7 @@ async function renderFacturaStaging() {
       <td>${l.client_name ? '' : `<input type="checkbox" data-id="${l.id}" ${_factSel.has(l.id) ? 'checked' : ''} onchange="toggleLine('${l.id}', this.checked)" />`}</td>
       <td style="font-family:monospace;font-weight:800;color:var(--purple)">${l.bodega === '2071' ? '<span class="badge" style="background:#E0E7FF;color:#3730A3;font-family:inherit" title="Bodega consolidada 2071">2071</span>' : esc(l.linea_id)}</td>
       <td style="font-family:monospace;font-size:.8rem;word-break:break-all">${esc(l.tracking)}${+l.desconocido_crc > 0 ? `<div style="font-family:inherit"><span class="badge" style="background:#FEF3C7;color:#92400E;margin-top:.2rem" title="La bodega cobró ${fCRC(l.desconocido_crc)} por dirección mal escrita">⚠ Desconocido +${fCRC(CARGO_DESCONOCIDO)}</span></div>` : ''}</td>
-      <td><strong>${l.weight_lbs}</strong>${l.bodega === '2071' ? `<div style="font-size:.7rem;color:var(--gray)">cobra ${billableLbs(l)}</div>` : ''}</td>
+      <td><strong>${l.weight_lbs}</strong></td>
       <td style="color:var(--gray)">${fCRC(l.cost_crc)}</td>
       <td>${cliente}</td>
       <td>${l.client_name ? `<button class="btn btn-sm btn-secondary" onclick="unassignLine('${l.id}')" title="Quitar del cliente">↩</button>` : ''}</td>
@@ -2164,9 +2170,10 @@ function toggleAllLines(on) {
   boxes.forEach(cb => { cb.checked = on; if (on) _factSel.add(cb.dataset.id); else _factSel.delete(cb.dataset.id); });
   updateBulkBar();
 }
-/* Libras que se cobran: la consolidada (2071) redondea a media libra hacia arriba; AM cobra el peso de la factura */
+/* Libras que se cobran: el peso real del paquete (consolidada y AM). En la consolidada se cobra la suma
+   real de los paquetes del cliente, sin redondear cada uno a media libra (0.1 + 0.2 + 0.2 = 0.5 lbs) */
 function billableLbs(l) {
-  return l.bodega === '2071' ? FacturaAM.lbsCobradasConsolidado(+l.weight_lbs) : +l.weight_lbs;
+  return Math.round((+l.weight_lbs || 0) * 100) / 100;
 }
 
 /* Precio por libra: el del cliente si tiene precio especial; si no, la tarifa estándar */
@@ -2228,11 +2235,20 @@ async function assignLines(lineIds, clientName, rate) {
       if (!created) throw new Error('No se pudo agregar el cliente a la carga.');
       ccId = created.id;
     }
-    const pkgRows = group.map(l => ({
-      carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
-      charged_crc: Math.round(billableLbs(l) * rate) + (+l.desconocido_crc > 0 ? CARGO_DESCONOCIDO : 0),
-      notes: (l.bodega === '2071' ? `Consolidada 2071 · cobra ${billableLbs(l)} lbs` : `Guía AM ${l.linea_id}`) + (+l.desconocido_crc > 0 ? ` · Dirección desconocida +${fCRC(CARGO_DESCONOCIDO)}` : ''), status: 'listo'
-    }));
+    /* Colones per package from the running total, so the packages add up exactly to
+       total lbs × rate (no ₡1 rounding drift between the packages and the total) */
+    let cumLbs = 0, cumCRC = 0;
+    const pkgRows = group.map(l => {
+      cumLbs += billableLbs(l);
+      const upTo = Math.round(Math.round(cumLbs * 100) / 100 * rate);
+      const lbsCRC = upTo - cumCRC;
+      cumCRC = upTo;
+      return {
+        carga_client_id: ccId, guia: l.tracking, weight_lbs: l.weight_lbs,
+        charged_crc: lbsCRC + (+l.desconocido_crc > 0 ? CARGO_DESCONOCIDO : 0),
+        notes: (l.bodega === '2071' ? 'Consolidada 2071' : `Guía AM ${l.linea_id}`) + (+l.desconocido_crc > 0 ? ` · Dirección desconocida +${fCRC(CARGO_DESCONOCIDO)}` : ''), status: 'listo'
+      };
+    });
     const { data: pk, error } = await sb.from('packages').insert(pkgRows).select('id');
     if (error) throw new Error(error.message);
     await recomputeCargaClient(ccId);
@@ -2313,7 +2329,7 @@ function openPegarConsolidado() {
   const hoy = new Date().toISOString().slice(0, 10);
   openModal(`
     <div class="modal-head"><span class="modal-title">💬 Mensaje de la consolidada</span><button class="modal-x" onclick="closeModal()">✕</button></div>
-    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá el mensaje tal cual (<code>1. TRACKING — 0.16 kg (0.35 lb)</code>…). La consolidada cobra en medias libras, redondeando hacia arriba.</p>
+    <p style="font-size:.82rem;color:var(--gray);margin-bottom:.6rem">Pegá el mensaje tal cual (<code>1. TRACKING — 0.16 kg (0.35 lb)</code>…). Al cliente se le cobran las libras reales sumadas de sus paquetes.</p>
     <textarea id="cons-text" rows="9" style="width:100%;font-family:monospace;font-size:.8rem" placeholder="1. GFUS01077763015939 — 0.16 kg (0.35 lb)&#10;2. TBA335491505186 — 0.70 kg (1.54 lb)"></textarea>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-top:.6rem">
       <div class="fg" style="margin:0"><label>Referencia de la carga</label><input type="text" id="cons-ref" value="CONS-${hoy.replace(/-/g, '')}" /></div>
@@ -2345,10 +2361,9 @@ async function leerConsolidado() {
   const have = new Set((ex || []).flatMap(x => [x.tracking, ...(x.trackings || [])]).map(norm));
   const nuevas = r.lineas.filter(l => !have.has(norm(l.tracking)));
   const repetidas = r.lineas.filter(l => have.has(norm(l.tracking)));
-  const cobradas = nuevas.reduce((s, l) => s + FacturaAM.lbsCobradasConsolidado(l.lbs), 0);
   _consParsed = { ...r, nuevas };
   out.style.color = repetidas.length || r.noLeidas.length ? '#B45309' : '#059669';
-  out.innerHTML = `✔ ${r.lineas.length} paquetes leídos · <strong>${nuevas.length} nuevos</strong> · ${Math.round(nuevas.reduce((s, l) => s + l.lbs, 0) * 100) / 100} lbs reales → <strong>${cobradas} lbs cobradas</strong>`
+  out.innerHTML = `✔ ${r.lineas.length} paquetes leídos · <strong>${nuevas.length} nuevos</strong> · <strong>${Math.round(nuevas.reduce((s, l) => s + l.lbs, 0) * 100) / 100} lbs</strong>`
     + (repetidas.length ? `<br>⚠ Ya estaban en la bandeja (se omiten): ${repetidas.map(l => esc(l.tracking)).join(', ')}` : '')
     + (r.noLeidas.length ? `<br>⚠ Líneas que no entendí: ${r.noLeidas.map(esc).join(' | ')}` : '');
   btn.disabled = !nuevas.length;
@@ -2710,6 +2725,8 @@ async function checkTrackingsNow() {
   }
 }
 
+let _alertsData = null;
+
 async function renderAlertas() {
   const tbody = document.getElementById('alertas-tbody');
   const empty = document.getElementById('alertas-empty');
@@ -2723,10 +2740,26 @@ async function renderAlertas() {
     sb.from('saved_clients').select('name, phone, email')
   ]);
 
-  const allAlerts  = alertsRes.data  || [];
-  const clientList = clientsRes.data || [];
+  _alertsData = { allAlerts: alertsRes.data || [], clientList: clientsRes.data || [] };
+  drawAlertas();
+}
+
+/* Text for searching: lowercase, no accents, no spaces/dashes (so "GFUS 0108-40" and "gfus010840" match) */
+function alertSearchKey(t) {
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9@.]/g, '');
+}
+
+/* Draws the list from the last load, applying the bodega filter and the search box (no reload) */
+function drawAlertas() {
+  if (!_alertsData) return;
+  const tbody = document.getElementById('alertas-tbody');
+  const empty = document.getElementById('alertas-empty');
+  const nomatch = document.getElementById('alertas-nomatch');
+  const { allAlerts, clientList } = _alertsData;
+  empty.style.display = 'none';
+  nomatch.style.display = 'none';
   const bodegaFilter = document.getElementById('alertas-bodega')?.value || '';
-  const alertList = !bodegaFilter ? allAlerts
+  let alertList = !bodegaFilter ? allAlerts
     : allAlerts.filter(a => bodegaFilter === 'none' ? !a.bodega : a.bodega === bodegaFilter);
 
   /* Update badge (always counts every bodega) */
@@ -2735,7 +2768,7 @@ async function renderAlertas() {
   if (pendingCount > 0) { badge.textContent = pendingCount; badge.style.display = 'inline-flex'; }
   else { badge.style.display = 'none'; }
 
-  if (!alertList.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  if (!allAlerts.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
 
   const norm = v => (v || '').trim().toLowerCase();
   const byEmail = {}, byName = {};
@@ -2743,6 +2776,17 @@ async function renderAlertas() {
     if (c.email) byEmail[norm(c.email)] = c;
     if (c.name)  byName[norm(c.name)]   = c;
   });
+
+  /* Search: every word must appear in the name, tracking, description, phone or email */
+  const words = (document.getElementById('alertas-search')?.value || '').trim().split(/\s+/).map(alertSearchKey).filter(Boolean);
+  if (words.length) {
+    alertList = alertList.filter(a => {
+      const c = byEmail[norm(a.user_email)] || byName[norm(a.client_name)] || {};
+      const hay = alertSearchKey([c.name, c.phone, a.client_name, a.user_email, a.tracking_number, a.description].join(' '));
+      return words.every(w => hay.includes(w));
+    });
+  }
+  if (!alertList.length) { tbody.innerHTML = ''; (words.length || bodegaFilter ? nomatch : empty).style.display = ''; return; }
 
   tbody.innerHTML = alertList.map(alert => {
     const matched = byEmail[norm(alert.user_email)] || byName[norm(alert.client_name)];
